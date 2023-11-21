@@ -19,6 +19,12 @@
 		// disable rules from base configurations
 		"for-direction": "off",
 
-		"comma-dangle": ["warn"]
+		"comma-dangle": ["warn", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "never"
+  }]
 	}
 }

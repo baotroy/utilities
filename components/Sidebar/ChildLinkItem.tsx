@@ -1,17 +1,16 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import { IconType } from "react-icons";
 
 export interface ChildLinkItemProps {
   label: string;
   slug?: string;
   href: string;
-//   isOpen?: boolean;
   icon?: IconType;
   currentPathname?: string
 }
 
-const ChildLinkItem: React.FC<ChildLinkItemProps> = ({ label, slug, href, icon: Icon, currentPathname }) => {
+const ChildLinkItem: React.FC<ChildLinkItemProps> = ({ label, href, icon: Icon, currentPathname }) => {
   return (
     <Link
       href={href}

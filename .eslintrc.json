@@ -1,3 +1,24 @@
 {
-  "extends": "next/core-web-vitals"
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint"],
+	"extends": ["next/core-web-vitals", "eslint:recommended", "plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
+	"rules": {
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-extra-semi": "off",
+		"no-case-declarations": "off",
+		// enable additional rules
+		"indent": ["warn", 2],
+		"linebreak-style": ["warn", "unix"],
+		"quotes": ["warn", "double"],
+
+		// override configuration set by extending "eslint:recommended"
+		"no-empty": "warn",
+		"no-cond-assign": ["warn", "always"],
+
+		// disable rules from base configurations
+		"for-direction": "off",
+
+		"comma-dangle": ["warn"]
+	}
 }

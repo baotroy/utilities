@@ -80,7 +80,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           { menus.map((group, index) => {
             return (
               <div key={index}>
-                <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">{group.groupName}</h3>
+                {group.groupName && <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">{group.groupName}</h3>}
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.items.map((item, index) => {
                     if (item.children?.length) {

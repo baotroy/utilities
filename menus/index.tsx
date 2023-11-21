@@ -1,6 +1,5 @@
-import { HiUser } from "react-icons/hi2";
-import { MdAreaChart, MdCalendarMonth, MdOutlineDashboard, MdOutlineViewList, MdSettings } from "react-icons/md";
-import { SiElement } from "react-icons/si";
+import { IconType } from "react-icons";
+import { MdOutlineDashboard } from "react-icons/md";
 interface childProps {
   label: string;
   href: string;
@@ -8,99 +7,39 @@ interface childProps {
 interface itemProps {
   label: string;
   href: string;
-  icon?: any;
+  icon?: IconType | null;
   slug: string;
   children?: childProps[];
 }
 interface menuProps {
-  groupName: string;
+  groupName: string | null;
   items: itemProps[];
 }
 
 const menus: menuProps[] = [
   {
-    groupName: "MENU",
+    groupName: "",
     items: [
       {
-        label: "Dashboard",
-        slug: "dashboard",
+        label: "Home",
+        slug: "home",
         href: "/",
         icon: MdOutlineDashboard,
-        children: [
-          {
-            label: "eCommerce",
-            href: "/",
-          },
-        ],
       },
-      {
-        label: "Calendar",
-        slug: "calendar",
-        href: "/calendar",
-        icon: MdCalendarMonth,
-      },
-      {
-        label: "Profile",
-        slug  : "profile",
-        href: "/profile",
-        icon: HiUser,
-      },
-      {
-        label: "Forms",
-        slug: "forms",
-        href: "#",
-        icon: MdCalendarMonth,
-        children: [
-          {
-            label: "Form Elements",
-            href: "/forms/form-elements",
-          },
-          {
-            label: "Form Layout",
-            href: "/forms/form-layout",
-          },
-        ],
-      },
-      {
-        label: "Tables",
-        slug: "tables",
-        href: "/tables",
-        icon: MdOutlineViewList,
-      },
-      {
-        label: "Settings",
-        slug: "settings",
-        href: "/settings",
-        icon: MdSettings,
-      },
+
     ],
   },
   {
-    groupName: "OTHERS",
+    groupName: "STRING",
     items: [
       {
-        label: "Chart",
-        slug: "chart",
-        href: "/chart",
-        icon: MdAreaChart,
+        label: "Convert Case",
+        slug: "convert-case",
+        href: "/convert-case",
+        icon: null,
       },
-      {
-        label: "UI Elements",
-        slug: "ui-elements",
-        href: "#",
-        icon: SiElement,
-        children: [
-          {
-            label: "Alerts",
-            href: "/ui/alerts",
-          },
-          {
-            label: "Buttons",
-            href: "/ui/buttons",
-          },
-        ]
-      },
-    ]
-  }
+
+    ],
+  },
 ];
 export default menus;

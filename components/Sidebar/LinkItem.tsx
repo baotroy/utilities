@@ -11,7 +11,7 @@ interface LinkItemProps {
   href: string;
   isParent?: boolean;
   isOpen?: boolean;
-  icon: IconType;
+  icon: IconType | null;
   handleClick?: (e: any) => void;
 }
 
@@ -27,7 +27,7 @@ const LinkItem: React.FC<LinkItemProps> = ({ label, isFocus, href, isParent, isO
         )}
         onClick={handleClick}
       >
-        <Icon size={20} />
+        {Icon && <Icon size={20} />}
         {label}
         {isParent && (isOpen ? <MdKeyboardArrowUp size={20} /> : <MdKeyboardArrowDown size={20} />)}
       </Link>

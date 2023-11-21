@@ -23,7 +23,7 @@ const LinkItem: React.FC<LinkItemProps> = ({ label, isFocus, href, isParent, isO
         href={href}
         className={clsx(
           `group relative flex items-center gap-2.5 rounded-sm py-1 px-4 font-medium text-graydark duration-300 ease-in-out hover:text-bodydark2 dark:hover:bg-meta-4`,
-          isFocus && "bg-graydark dark:bg-meta-4"
+          isFocus && "text-bodydark2 dark:text-bodylight2"
         )}
         onClick={handleClick}
       >

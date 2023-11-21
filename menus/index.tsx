@@ -38,6 +38,12 @@ const menus: menuProps[] = [
         href: "/convert-case",
         icon: null,
       },
+      {
+        label: "Convert Units",
+        slug: "convert-units",
+        href: "/convert-units",
+        icon: null,
+      },
 
     ],
   },

@@ -49,12 +49,20 @@ const ConvertCase = () => {
       },
     },
     {
+      label: "Rotate Text",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Rotate));
+      },
+    },
+    {
       label: "Download Text",
       handleClick: () => {},
     },
     {
       label: "Copy to Clipboard",
-      handleClick: () => {},
+      handleClick: () => {
+        navigator.clipboard.writeText(text);
+      },
     },
     {
       label: "Clear",

@@ -8,20 +8,22 @@ export enum CaseType {
   Alternating = "alternating",
   Title = "title",
   Inverse = "inverse",
+  Rotate = "rotate",
 }
 
 export default function convertCase(str: string, type: CaseType): string {
-  if (type === "uppercase") return str.toUpperCase();
-  if (type === "capitalized")
+  if (type === CaseType.Uppercase) return str.toUpperCase();
+  if (type === CaseType.Capitalized)
     return str
       .toLowerCase()
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
-  if (type === "sentence") return _sentense(str);
-  if (type === "alternating") return convert(str, CaseType.Alternating);
-  if (type === "title") return convert(str, CaseType.Title);
-  if (type === "inverse") return convert(str, CaseType.Inverse);
+  if (type === CaseType.Sentence) return _sentense(str);
+  if (type === CaseType.Alternating) return convert(str, CaseType.Alternating);
+  if (type === CaseType.Title) return convert(str, CaseType.Title);
+  if (type === CaseType.Inverse) return convert(str, CaseType.Inverse);
+  if (type === CaseType.Rotate) return convert(str, CaseType.Rotate);
   return str.toLowerCase();
 }
 
@@ -30,12 +32,14 @@ function convert(str: string, type: CaseType): string {
   // Loop each line in the array
   for (let i = 0; i < a.length; i++) {
     const original = a[i];
-    const line = original.trim();
-    if (line.trim() === "") {
-      continue;
-    }
+   
     if (type === CaseType.Lowercase) {
+      const line = original.toLowerCase().trim();
+      if (line.trim() === "") {
+        continue;
+      }
       const after = _sentense(line);
+      
       // Replace the original line with the new one
       a[i] = original.replace(line, after);
     } else if (type === CaseType.Alternating) {
@@ -44,6 +48,8 @@ function convert(str: string, type: CaseType): string {
       a[i] = _title(original);
     } else if (type === CaseType.Inverse) {
       a[i] = _inverse(original);
+    } else if (type === CaseType.Rotate) {
+      a[i] = _rotate(original);
     }
   }
   return a.join("\n");
@@ -53,10 +59,13 @@ function _sentense(str: string): string {
   const cs = str.toLowerCase().split("");
 
   cs[0] = cs[0].toUpperCase();
+  let dot = false;
   for (let j = 2; j < cs.length; j++) {
+    if (cs[j] === ".") dot = true;
     if (!isAlphabet(cs[j])) continue;
-    if (cs[j - 1] === " " || cs[j - 1] === ".") {
+    if (dot) {
       cs[j] = cs[j].toUpperCase();
+      dot = false;
     }
   }
   return cs.join("");
@@ -105,9 +114,13 @@ function _title(str: string): string {
       }
 
       /* Ignore intentional capitalization */
-      if (current.substr(1).search(/[A-Z]|\../) > -1) {
-        return current;
-      }
+      /**
+       * test failed Ddsf  sdf asdf. bdfdsf.sdfsdf.   cdfsd.     ddfs. edf
+       * bdfdsf.sdfsdf NOT UPPER CASE b 
+       */
+      // if (current.substring(1).search(/[A-Z]|\../) > -1) {
+      //   return current;
+      // }
 
       /* Ignore URLs */
       if (array[index + 1] === ":" && array[index + 2] !== "") {
@@ -128,19 +141,19 @@ function _inverse(str: string): string {
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
 
-    // Convert lowercase to uppercase
     if (char === char.toLowerCase()) {
       convertedString += char.toUpperCase();
     }
-    // Convert uppercase to lowercase
     else if (char === char.toUpperCase()) {
       convertedString += char.toLowerCase();
     }
-    // Keep non-alphabetic characters unchanged
     else {
       convertedString += char;
     }
   }
-
   return convertedString;
+}
+
+function _rotate(str: string): string{
+  return str.split("").reverse().join("");
 }

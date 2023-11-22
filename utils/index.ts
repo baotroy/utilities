@@ -1,5 +1,5 @@
 export function stringExplode(str: string): string[] {
-  return str.toLowerCase().split("\n");
+  return str.split("\n");
 }
 
 export function isAlphabet(char: string): boolean {

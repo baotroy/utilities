@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --ignore-pattern node_modules/"
+    "lint": "eslint --ignore-pattern node_modules/",
+    "lint-fix": "eslint . --ext .ts --fix --ignore-pattern node_modules/"
   },
   "dependencies": {
     "@react-jvectormap/core": "^1.0.4",

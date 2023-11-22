@@ -2,7 +2,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
 import convertCase, { CaseType } from "../utils";
-
+import toast from "react-hot-toast";
 const ConvertCase = () => {
   const [text, setText] = useState("");
   const buttons = [
@@ -61,7 +61,16 @@ const ConvertCase = () => {
     {
       label: "Copy to Clipboard",
       handleClick: () => {
-        navigator.clipboard.writeText(text);
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            toast.success("Text copied to clipboard");
+            // You can also provide a success message or perform other actions here
+          })
+          .catch((err) => {
+            console.error("Unable to copy:", err);
+            // Handle any errors that might occur during the copy process
+          });
       },
     },
     {

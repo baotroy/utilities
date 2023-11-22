@@ -29,8 +29,21 @@ const LinkItem: React.FC<LinkItemProps> = ({
       <Link
         href={href}
         className={clsx(
-          `group relative flex items-center gap-2.5 rounded-sm py-1 px-4 font-medium text-graydark duration-300 ease-in-out hover:text-bodydark2 dark:hover:bg-meta-4`,
-          isFocus && "text-bodydark2 dark:text-bodylight2"
+          `
+          group relative 
+          flex 
+          items-center
+          gap-2.5 
+          rounded-sm 
+          py-1 
+          px-4 
+          font-medium
+          duration-300
+          ease-in-out 
+          `,
+          isFocus
+            ? "text-bodydark2 dark:text-white"
+            : "text-graydark dark:text-bodydark2"
         )}
         onClick={handleClick}
       >

@@ -65,11 +65,9 @@ const ConvertCase = () => {
           .writeText(text)
           .then(() => {
             toast.success("Text copied to clipboard");
-            // You can also provide a success message or perform other actions here
           })
-          .catch((err) => {
-            console.error("Unable to copy:", err);
-            // Handle any errors that might occur during the copy process
+          .catch(() => {
+            toast.error("Unable to copy");
           });
       },
     },
@@ -90,11 +88,14 @@ const ConvertCase = () => {
           onChange={(e) => setText(e.target.value)}
           value={text}
           className="
+          dark:text-graydark2
           bg-white
+          dark:bg-graydark
           w-full 
           rounded-lg
           border-[1.5px] 
           border-stroke  
+          dark:border-strokedark
           py-3 px-5 font-medium outline-none "
         ></textarea>
       </div>
@@ -103,7 +104,7 @@ const ConvertCase = () => {
           <button
             type="button"
             key={index}
-            className="m-1 rounded bg-bodydark p-1 font-medium text-gray"
+            className="m-1 rounded bg-bodydark1 dark:bg-boxdark p-1 font-medium text-graydark dark:text-bodydark2"
             onClick={btn.handleClick}
           >
             {btn.label}

@@ -22,7 +22,7 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Home",
-        slug: "home",
+        slug: "/",
         href: "/",
         icon: MdOutlineDashboard,
       },

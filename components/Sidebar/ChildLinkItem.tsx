@@ -4,7 +4,7 @@ import { IconType } from "react-icons";
 
 export interface ChildLinkItemProps {
   label: string;
-  slug?: string;
+  // slug?: string;
   href: string;
   icon?: IconType;
   currentPathname?: string;

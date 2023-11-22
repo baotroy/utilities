@@ -118,8 +118,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <SidebarLinkGroup
                           key={index}
                           activeCondition={
-                            pathname === item.href ||
-                            pathname.includes(item.slug)
+                            pathname === item.href
+                            //  || pathname.includes(item.slug)
                           }
                         >
                           {(handleClick, open) => {
@@ -133,8 +133,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                   href="#"
                                   icon={item.icon}
                                   isFocus={
-                                    pathname === item.href ||
-                                    pathname.includes(item.slug)
+                                    pathname === item.href
+                                    // || pathname.includes(item.slug)
                                   }
                                 />
                                 <ChildrenLinkItems

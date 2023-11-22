@@ -6,7 +6,7 @@ import clsx from "clsx";
 
 interface LinkItemProps {
   label: string;
-  slug?: string;
+  // slug?: string;
   isFocus?: boolean;
   href: string;
   isParent?: boolean;

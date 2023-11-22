@@ -8,7 +8,7 @@ interface itemProps {
   label: string;
   href: string;
   icon?: IconType | null;
-  slug: string;
+  // slug: string;
   children?: childProps[];
 }
 interface menuProps {
@@ -22,7 +22,7 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Home",
-        slug: "/",
+        // slug: "/",
         href: "/",
         icon: MdOutlineDashboard,
       },
@@ -33,13 +33,13 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Convert Case",
-        slug: "convert-case",
+        // slug: "convert-case",
         href: "/string/convert-case",
         icon: null,
       },
       {
         label: "Convert Units",
-        slug: "convert-units",
+        // slug: "convert-units",
         href: "/string/convert-units",
         icon: null,
       },
@@ -50,13 +50,13 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Big Number Calculator",
-        slug: "big-number-calculator",
+        // slug: "big-number-calculator",
         href: "/number/convert-case",
         icon: null,
       },
       {
         label: "Ethereum Convert Units",
-        slug: "ethereum-convert-units",
+        // slug: "ethereum-convert-units",
         href: "/number/ethereum-convert-units",
         icon: null,
       },

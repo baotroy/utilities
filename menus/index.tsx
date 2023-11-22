@@ -26,7 +26,6 @@ const menus: menuProps[] = [
         href: "/",
         icon: MdOutlineDashboard,
       },
-
     ],
   },
   {
@@ -35,16 +34,15 @@ const menus: menuProps[] = [
       {
         label: "Convert Case",
         slug: "convert-case",
-        href: "/convert-case",
+        href: "/string/convert-case",
         icon: null,
       },
       {
         label: "Convert Units",
         slug: "convert-units",
-        href: "/convert-units",
+        href: "/string/convert-units",
         icon: null,
       },
-
     ],
   },
 ];

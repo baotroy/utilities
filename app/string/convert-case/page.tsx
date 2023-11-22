@@ -1,7 +1,7 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
-import convertCase, { CaseType } from "./utils";
+import convertCase, { CaseType } from "../utils";
 
 const ConvertCase = () => {
   const [text, setText] = useState("");

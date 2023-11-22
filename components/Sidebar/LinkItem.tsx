@@ -11,12 +11,19 @@ interface LinkItemProps {
   href: string;
   isParent?: boolean;
   isOpen?: boolean;
-  icon: IconType | null;
+  icon: IconType | null | undefined;
   handleClick?: (e: any) => void;
 }
 
-const LinkItem: React.FC<LinkItemProps> = ({ label, isFocus, href, isParent, isOpen, icon: Icon, handleClick }) => {
-
+const LinkItem: React.FC<LinkItemProps> = ({
+  label,
+  isFocus,
+  href,
+  isParent,
+  isOpen,
+  icon: Icon,
+  handleClick,
+}) => {
   return (
     <li>
       <Link
@@ -29,7 +36,12 @@ const LinkItem: React.FC<LinkItemProps> = ({ label, isFocus, href, isParent, isO
       >
         {Icon && <Icon size={20} />}
         {label}
-        {isParent && (isOpen ? <MdKeyboardArrowUp size={20} /> : <MdKeyboardArrowDown size={20} />)}
+        {isParent &&
+          (isOpen ? (
+            <MdKeyboardArrowUp size={20} />
+          ) : (
+            <MdKeyboardArrowDown size={20} />
+          ))}
       </Link>
     </li>
   );

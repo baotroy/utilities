@@ -18,6 +18,7 @@
     "apexcharts": "^3.41.1",
     "autoprefixer": "10.4.14",
     "clsx": "^2.0.0",
+    "dayjs": "^1.11.10",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "jsvectormap": "^1.5.3",

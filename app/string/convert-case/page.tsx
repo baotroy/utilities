@@ -5,6 +5,9 @@ import convertCase, { CaseType } from "../utils";
 import toast from "react-hot-toast";
 const ConvertCase = () => {
   const [text, setText] = useState("");
+  const [characterCount, setCharacterCount] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const [lineCount, setLineCount] = useState(0);
   const buttons = [
     {
       label: "lower case",
@@ -80,12 +83,17 @@ const ConvertCase = () => {
   ];
   return (
     <>
-      <Breadcrumb pageName="Convert Case" />
+      <Breadcrumb />
       <div>
         <textarea
           rows={20}
           placeholder=""
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setCharacterCount(e.target.value.length);
+            setWordCount(e.target.value.split(" ").length);
+            setLineCount(e.target.value.split("\n").length);
+            setText(e.target.value);
+          }}
           value={text}
           className="
           dark:text-graydark2
@@ -100,6 +108,10 @@ const ConvertCase = () => {
         ></textarea>
       </div>
       <div>
+        Character Count: {characterCount} | Word Count: {wordCount} | Line
+        Count: {lineCount}
+      </div>
+      <div>
         {buttons.map((btn, index) => (
           <button
             type="button"
@@ -111,6 +123,10 @@ const ConvertCase = () => {
           </button>
         ))}
       </div>
+
+      <p className="text-sm mt-20 italic">
+        Functions depend on https://convertcase.net/
+      </p>
     </>
   );
 };

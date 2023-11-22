@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { IconType } from "react-icons";
+import convertCase, { CaseType } from "@/app/string/utils";
 
 export interface ChildLinkItemProps {
   label: string;
@@ -23,7 +24,7 @@ const ChildLinkItem: React.FC<ChildLinkItemProps> = ({
         currentPathname === href && "text-white"
       } `}
     >
-      {label}
+      {convertCase(label, CaseType.Title)}
     </Link>
   );
 };

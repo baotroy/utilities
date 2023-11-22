@@ -3,6 +3,7 @@ import React from "react";
 import { IconType } from "react-icons";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import clsx from "clsx";
+import convertCase, { CaseType } from "@/app/string/utils";
 
 interface LinkItemProps {
   label: string;
@@ -48,7 +49,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
         onClick={handleClick}
       >
         {Icon && <Icon size={20} />}
-        {label}
+        {convertCase(label, CaseType.Title)}
         {isParent &&
           (isOpen ? (
             <MdKeyboardArrowUp size={20} />

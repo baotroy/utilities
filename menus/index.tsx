@@ -67,13 +67,13 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Epoch Converter",
-        slug: "epoch-converter",
+        // slug: "epoch-converter",
         href: "/date/epoch-converter",
         icon: null,
       },
       {
         label: "Date Difference",
-        slug: "date-difference",
+        // slug: "date-difference",
         href: "/date/date-difference",
         icon: null,
       },

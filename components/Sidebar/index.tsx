@@ -111,7 +111,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     {group.groupName}
                   </h3>
                 )}
-                <ul className="mb-6 flex flex-col gap-1.5">
+                <ul className="mb-4 flex flex-col gap-1.5">
                   {group.items.map((item, index) => {
                     if (item.children?.length) {
                       return (

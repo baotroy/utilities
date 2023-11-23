@@ -1,1 +1,101 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
+type TimestampDifferenceType = {
+    second: number;
+    minute: number;
+    hour: number;
+    day: number;
+    week: number;
+    month: number;
+    year: number;
+} 
+type NearestUnitType = { value: number, unit: string, past: boolean }
+
 export const getCurrent = (): number => Math.floor(Date.now() / 1000);
+export const getTimestampUnit = (timestamp: number): string => {
+  const s =
+    timestamp.toString().length > 20
+      ? timestamp.toString().substring(0, 20)
+      : timestamp.toString();
+
+  if (s.length >= 17) {
+    return "nanoseconds (1 billionth of a second)"; // Very unlikely in standard JavaScript
+  } else if (s.length >= 15) {
+    return "microseconds (1/1,000,000 second)"; // Likely custom implementation, not standard JavaScript
+  } else if (s.length >= 12) {
+    return "milliseconds"; // Timestamp is in milliseconds
+  }
+  return "seconds"; // Timestamp is in seconds
+};
+
+
+const dateDiff = (timestamp: number): TimestampDifferenceType => {
+  const s = formatString(timestamp.toString());
+  const now = dayjs();
+  const then = dayjs(parseInt(s));
+  return {
+    second: then.diff(now, "second", true),
+    minute: then.diff(now, "minute", true),
+    hour: then.diff(now, "hour", true),
+    day: then.diff(now, "day", true),
+    week: then.diff(now, "week", true),
+    month: then.diff(now, "month", true),
+    year: then.diff(now, "year", true),
+  };
+};
+
+const formatString = (str: string): string => {
+  if (str.length > 13) {
+    return str.slice(0, 13);
+  } else {
+    return str.padEnd(13, "0");
+  }
+};
+
+const convertSecondsToNearestUnit = (differences: TimestampDifferenceType): NearestUnitType => {
+  const units = Object.keys(differences).reverse() as Array<keyof TimestampDifferenceType>;
+
+  for (const unit of units) {
+    const past = differences[unit] < 0;
+    const value = Math.abs(Math.round(differences[unit]));
+    if (Math.abs(differences[unit]) < 1) {
+      continue;
+    }
+    return { value, unit, past };
+  }
+  return { value: 0, unit: "second", past: false };
+};
+
+export const getRelativeTime = (timestamp: number): string => {
+  const { value, unit, past } = convertSecondsToNearestUnit(dateDiff(timestamp));
+
+  let message = "";
+
+  if (unit === "second") {
+    message = "a few seconds";
+  } else if (unit === "minute") {
+    message = `${value} minute${value > 1 ? "s" : ""}`;
+  } else if (unit === "hour") {
+    message = `${value} hour${value > 1 ? "s" : ""}`;
+  } else if (unit === "day") {
+    message = `${value} day${value > 1 ? "s" : ""}`;
+  } else if (unit === "week") {
+    message = `${value} week${value > 1 ? "s" : ""}`;
+  } else if (unit === "month") {
+    message = `${value} month${value > 1 ? "s" : ""}`;
+  } else if (unit === "year") {
+    message = `${value} year${value > 1 ? "s" : ""}`;
+  }
+
+  return past ? `${message} ago` : `in ${message}`;
+};
+
+export const dateFormat = (timestamp: number, utc = false): string => {
+    return utc
+      ? dayjs(parseInt(formatString(timestamp.toString())))
+          .utc()
+          .format("dddd, MMMM D, YYYY h:mm:ss A")
+      : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
+  };

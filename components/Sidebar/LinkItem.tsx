@@ -34,13 +34,12 @@ const LinkItem: React.FC<LinkItemProps> = ({
           group relative 
           flex 
           items-center
-          gap-2.5 
           rounded-sm 
-          py-1 
           px-4 
-          font-medium
           duration-300
           ease-in-out 
+          font-normal
+          leading-tight
           `,
           isFocus
             ? "text-bodydark2 dark:text-white"

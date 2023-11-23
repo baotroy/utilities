@@ -123,10 +123,6 @@ const ConvertCase = () => {
           </button>
         ))}
       </div>
-
-      <p className="text-sm mt-20 italic">
-        Functions depend on https://convertcase.net/
-      </p>
     </>
   );
 };

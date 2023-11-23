@@ -55,9 +55,9 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
-        label: "Ethereum Convert Units",
+        label: "Ethereum Unit Converter",
         // slug: "ethereum-convert-units",
-        href: "/number/ethereum-convert-units",
+        href: "/number/ethereum-unit-converter",
         icon: null,
       },
     ],
@@ -84,19 +84,19 @@ const menus: menuProps[] = [
     items: [
       {
         label: "Image To Base64",
-        slug: "image-to-base64",
+        // slug: "image-to-base64",
         href: "/image/image-to-base64",
         icon: null,
       },
       {
         label: "Image Compressor",
-        slug: "image-compressor",
+        // slug: "image-compressor",
         href: "/image/image-compressor",
         icon: null,
       },
       {
         label: "Image Resize",
-        slug: "image-resize",
+        // slug: "image-resize",
         href: "/image/image-resize",
         icon: null,
       },

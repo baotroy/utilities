@@ -2,6 +2,16 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
+enum TimestampUnit {
+  SECOND = "second",
+  MINUTE = "minute",
+  HOUR = "hour",
+  DAY = "day",
+  WEEK = "week",
+  MONTH = "month",
+  YEAR = "year",
+}
+
 type TimestampDifferenceType = {
     second: number;
     minute: number;
@@ -36,13 +46,13 @@ const dateDiff = (timestamp: number): TimestampDifferenceType => {
   const now = dayjs();
   const then = dayjs(parseInt(s));
   return {
-    second: then.diff(now, "second", true),
-    minute: then.diff(now, "minute", true),
-    hour: then.diff(now, "hour", true),
-    day: then.diff(now, "day", true),
-    week: then.diff(now, "week", true),
-    month: then.diff(now, "month", true),
-    year: then.diff(now, "year", true),
+    second: then.diff(now, TimestampUnit.SECOND, true),
+    minute: then.diff(now, TimestampUnit.MINUTE, true),
+    hour: then.diff(now, TimestampUnit.HOUR, true),
+    day: then.diff(now, TimestampUnit.DAY, true),
+    week: then.diff(now, TimestampUnit.WEEK, true),
+    month: then.diff(now, TimestampUnit.MONTH, true),
+    year: then.diff(now, TimestampUnit.YEAR, true),
   };
 };
 
@@ -65,7 +75,7 @@ const convertSecondsToNearestUnit = (differences: TimestampDifferenceType): Near
     }
     return { value, unit, past };
   }
-  return { value: 0, unit: "second", past: false };
+  return { value: 0, unit: TimestampUnit.SECOND, past: false };
 };
 
 export const getRelativeTime = (timestamp: number): string => {
@@ -73,19 +83,19 @@ export const getRelativeTime = (timestamp: number): string => {
 
   let message = "";
 
-  if (unit === "second") {
+  if (unit === TimestampUnit.SECOND) {
     message = "a few seconds";
-  } else if (unit === "minute") {
+  } else if (unit === TimestampUnit.MINUTE) {
     message = `${value} minute${value > 1 ? "s" : ""}`;
-  } else if (unit === "hour") {
+  } else if (unit === TimestampUnit.HOUR) {
     message = `${value} hour${value > 1 ? "s" : ""}`;
-  } else if (unit === "day") {
+  } else if (unit === TimestampUnit.DAY) {
     message = `${value} day${value > 1 ? "s" : ""}`;
-  } else if (unit === "week") {
+  } else if (unit === TimestampUnit.WEEK) {
     message = `${value} week${value > 1 ? "s" : ""}`;
-  } else if (unit === "month") {
+  } else if (unit === TimestampUnit.MONTH) {
     message = `${value} month${value > 1 ? "s" : ""}`;
-  } else if (unit === "year") {
+  } else if (unit === TimestampUnit.YEAR) {
     message = `${value} year${value > 1 ? "s" : ""}`;
   }
 

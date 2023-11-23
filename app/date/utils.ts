@@ -24,7 +24,8 @@ type TimestampDifferenceType = {
 type NearestUnitType = { value: number, unit: string, past: boolean }
 
 export const getCurrent = (): number => Math.floor(Date.now() / 1000);
-export const getTimestampUnit = (timestamp: number): string => {
+export const getTimestampUnit = (timestamp?: number): string => {
+  if (!timestamp) return ""
   const s =
     timestamp.toString().length > 20
       ? timestamp.toString().substring(0, 20)
@@ -78,7 +79,8 @@ const convertSecondsToNearestUnit = (differences: TimestampDifferenceType): Near
   return { value: 0, unit: TimestampUnit.SECOND, past: false };
 };
 
-export const getRelativeTime = (timestamp: number): string => {
+export const getRelativeTime = (timestamp?: number): string => {
+  if (!timestamp) return ""
   const { value, unit, past } = convertSecondsToNearestUnit(dateDiff(timestamp));
 
   let message = "";
@@ -102,7 +104,8 @@ export const getRelativeTime = (timestamp: number): string => {
   return past ? `${message} ago` : `in ${message}`;
 };
 
-export const dateFormat = (timestamp: number, utc = false): string => {
+export const dateFormat = (timestamp?: number, utc = false): string => {
+  if (!timestamp) return "";
     return utc
       ? dayjs(parseInt(formatString(timestamp.toString())))
           .utc()

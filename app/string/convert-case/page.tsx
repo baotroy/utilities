@@ -2,7 +2,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
 import convertCase, { CaseType } from "../utils";
-import toast from "react-hot-toast";
+import { copyToClipboard } from "@/common/lib";
 const ConvertCase = () => {
   const [text, setText] = useState("");
   const [characterCount, setCharacterCount] = useState(0);
@@ -64,14 +64,7 @@ const ConvertCase = () => {
     {
       label: "Copy to Clipboard",
       handleClick: () => {
-        navigator.clipboard
-          .writeText(text)
-          .then(() => {
-            toast.success("Text copied to clipboard");
-          })
-          .catch(() => {
-            toast.error("Unable to copy");
-          });
+        copyToClipboard(text);
       },
     },
     {

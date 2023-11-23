@@ -7,14 +7,18 @@ import {
   getTimestampUnit,
   dateFormat,
 } from "../utils";
+import { copyToClipboard } from "@/common/lib";
+import clsx from "clsx";
+import Toast from "react-hot-toast";
 const EpochConverter = () => {
   const [tickingUnixTimestamp, setTickingUnixTimestamp] =
     useState(getCurrent());
   const [intervalId, setIntervalId] = useState();
   const [meridiem, setMeridiem] = useState("AM");
   const [locale, setLocale] = useState("GMT");
+  const [convertTimestampVal, setConvertTimestampVal] = useState("");
 
-  const [currentTimestamp, setCurrentTimestamp] = useState(getCurrent());
+  const [inputCurrentTimestamp, setInputCurrentTimestamp] = useState("");
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -37,22 +41,40 @@ const EpochConverter = () => {
     setIntervalId(id);
   };
 
+  const handleOnChangeInputTimestamp = (str: string) => {
+    setInputCurrentTimestamp(str);
+  };
+
+  const convertTimeStamptoHumanDate = () => {
+    if (!isNumber(inputCurrentTimestamp)) {
+      Toast.error("Invalid timestamp");
+      return;
+    }
+    setConvertTimestampVal(inputCurrentTimestamp);
+  };
+
+  const isNumber = (str: string): boolean => /^\d+$/.test(str);
+
   return (
     <>
       <Breadcrumb />
       <div>
-        The current Unix Timestamp is:
+        {/* The current Unix Timestamp is: */}
         <span
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          onClick={() => copyToClipboard(tickingUnixTimestamp.toString())}
           className="
-                p-2
+                py-2
                 m-1
                 rounded
                 text-stroke
+                text-center
                 font-bold
                 inline-block
                 bg-body
+                text-3xl
+                w-[195px]
               "
         >
           {tickingUnixTimestamp}
@@ -60,22 +82,23 @@ const EpochConverter = () => {
       </div>
 
       <div className="mt-10">
-        <label htmlFor="epoch" className=" text-graydark dark:text-bodydark2">
+        <h3 className="text-graydark dark:text-bodydark2 font-semibold text-[20px]">
           Convert Timestamp To Human Readable Date
-        </label>
+        </h3>
         <div className="mt-4">
           <input
-            id="epoch"
             maxLength={20}
             type="text"
-            className="w-50 rounded p-1.5 mx-1"
-            defaultValue={currentTimestamp}
+            className="w-50 rounded border border-bodydark p-2 mx-1 outline-bodydark dark:outline-boxdark"
+            value={inputCurrentTimestamp}
+            onChange={(e) => handleOnChangeInputTimestamp(e.target.value)}
           />
           <button
+            onClick={convertTimeStamptoHumanDate}
             type="button"
             className="m-1 rounded bg-bodydark1 dark:bg-boxdark py-2 px-4 font-medium text-graydark dark:text-bodydark2"
           >
-            Convert To Human Date
+            Convert
           </button>
           {/* <button
             type="button"
@@ -88,30 +111,33 @@ const EpochConverter = () => {
           Supports Unix timestamps in seconds, milliseconds, microseconds and
           nanoseconds.
         </p>
-        <div className="mt-10">
+        <div className={clsx("mt-10", !convertTimestampVal && "hidden")}>
           Assuming that this timestamp is in{" "}
           <span className="font-semibold">
-            {getTimestampUnit(currentTimestamp)}:
+            {getTimestampUnit(parseInt(convertTimestampVal))}:
           </span>
           <table>
             <tbody>
               <tr>
                 <td className="font-bold w-40">GMT</td>
-                <td>{dateFormat(currentTimestamp, true)}</td>
+                <td>{dateFormat(parseInt(convertTimestampVal), true)}</td>
               </tr>
               <tr>
                 <td className="font-bold">Your Local Time</td>
-                <td>{dateFormat(currentTimestamp)}</td>
+                <td>{dateFormat(parseInt(convertTimestampVal))}</td>
               </tr>
               <tr>
                 <td className="font-bold">Relative</td>
-                <td>{getRelativeTime(currentTimestamp)}</td>
+                <td>{getRelativeTime(parseInt(convertTimestampVal))}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div className="mt-10">
+        <h3 className="text-graydark dark:text-bodydark2 font-semibold text-[20px]">
+          Convert Human Readable Date To Timestamp
+        </h3>
         <div>
           <table>
             <thead>
@@ -132,7 +158,7 @@ const EpochConverter = () => {
                 <td>
                   <input
                     maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     defaultValue=""
                   />
                   -
@@ -140,7 +166,7 @@ const EpochConverter = () => {
                 <td>
                   <input
                     maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     defaultValue=""
                   />
                   -
@@ -148,22 +174,14 @@ const EpochConverter = () => {
                 <td>
                   <input
                     maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     defaultValue=""
                   />
                 </td>
                 <td>
                   <input
                     maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
-                    defaultValue=""
-                  />
-                  :
-                </td>
-                <td>
-                  <input
-                    maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     defaultValue=""
                   />
                   :
@@ -171,13 +189,21 @@ const EpochConverter = () => {
                 <td>
                   <input
                     maxLength={4}
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
+                    defaultValue=""
+                  />
+                  :
+                </td>
+                <td>
+                  <input
+                    maxLength={4}
+                    className="w-15 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     defaultValue=""
                   />
                 </td>
                 <td>
                   <select
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-16 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     value={meridiem}
                     onChange={(e) => setMeridiem(e.target.value)}
                   >
@@ -187,7 +213,7 @@ const EpochConverter = () => {
                 </td>
                 <td>
                   <select
-                    className="w-15 rounded p-1.5 mx-1"
+                    className="w-20 rounded p-2 mx-1 border border-bodydark outline-bodydark dark:outline-boxdark"
                     value={locale}
                     onChange={(e) => setLocale(e.target.value)}
                   >

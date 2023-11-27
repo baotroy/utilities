@@ -7,7 +7,7 @@ import {
   getTimestampUnit,
   dateFormat,
 } from "../utils";
-import { copyToClipboard } from "@/common/lib";
+import { copyToClipboard, isNumber } from "@/common/utils";
 import clsx from "clsx";
 import Toast from "react-hot-toast";
 const EpochConverter = () => {
@@ -52,8 +52,6 @@ const EpochConverter = () => {
     }
     setConvertTimestampVal(inputCurrentTimestamp);
   };
-
-  const isNumber = (str: string): boolean => /^\d+$/.test(str);
 
   return (
     <>

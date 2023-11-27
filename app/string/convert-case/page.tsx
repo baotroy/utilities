@@ -2,7 +2,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
 import convertCase, { CaseType } from "../utils";
-import { copyToClipboard } from "@/common/lib";
+import { copyToClipboard } from "@/common/utils";
 const ConvertCase = () => {
   const [text, setText] = useState("");
   const [characterCount, setCharacterCount] = useState(0);

@@ -106,9 +106,9 @@ export const getRelativeTime = (timestamp?: number): string => {
 
 export const dateFormat = (timestamp?: number, utc = false): string => {
   if (!timestamp) return "";
-    return utc
-      ? dayjs(parseInt(formatString(timestamp.toString())))
-          .utc()
+  return utc
+    ? dayjs(parseInt(formatString(timestamp.toString())))
+    .utc()
           .format("dddd, MMMM D, YYYY h:mm:ss A")
       : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
   };

@@ -1,7 +1,33 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { MdContentCopy } from "react-icons/md";
+import { ethUnitDecimals } from "../utils";
+import { ethUnitMap } from "web3-utils";
+import EtherUnit from "../components/ethereum-unit";
+import { useEffect, useState } from "react";
+import { isNumber } from "@/common/utils";
 const EtherUnitConverter = () => {
+  const [inputValues, setInputValues] = useState({
+    wei: "",
+    kwei: "",
+    mwei: "",
+    gwei: "",
+    szsabo: "",
+    finney: "",
+    ether: "",
+    kether: "",
+    mether: "",
+    gether: "",
+    tether: "",
+  });
+
+  const handleOnChange = (str: string, unit: keyof typeof ethUnitMap) => {
+    if (!isNumber(str)) return;
+    setInputValues((inputVal) => ({
+      ...inputVal,
+      ...{ [unit]: str },
+    }));
+  };
+  console.log("data", inputValues);
   return (
     <>
       <Breadcrumb />
@@ -13,26 +39,20 @@ const EtherUnitConverter = () => {
           calculating gas prices. Use our Unit Converter to easily convert
           between them!
         </p>
-        <div>Enter any value</div>
-        <div>
-          <div>
-            <span className="bg-stroke inline-block rounded-tl-lg rounded-bl-lg">
-              <MdContentCopy size={20} />
-            </span>
-            <input
-              id="wei"
-              type="text"
-              className="w-100  p-1.5 outline-none"
-              defaultValue=""
+        <div className="my-4">Enter any value</div>
+        {Object.keys(ethUnitDecimals).map((unit, index) => {
+          return (
+            <EtherUnit
+              key={index}
+              unit={unit as keyof typeof ethUnitMap}
+              decimals={ethUnitDecimals[unit as keyof typeof ethUnitDecimals]}
+              value={inputValues[unit as keyof typeof inputValues]}
+              handleOnChange={(e) =>
+                handleOnChange(e, unit as keyof typeof ethUnitMap)
+              }
             />
-            <label
-              htmlFor="wei"
-              className="p-2 bg-stroke rounded-tr-lg rounded-br-lg"
-            >
-              Wei (10<sup>-18</sup>)
-            </label>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </>
   );

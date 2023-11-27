@@ -1,4 +1,4 @@
-import { isAlphabet, stringExplode } from "@/utils";
+import { isAlphabet, stringExplode } from "@/common/utils";
 
 export enum CaseType {
   Lowercase = "lowercase",

@@ -80,6 +80,17 @@ const menus: menuProps[] = [
     ],
   },
   {
+    groupName: "DEV",
+    items: [
+      {
+        label: "JSON Prettier",
+        // slug: "convert-case",
+        href: "/dev/json-prettier",
+        icon: null,
+      },
+    ],
+  },
+  {
     groupName: "IMAGE",
     items: [
       {

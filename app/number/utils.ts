@@ -1,6 +1,6 @@
-const BigNumber = require("bignumber.js");
-BigNumber.config({ DECIMAL_PLACES: 18 });
-const units = {
+import BigNumber from "bignumber.js";
+import { Web3 } from "web3";
+export const ethUnitMap = {
   wei: -18,
   kwei: -15,
   mwei: -12,
@@ -14,15 +14,22 @@ const units = {
   tether: 12,
 };
 
-const convert = (value, from) => {
-  // convert ether to wei
-  const bnValue = new BigNumber(value);
-  const fromUnit = units[from];
 
-  const result = {};
-  for (const unit in units) {
-    const toUnit = units[unit];
-    result[unit] = bnValue.multipliedBy(BigNumber(10).pow(fromUnit - toUnit)).toString(10);
+export const convert = (value: string, from: keyof typeof ethUnitMap):  Record<keyof typeof ethUnitMap, string>  => {
+  const bnValue = BigNumber(value);
+  const fromUnit = ethUnitMap[from];
+  const wei = bnValue.multipliedBy(BigNumber(10).pow(fromUnit + 18));
+
+  const result: Record<keyof typeof ethUnitMap, string> = {} as Record<keyof typeof ethUnitMap, string>
+  for (const unit in ethUnitMap) {
+    result[unit as keyof typeof ethUnitMap] = unit === from ? wei.toString() : convertFromWei(wei.toString(), unit as keyof typeof ethUnitMap);
   }
   return result;
+};
+const convertFromWei = (weiValue: string, to: keyof typeof ethUnitMap) : string => {
+  try {
+    return Web3.utils.fromWei(weiValue.toString(), to);
+  } catch (error) {
+    return "0";
+  }
 };

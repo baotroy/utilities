@@ -9,7 +9,7 @@
   - Ethereum Unit Converter [[Ref](https://etherscan.io/unitconverter)]
 - Date
   - Epoc Converter [[Ref](URL)]
-- JSON
+- Dev
   - JSON Prettier [[Ref](https://jsonformatter.org/)]
   - JSON Parser
 - Image

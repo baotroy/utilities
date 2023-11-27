@@ -157,3 +157,4 @@ function _inverse(str: string): string {
 function _rotate(str: string): string{
   return str.split("").reverse().join("");
 }
+

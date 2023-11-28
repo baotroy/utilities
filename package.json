@@ -18,8 +18,10 @@
     "apexcharts": "^3.41.1",
     "autoprefixer": "10.4.14",
     "bignumber.js": "^9.1.2",
+    "bufferutil": "^4.0.8",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
+    "encoding": "^0.1.13",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "jsvectormap": "^1.5.3",
@@ -35,6 +37,7 @@
     "react-jvectormap": "^0.0.16",
     "tailwindcss": "3.3.3",
     "typescript": "5.1.6",
+    "utf-8-validate": "^6.0.3",
     "web3": "^4.2.2"
   },
   "devDependencies": {

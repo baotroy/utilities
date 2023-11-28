@@ -108,7 +108,15 @@ export const dateFormat = (timestamp?: number, utc = false): string => {
   if (!timestamp) return "";
   return utc
     ? dayjs(parseInt(formatString(timestamp.toString())))
-    .utc()
-          .format("dddd, MMMM D, YYYY h:mm:ss A")
-      : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
-  };
+      .utc()
+      .format("dddd, MMMM D, YYYY h:mm:ss A")
+    : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
+};
+
+export const createTimeUnix = (dateStr: string, utc = false): number => {
+  return utc ? dayjs.utc(dateStr).unix() : dayjs(dateStr).unix();
+}
+
+export const getGreenwichMeanTime = (): string => {
+  return dayjs().utc().format("dddd, MMMM D, YYYY h:mm:ss A");
+}

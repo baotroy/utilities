@@ -1,38 +1,21 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { ethUnitDecimals } from "../utils";
+import { convertEthereumUnits, ethUnitDecimals } from "../utils";
 import { ethUnitMap } from "web3-utils";
 import EtherUnit from "../components/ethereum-unit";
-import { useEffect, useState } from "react";
-import { isNumber } from "@/common/utils";
+import { useState } from "react";
 const EtherUnitConverter = () => {
-  const [inputValues, setInputValues] = useState({
-    wei: "",
-    kwei: "",
-    mwei: "",
-    gwei: "",
-    szsabo: "",
-    finney: "",
-    ether: "",
-    kether: "",
-    mether: "",
-    gether: "",
-    tether: "",
-  });
+  const [inputValues, setInputValues] = useState(
+    convertEthereumUnits("1", "ether")
+  );
 
-  const handleOnChange = (str: string, unit: keyof typeof ethUnitMap) => {
-    if (!isNumber(str)) return;
-    setInputValues((inputVal) => ({
-      ...inputVal,
-      ...{ [unit]: str },
-    }));
+  const handleOnChange = (str: string, unit: keyof typeof ethUnitDecimals) => {
+    setInputValues(convertEthereumUnits(str, unit));
   };
-  console.log("data", inputValues);
   return (
     <>
       <Breadcrumb />
       <div>
-        Unit Converter
         <p>
           Ether or ETH is often used in different denominations of its currency,
           such as Wei for interacting with smart contracts and Gwei for
@@ -48,7 +31,7 @@ const EtherUnitConverter = () => {
               decimals={ethUnitDecimals[unit as keyof typeof ethUnitDecimals]}
               value={inputValues[unit as keyof typeof inputValues]}
               handleOnChange={(e) =>
-                handleOnChange(e, unit as keyof typeof ethUnitMap)
+                handleOnChange(e, unit as keyof typeof ethUnitDecimals)
               }
             />
           );

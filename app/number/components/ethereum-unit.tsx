@@ -29,6 +29,7 @@ const EtherUnit: React.FC<EtherUnitProps> = ({
         </div>
         <div className="flex">
           <input
+            placeholder={convertCase(unit, CaseType.Title)}
             id={unit}
             type="text"
             className="w-100 p-1.5 outline-none border-t border-b border-t-bodydark border-b-bodydark border-bodydark"

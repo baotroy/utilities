@@ -20,7 +20,7 @@ const EtherUnit: React.FC<EtherUnitProps> = ({
   };
 
   return (
-    <div className="my-4">
+    <div className="my-2">
       <div className="flex">
         <div className="flex">
           <span className="bg-gray-2  dark:bg-graydark border border-bodydark  dark:border-body block py-2 px-4 rounded-tl-lg rounded-bl-lg hover:cursor-pointer">

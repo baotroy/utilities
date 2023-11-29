@@ -13,19 +13,19 @@ enum TimestampUnit {
 }
 
 type TimestampDifferenceType = {
-    second: number;
-    minute: number;
-    hour: number;
-    day: number;
-    week: number;
-    month: number;
-    year: number;
-} 
-type NearestUnitType = { value: number, unit: string, past: boolean }
+  second: number;
+  minute: number;
+  hour: number;
+  day: number;
+  week: number;
+  month: number;
+  year: number;
+};
+type NearestUnitType = { value: number; unit: string; past: boolean };
 
 export const getCurrent = (): number => Math.floor(Date.now() / 1000);
 export const getTimestampUnit = (timestamp?: number): string => {
-  if (!timestamp) return ""
+  if (!timestamp) return "";
   const s =
     timestamp.toString().length > 20
       ? timestamp.toString().substring(0, 20)
@@ -40,7 +40,6 @@ export const getTimestampUnit = (timestamp?: number): string => {
   }
   return "seconds"; // Timestamp is in seconds
 };
-
 
 const dateDiff = (timestamp: number): TimestampDifferenceType => {
   const s = formatString(timestamp.toString());
@@ -65,8 +64,12 @@ const formatString = (str: string): string => {
   }
 };
 
-const convertSecondsToNearestUnit = (differences: TimestampDifferenceType): NearestUnitType => {
-  const units = Object.keys(differences).reverse() as Array<keyof TimestampDifferenceType>;
+const convertSecondsToNearestUnit = (
+  differences: TimestampDifferenceType
+): NearestUnitType => {
+  const units = Object.keys(differences).reverse() as Array<
+    keyof TimestampDifferenceType
+  >;
 
   for (const unit of units) {
     const past = differences[unit] < 0;
@@ -80,8 +83,10 @@ const convertSecondsToNearestUnit = (differences: TimestampDifferenceType): Near
 };
 
 export const getRelativeTime = (timestamp?: number): string => {
-  if (!timestamp) return ""
-  const { value, unit, past } = convertSecondsToNearestUnit(dateDiff(timestamp));
+  if (!timestamp) return "";
+  const { value, unit, past } = convertSecondsToNearestUnit(
+    dateDiff(timestamp)
+  );
 
   let message = "";
 
@@ -108,7 +113,23 @@ export const dateFormat = (timestamp?: number, utc = false): string => {
   if (!timestamp) return "";
   return utc
     ? dayjs(parseInt(formatString(timestamp.toString())))
-    .utc()
-          .format("dddd, MMMM D, YYYY h:mm:ss A")
-      : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
-  };
+        .utc()
+        .format("dddd, MMMM D, YYYY h:mm:ss A")
+    : dayjs(parseInt(formatString(timestamp.toString()))).format(
+        "dddd, MMMM D, YYYY h:mm:ss A"
+      );
+};
+
+export const getTimezoneOffsetFormat = () => {
+  const now = new Date();
+  const offsetInMinutes = now.getTimezoneOffset();
+
+  // Convert offset to hours and minutes
+  const hoursOffset = Math.floor(Math.abs(offsetInMinutes) / 60);
+  const minutesOffset = Math.abs(offsetInMinutes) % 60;
+  const offsetSign = offsetInMinutes > 0 ? "-" : "+";
+
+  return `GMT${offsetSign}${hoursOffset
+    .toString()
+    .padStart(2, "0")}:${minutesOffset.toString().padStart(2, "0")}`;
+};

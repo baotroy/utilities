@@ -122,10 +122,6 @@ export const createTimeUnix = (dateStr: string, utc = false): number => {
   return utc ? dayjs.utc(dateStr).unix() : dayjs(dateStr).unix();
 }
 
-export const getGreenwichMeanTime = (): string => {
-  return dayjs().utc().format("dddd, MMMM D, YYYY h:mm:ss A");
-}
-
 export const getTimezoneOffsetFormat = () => {
   const now = new Date();
   const offsetInMinutes = now.getTimezoneOffset();

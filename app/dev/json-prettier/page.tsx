@@ -43,7 +43,6 @@ const JsonPrettier = () => {
         <div className="w-1/2">
           <AceEditor
             width="100%"
-            placeholder="Placeholder Text"
             mode="json"
             theme="github"
             name="blah0"

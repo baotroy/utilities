@@ -1,55 +1,115 @@
 "use client";
+import Toast from "react-hot-toast";
 import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/theme-eclipse";
+import "ace-builds/src-noconflict/mode-json";
+
 import { useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { validJSON, prettyJson } from "../utils";
 const JsonPrettier = () => {
-  const [inputValue, setInputValue] = useState(
-    `[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"target","type":"address"}],"name":"AddressEmptyCode","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ERC1155InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC1155InvalidApprover","type":"error"},{"inputs":[{"internalType":"uint256","name":"idsLength","type":"uint256"},{"internalType":"uint256","name":"valuesLength","type":"uint256"}],"name":"ERC1155InvalidArrayLength","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"}],"name":"ERC1155InvalidOperator","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC1155InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC1155InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"owner","type":"address"}],"name":"ERC1155MissingApprovalForAll","type":"error"},{"inputs":[{"internalType":"address","name":"implementation","type":"address"}],"name":"ERC1967InvalidImplementation","type":"error"},{"inputs":[],"name":"ERC1967NonPayable","type":"error"},{"inputs":[],"name":"EnforcedPause","type":"error"},{"inputs":[],"name":"ExpectedPause","type":"error"},{"inputs":[],"name":"FailedInnerCall","type":"error"},{"inputs":[],"name":"InsufficientBalance","type":"error"},{"inputs":[],"name":"InvalidInitialization","type":"error"},{"inputs":[],"name":"InvalidPrice","type":"error"},{"inputs":[],"name":"InvalidTimeRange","type":"error"},{"inputs":[],"name":"NotInitializing","type":"error"},{"inputs":[],"name":"NotWhitelisted","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"Payment__InsufficientBalance","type":"error"},{"inputs":[],"name":"Payment__InvalidPercentage","type":"error"},{"inputs":[],"name":"UUPSUnauthorizedCallContext","type":"error"},{"inputs":[{"internalType":"bytes32","name":"slot","type":"bytes32"}],"name":"UUPSUnsupportedProxiableUUID","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint64","name":"version","type":"uint64"}],"name":"Initialized","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"tokenPrice","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"netPrice","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"maxSupply","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"maxBuy","type":"uint256"}],"name":"PreSaleInfo","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"referrer","type":"address"},{"indexed":false,"internalType":"uint256","name":"referralBonus","type":"uint256"}],"name":"ReferralBonus","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"forexPriceFeed","type":"address"}],"name":"SetForexPriceFeed","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"token","type":"address"},{"components":[{"internalType":"contract IAggregatorV3","name":"usdAggregator","type":"address"},{"internalType":"uint96","name":"multiplier","type":"uint96"},{"internalType":"uint256","name":"price","type":"uint256"}],"indexed":false,"internalType":"struct PresaleOracleUpgradeable.PriceFeed","name":"priceFeed","type":"tuple"}],"name":"SetPriceFeed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"purchaser","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"quantity","type":"uint256"},{"indexed":false,"internalType":"address","name":"paymentToken","type":"address"}],"name":"TokensPurchased","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"value","type":"string"},{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"implementation","type":"address"}],"name":"Upgraded","type":"event"},{"inputs":[],"name":"UPGRADE_INTERFACE_VERSION","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"affiliatePercentageInBps","outputs":[{"internalType":"uint96","name":"","type":"uint96"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"}],"name":"burnBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id_","type":"uint256"},{"internalType":"uint256","name":"quantity_","type":"uint256"},{"internalType":"address","name":"paymentToken_","type":"address"},{"internalType":"address","name":"recipient_","type":"address"},{"internalType":"address","name":"referrer_","type":"address"}],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"clientInfo","outputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"stateMutability":"view","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"internalType":"struct PaymenProcessingUpgradeable.FeeInfo","name":"clientInfo_","type":"tuple"},{"components":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"internalType":"struct PaymenProcessingUpgradeable.FeeInfo","name":"systemInfo_","type":"tuple"},{"internalType":"uint96","name":"affiliatePercentageInBps_","type":"uint96"}],"name":"configPaymentPercentage","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"exists","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getPresaleInfo","outputs":[{"internalType":"uint256","name":"tokensSold","type":"uint256"},{"internalType":"uint256","name":"maxSupply","type":"uint256"},{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"uint256","name":"startTime","type":"uint256"},{"internalType":"uint256","name":"endTime","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id_","type":"uint256"},{"internalType":"uint256","name":"quantity_","type":"uint256"},{"internalType":"address","name":"paymentToken_","type":"address"}],"name":"getTokenPaymentAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token_","type":"address"}],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token_","type":"address"},{"internalType":"uint256","name":"usdAmount_","type":"uint256"}],"name":"getTokenUsdAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id_","type":"uint256"},{"components":[{"internalType":"uint64","name":"startTime","type":"uint64"},{"internalType":"uint64","name":"endTime","type":"uint64"},{"internalType":"uint128","name":"tokenPrice","type":"uint128"}],"internalType":"struct MyToken.PresaleInfo","name":"presaleInfo_","type":"tuple"},{"components":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"internalType":"struct PaymenProcessingUpgradeable.FeeInfo","name":"clientInfo_","type":"tuple"},{"components":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"internalType":"struct PaymenProcessingUpgradeable.FeeInfo","name":"systemInfo_","type":"tuple"},{"internalType":"address","name":"paymentToken_","type":"address"},{"components":[{"internalType":"contract IAggregatorV3","name":"usdAggregator","type":"address"},{"internalType":"uint96","name":"multiplier","type":"uint96"},{"internalType":"uint256","name":"price","type":"uint256"}],"internalType":"struct PresaleOracleUpgradeable.PriceFeed","name":"priceFeed_","type":"tuple"}],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address[]","name":"accounts_","type":"address[]"},{"internalType":"uint256[]","name":"amounts_","type":"uint256[]"}],"name":"mintBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"mintBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"proxiableUUID","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeBatchTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id_","type":"uint256"},{"components":[{"internalType":"uint64","name":"startTime","type":"uint64"},{"internalType":"uint64","name":"endTime","type":"uint64"},{"internalType":"uint128","name":"tokenPrice","type":"uint128"}],"internalType":"struct MyToken.PresaleInfo","name":"presaleInfo_","type":"tuple"},{"internalType":"uint256","name":"netPrice_","type":"uint256"},{"internalType":"uint256","name":"maxSupply_","type":"uint256"},{"internalType":"uint256","name":"maxBuy_","type":"uint256"}],"name":"setPresale","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token_","type":"address"},{"components":[{"internalType":"contract IAggregatorV3","name":"usdAggregator","type":"address"},{"internalType":"uint96","name":"multiplier","type":"uint96"},{"internalType":"uint256","name":"price","type":"uint256"}],"internalType":"struct PresaleOracleUpgradeable.PriceFeed","name":"priceFeed_","type":"tuple"}],"name":"setPriceFeeds","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"newuri","type":"string"}],"name":"setURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"systemInfo","outputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint96","name":"percentageInBps","type":"uint96"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newImplementation","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"upgradeToAndCall","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"uri","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}]`
-  );
+  const [inputValue, setInputValue] = useState("");
   const [parseValue, setParseValue] = useState("");
-  const handleOnChange = (e: any) => {
-    // setInputValue(value);
-    console.log(e);
+  const [tabSize, setTabSize] = useState(2);
+  const handleTabSizeChange = (tab: number) => {
+    setTabSize(tab);
   };
+  const handleOnChangeInput = (value: string) => {
+    setInputValue(value);
+  };
+
+  // Download file with content is parseValue
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([parseValue], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "download.json";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  };
+
   const handleConvert = () => {
     if (validJSON(inputValue)) {
-      setParseValue(prettyJson(inputValue, 2));
+      setParseValue(prettyJson(inputValue, tabSize));
+    } else {
+      Toast.error("Invalid input");
     }
   };
 
   return (
     <>
       <Breadcrumb />
-      <div>
-        <div>
-          <div></div>
-          <div>
-            <AceEditor
-              placeholder=""
-              mode="json"
-              theme="monokai"
-              name="blah2"
-              //   onLoad={this.onLoad}
-              onChange={() => handleOnChange(this)}
-              fontSize={14}
-              showPrintMargin={true}
-              showGutter={true}
-              highlightActiveLine={true}
-              value={inputValue}
-              setOptions={{
-                enableBasicAutocompletion: false,
-                enableLiveAutocompletion: false,
-                enableSnippets: false,
-                showLineNumbers: true,
-                tabSize: 2,
-              }}
-            />
-          </div>
+      <div className="flex w-full">
+        <div className="w-1/2">
+          <AceEditor
+            width="100%"
+            placeholder="Placeholder Text"
+            mode="json"
+            theme="github"
+            name="blah0"
+            onChange={(value) => handleOnChangeInput(value)}
+            fontSize={14}
+            showPrintMargin={true}
+            highlightActiveLine={true}
+            value={inputValue}
+            wrapEnabled={true}
+            setOptions={{
+              enableBasicAutocompletion: false,
+              enableLiveAutocompletion: false,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize,
+              spellcheck: true,
+            }}
+          />
         </div>
-        <button type="button" onClick={handleConvert}>
-          Prettier
-        </button>
+        <div className="w-[150px] justify-center text-center">
+          <button
+            type="button"
+            onClick={handleConvert}
+            className="w-[120px] m-1 mb-3 rounded bg-bodydark1 dark:bg-boxdark px-2 py-[5px] font-medium text-[14px] text-graydark dark:text-bodydark2"
+          >
+            Beautify
+          </button>
+          <select
+            className="w-[120px] m-1 rounded p-2 border border-bodydark outline-bodydark dark:outline-boxdark text-[14px]"
+            value={tabSize}
+            onChange={(e) => handleTabSizeChange(parseInt(e.target.value))}
+          >
+            <option value="2">2 tab space</option>
+            <option value="3">3 tab space</option>
+            <option value="4">4 tab space</option>
+          </select>
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="w-[120px] m-1 rounded bg-bodydark1 dark:bg-boxdark px-2 py-[5px] font-medium text-[14px] text-graydark dark:text-bodydark2"
+          >
+            Download
+          </button>
+        </div>
+        <div className="w-1/2">
+          <AceEditor
+            width="100%"
+            placeholder=""
+            mode="json"
+            theme="eclipse"
+            name="blah2"
+            fontSize={14}
+            showPrintMargin={true}
+            highlightActiveLine={true}
+            value={parseValue}
+            readOnly={true}
+            wrapEnabled={true}
+            setOptions={{
+              enableBasicAutocompletion: false,
+              enableLiveAutocompletion: false,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize,
+            }}
+          />
+        </div>
       </div>
     </>
   );

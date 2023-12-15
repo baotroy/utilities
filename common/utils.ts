@@ -33,11 +33,16 @@ export function bytesToSize(bytes: number) {
   return (bytes / Math.pow(BASE_UNIT, i)).toFixed(1) + " " + sizes[i];
 }
 
-export function download(content: string, filename: string, type = "text/plain") {
+export const download = (content: string, filename: string, type = "text/plain") => {
   const element = document.createElement("a");
   const file = new Blob([content], { type });
   element.href = URL.createObjectURL(file);
   element.download = filename;
   document.body.appendChild(element); // Required for this to work in FireFox
   element.click();
+}
+
+export const getSizeFileFromBase64 = (str: string) => {
+  const numberEq = str.slice(str.length - 5).split("=").length - 1
+  return str.length * (3 / 4) - numberEq
 }

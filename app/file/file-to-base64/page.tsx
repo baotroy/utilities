@@ -1,6 +1,7 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import React, { useState } from "react";
+import clsx from "clsx";
 import { prettyJson } from "@/app/dev/utils";
 import { bytesToSize, copyToClipboard, download } from "@/common/utils";
 
@@ -89,7 +90,7 @@ const ImageToBase64 = () => {
           />
           <p className="text-sm">Choose a file or drag and drop it here</p>
           {selectFile && (
-            <div>Filesize: {bytesToSize(selectFile?.size || 0)}</div>
+            <div>File size: {bytesToSize(selectFile?.size || 0)}</div>
           )}
         </div>
         <div className="mb-4">
@@ -111,30 +112,30 @@ const ImageToBase64 = () => {
             onClick={handleEncode}
             className="rounded bg-bodydark dark:bg-boxdark px-3 py-1.5 font-medium text-[14px] text-graydark dark:text-bodydark2"
           >
-            Encode file to Base64
+            Encode File to Base64
           </button>
         </div>
         <div className="mb-4 w-full">
-          <div className="flex">
-            <h3 className={h3Style}>Base64</h3>
+          <div className="block">
+            <h3 className={clsx(`${h3Style} inline-block`)}>Base64</h3>
             <div className="flex float-right">
               <a
                 href="#"
-                className="ml-3 text-sky text-xs underline"
+                className="ml-3 text-xs underline decoration-dashed"
                 onClick={handleCopy}
               >
                 copy
               </a>
               <a
                 href="#"
-                className="ml-3 text-blue text-xs underline"
+                className="ml-3 text-xs underline decoration-dashed"
                 onClick={handleClear}
               >
                 clear
               </a>
               <a
                 href="#"
-                className="ml-3 text-blue-500 text-xs underline"
+                className="ml-3 text-xs underline decoration-dashed"
                 onClick={handleDownload}
               >
                 download
@@ -159,6 +160,11 @@ const ImageToBase64 = () => {
                 py-3 px-5 font-medium outline-none "
             ></textarea>
           </div>
+          {/* <div>
+            {formatData && (
+              <div>{bytesToSize(getSizeFileFromBase64(base64))}</div>
+            )}
+          </div> */}
         </div>
         <div className="mb-4"></div>
       </div>

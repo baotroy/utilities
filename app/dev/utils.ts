@@ -1,6 +1,6 @@
 import { parse } from "@prantlf/jsonlint";
 // JSON
-export function prettyJson(str: string, indent: number): string {
+export function prettyJson(str: string, indent = 2): string {
   try {
     const obj = JSON.parse(str);
     return JSON.stringify(obj, null, indent);

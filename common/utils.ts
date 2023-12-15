@@ -5,13 +5,12 @@ export const copyToClipboard = (content: string) => {
   navigator.clipboard
     .writeText(content)
     .then(() => {
-      toast.success( "Copied to clipboard");
+      toast.success("Copied to clipboard");
     })
     .catch(() => {
-      toast.error( "Unable to copy");
+      toast.error("Unable to copy");
     });
-
-}
+};
 
 export function stringExplode(str: string): string[] {
   return str.split("\n");
@@ -22,3 +21,23 @@ export function isAlphabet(char: string): boolean {
 }
 
 export const isNumber = (str: string): boolean => /^\d+$/.test(str);
+
+export function bytesToSize(bytes: number) {
+  const BASE_UNIT = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes == 0) return "n/a";
+  const i = parseInt(
+    Math.floor(Math.log(bytes) / Math.log(BASE_UNIT)).toString()
+  );
+  if (i == 0) return bytes + " " + sizes[i];
+  return (bytes / Math.pow(BASE_UNIT, i)).toFixed(1) + " " + sizes[i];
+}
+
+export function download(content: string, filename: string, type = "text/plain") {
+  const element = document.createElement("a");
+  const file = new Blob([content], { type });
+  element.href = URL.createObjectURL(file);
+  element.download = filename;
+  document.body.appendChild(element); // Required for this to work in FireFox
+  element.click();
+}

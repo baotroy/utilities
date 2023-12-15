@@ -45,7 +45,7 @@ export default function EpochConverterComponent() {
     }, 1000);
 
     
-    setIntervalId(id); // eslint-disable-line
+    setIntervalId(id);
 
     return () => clearInterval(id);
   }, []);
@@ -59,7 +59,7 @@ export default function EpochConverterComponent() {
     }, 1000);
     
     
-    setIntervalId(id); // eslint-disable-line
+    setIntervalId(id);
   };
 
   const handleOnChangeInputTimestamp = (str: string) => {

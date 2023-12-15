@@ -6,7 +6,7 @@ import "ace-builds/src-noconflict/mode-json";
 import { useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { prettyJson } from "../utils";
-import { copyToClipboard } from "@/common/utils";
+import { copyToClipboard, download } from "@/common/utils";
 const JsonPrettier = () => {
   const modes = [
     "javascript",
@@ -45,12 +45,7 @@ const JsonPrettier = () => {
 
   // Download file with content is parseValue
   const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([parseValue], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "download.json";
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
+    download(parseValue, "download.json", "application/json");
   };
 
   const handleConvert = async () => {

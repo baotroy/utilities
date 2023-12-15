@@ -37,12 +37,12 @@ const menus: menuProps[] = [
         href: "/string/convert-case",
         icon: null,
       },
-      {
-        label: "Convert Units",
-        // slug: "convert-units",
-        href: "/string/convert-units",
-        icon: null,
-      },
+      // {
+      //   label: "Convert Units",
+      //   // slug: "convert-units",
+      //   href: "/string/convert-units",
+      //   icon: null,
+      // },
     ],
   },
   {
@@ -71,12 +71,12 @@ const menus: menuProps[] = [
         href: "/date/epoch-converter",
         icon: null,
       },
-      {
-        label: "Date Difference",
-        // slug: "date-difference",
-        href: "/date/date-difference",
-        icon: null,
-      },
+      // {
+      //   label: "Date Difference",
+      //   // slug: "date-difference",
+      //   href: "/date/date-difference",
+      //   icon: null,
+      // },
     ],
   },
   {
@@ -91,27 +91,32 @@ const menus: menuProps[] = [
     ],
   },
   {
-    groupName: "IMAGE",
+    groupName: "FILE",
     items: [
       {
-        label: "Image To Base64",
+        label: "File To Base64",
         // slug: "image-to-base64",
-        href: "/image/image-to-base64",
-        icon: null,
-      },
-      {
-        label: "Image Compressor",
-        // slug: "image-compressor",
-        href: "/image/image-compressor",
-        icon: null,
-      },
-      {
-        label: "Image Resize",
-        // slug: "image-resize",
-        href: "/image/image-resize",
+        href: "/file/file-to-base64",
         icon: null,
       },
     ],
   },
+  // {
+  //   groupName: "IMAGE",
+  //   items: [
+  //     {
+  //       label: "Image Compressor",
+  //       // slug: "image-compressor",
+  //       href: "/image/image-compressor",
+  //       icon: null,
+  //     },
+  //     {
+  //       label: "Image Resize",
+  //       // slug: "image-resize",
+  //       href: "/image/image-resize",
+  //       icon: null,
+  //     },
+  //   ],
+  // },
 ];
 export default menus;

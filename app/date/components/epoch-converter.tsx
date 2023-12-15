@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function EpochConverterComponent() {
   const [tickingUnixTimestamp, setTickingUnixTimestamp] =
     useState(getCurrent());
-  const [intervalId, setIntervalId] = useState();
+  const [intervalId, setIntervalId] = useState<NodeJS.Timer | number>(0);
   const [locale, setLocale] = useState("GMT");
   const [convertTimestampVal, setConvertTimestampVal] = useState("");
   const [inputCurrentTimestamp, setInputCurrentTimestamp] = useState("");
@@ -44,7 +44,8 @@ export default function EpochConverterComponent() {
       setTickingUnixTimestamp(getCurrent());
     }, 1000);
 
-    setIntervalId(id);
+    
+    setIntervalId(id); // eslint-disable-line
 
     return () => clearInterval(id);
   }, []);
@@ -56,8 +57,9 @@ export default function EpochConverterComponent() {
     const id = setInterval(() => {
       setTickingUnixTimestamp(getCurrent());
     }, 1000);
-
-    setIntervalId(id);
+    
+    
+    setIntervalId(id); // eslint-disable-line
   };
 
   const handleOnChangeInputTimestamp = (str: string) => {

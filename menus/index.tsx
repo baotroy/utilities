@@ -101,22 +101,22 @@ const menus: menuProps[] = [
       },
     ],
   },
-  // {
-  //   groupName: "IMAGE",
-  //   items: [
-  //     {
-  //       label: "Image Compressor",
-  //       // slug: "image-compressor",
-  //       href: "/image/image-compressor",
-  //       icon: null,
-  //     },
-  //     {
-  //       label: "Image Resize",
-  //       // slug: "image-resize",
-  //       href: "/image/image-resize",
-  //       icon: null,
-  //     },
-  //   ],
-  // },
+  {
+    groupName: "IMAGE",
+    items: [
+      // {
+      //   label: "Image Compressor",
+      //   // slug: "image-compressor",
+      //   href: "/image/image-compressor",
+      //   icon: null,
+      // },
+      {
+        label: "Image Resize",
+        // slug: "image-resize",
+        href: "/image/image-resize",
+        icon: null,
+      },
+    ],
+  },
 ];
 export default menus;

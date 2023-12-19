@@ -1,32 +1,32 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Resize from "./components/resize";
 import { getImageDimensions } from "../utils";
 import { Dimensions, FileFormat } from "../type";
 import Toast from "react-hot-toast";
+import { MdCrop, MdPhotoSizeSelectLarge, MdRotateLeft } from "react-icons/md";
 
 type Tabs = "resize" | "crop" | "rotate";
 
 const ImageResize = () => {
-  const [selectFile, setSelectFile] = useState<File | null>(null);
+  const [, setSelectFile] = useState<File | null>(null);
   const [base64, setBase64] = useState("");
   const [activeTab, setActiveTab] = useState<Tabs>("resize");
   const [dimensions, setDimensions] = useState<Dimensions>();
-  const [format, setFormat] = useState<FileFormat>("image/jpg");
+  const [format, setFormat] = useState<FileFormat>("original");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
+      console.log(file);
       setSelectFile(file);
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const b64 = reader.result as string;
         try {
-          const demens: Dimensions = await getImageDimensions(b64);
           setBase64(b64);
-          setDimensions(demens);
           setFormat(file.type as FileFormat);
         } catch (error: any) {
           Toast.error(error.message);
@@ -34,7 +34,13 @@ const ImageResize = () => {
       };
     }
   };
-
+  useEffect(() => {
+    if (base64.trim() !== "") {
+      getImageDimensions(base64).then((demens) => {
+        setDimensions(demens);
+      });
+    }
+  }, [base64]);
   const handleTabClick = (tab: Tabs) => {
     setActiveTab(tab);
   };
@@ -51,46 +57,50 @@ const ImageResize = () => {
           />
         </div>
         {base64 && (
-          <div>
-            <div className="">
-              <button
-                className={`px-4 py-2 rounded-t-lg ${
-                  activeTab === "resize"
-                    ? "bg-blue-500 text-bodydark"
-                    : "bg-gray-200"
-                }`}
-                onClick={() => handleTabClick("resize")}
-              >
-                Resize
-              </button>
-              <button
-                className={`px-4 py-2 ${
-                  activeTab === "crop"
-                    ? "bg-blue-500 text-bodydark"
-                    : "bg-gray-200"
-                }`}
-                onClick={() => handleTabClick("crop")}
-              >
-                Crop
-              </button>
-              <button
-                className={`px-4 py-2 rounded-b-lg ${
-                  activeTab === "rotate"
-                    ? "bg-blue-500 text-bodydark"
-                    : "bg-gray-200"
-                }`}
-                onClick={() => handleTabClick("rotate")}
-              >
-                Rotate
-              </button>
+          <div className="border border-bodydark ">
+            <div className="xl:flex block">
+              <div className="xl:w-[350px] text-center w-full border-r border-b py-2 border-bodydark">
+                <button
+                  className={`px-4 py-1.5 rounded-[0.375rem] ${
+                    activeTab === "resize" ? "bg-meta-5 text-white" : ""
+                  }`}
+                  onClick={() => handleTabClick("resize")}
+                >
+                  <div className="flex items-center">
+                    <MdPhotoSizeSelectLarge className="mr-1" /> Resize
+                  </div>
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-[0.375rem] ${
+                    activeTab === "crop" ? "bg-meta-5 text-white" : ""
+                  }`}
+                  onClick={() => handleTabClick("crop")}
+                >
+                  <div className="flex items-center">
+                    <MdCrop className="mr-1" /> Crop
+                  </div>
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-[0.375rem] ${
+                    activeTab === "rotate" ? "bg-meta-5 text-white" : ""
+                  }`}
+                  onClick={() => handleTabClick("rotate")}
+                >
+                  <div className="flex items-center">
+                    <MdRotateLeft className="mr-1" /> Rotate
+                  </div>
+                </button>
+              </div>
+              <div className="xl:flex xl:flex-1 xl:w-[cal(100%-350px)] xl:m-0 mt-8 w-full justify-center align-middle  px-4 py-6 ">
+                {/* for ads */}
+              </div>
             </div>
-
-            <div className="mt-4">
+            <div>
               {activeTab === "resize" && (
                 <Resize
                   base64={base64}
                   dimensions={dimensions}
-                  format={format}
+                  originalFormat={format}
                 />
               )}
               {activeTab === "crop" && <p>Content for Tab 2</p>}

@@ -1,3 +1,9 @@
 export type Dimensions = { width: number; height: number };
 export type Unit = "px" | "in" | "cm" | "mm"
-export type FileFormat = "image/jpg" | "image/png" | "image/webp"
+export type FileFormat = "image/jpeg" | "image/png" | "image/webp" | "original"
+export type Measure = {
+    px: number;
+    in: number;
+    cm: number;
+    mm: number;
+  }

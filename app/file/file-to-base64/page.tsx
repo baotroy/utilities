@@ -6,7 +6,6 @@ import { prettyJson } from "@/app/dev/utils";
 import { bytesToSize, copyToClipboard, download } from "@/common/utils";
 
 const ImageToBase64 = () => {
-  const h3Style = "font-bold text-20 mb-2";
   const outputs: Record<string, string> = {
     txt: "Plain text -- just the Base64 value",
     uri: "Data URI -- data:content/type;base64",
@@ -14,6 +13,8 @@ const ImageToBase64 = () => {
     json: "JSON -- {file:{mime,data}}",
     xml: "XML -- <file></file>",
   };
+  
+  const h3Style = "font-bold text-20 mb-2";
   const [selectedFormat, setSelectedFormat] = useState("txt");
   const [base64, setBase64] = useState("");
   const [formatData, setFormatData] = useState("");

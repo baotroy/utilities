@@ -21,7 +21,7 @@ export const getImageDimensions = (base64: string) : Promise<Dimensions> =>  {
   });
 }
 
-export const resizeImageExec = (file: string, width: number, height: number, outFormat: FileFormat) : Promise<string> => {
+export const resizeImageExec = (file: string, newWidth: number, newHeight: number, outFormat: FileFormat) : Promise<string> => {
   return new Promise((resolve, reject) => {
     // Create a new image element
     const img = new Image();
@@ -31,10 +31,10 @@ export const resizeImageExec = (file: string, width: number, height: number, out
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = newWidth;
+      canvas.height = newHeight;
       if (ctx !== null) {
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
         return resolve(canvas.toDataURL(outFormat));
       }
       reject(new Error("Invalid base64 string"));
@@ -48,14 +48,12 @@ export const resizeImageExec = (file: string, width: number, height: number, out
 
 export const convertOtherUnitToPixel = (value: number, unit: Unit, dpi: number) : number => {
   switch(unit) {
-    case "px":
-      return value;
     case "in":
-      return value * dpi;
+      return Math.round(value * dpi);
     case "cm":
-      return value * dpi / 2.54;
+      return Math.round(value * dpi / 2.54);
     case "mm":
-      return value * dpi / 25.4;
+      return Math.round(value * dpi / 25.4);
     default:
       return value;
   }
@@ -63,8 +61,6 @@ export const convertOtherUnitToPixel = (value: number, unit: Unit, dpi: number) 
 
 export const convertPixelOtherUnit = (value: number, unit: Unit, dpi: number) => {
   switch(unit) {
-    case "px":
-      return value;
     case "in":
       return value / dpi;
     case "cm":

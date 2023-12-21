@@ -70,14 +70,11 @@ const Resize: React.FC<ResizeProps> = ({
 
   useEffect(() => {
     updateOtherUnits();
-    console.log("outWidth", outWidths);
   }, [outWidth, outHeight, dpi]);
 
   useEffect(() => {
     setOutWidth(outWidths[unit]);
     setOutHeight(outHeights[unit]);
-    // setWidthString(outWidths[unit].toString());
-    // setHeightString(outHeights[unit].toString());
   }, [unit]);
 
   const handleTabClick = (tab: Tabs) => {
@@ -87,7 +84,6 @@ const Resize: React.FC<ResizeProps> = ({
   const handleChangeOutputWidth = (w: string) => {
     if (w.trim() === "") w = "0";
     if (Number.isNaN(w)) {
-      console.log("w", w);
       return;
     }
     setWidthString(w);
@@ -104,7 +100,6 @@ const Resize: React.FC<ResizeProps> = ({
   const handleChangeOutputHeight = (h: string) => {
     if (h.trim() === "") h = "0";
     if (Number.isNaN(h)) {
-      console.log("h", h);
       return;
     }
     setHeightString(h);
@@ -123,9 +118,6 @@ const Resize: React.FC<ResizeProps> = ({
       unit === "px" ? outWidth : convertOtherUnitToPixel(outWidth, unit, dpi);
     const pixelHeight =
       unit === "px" ? outHeight : convertOtherUnitToPixel(outHeight, unit, dpi);
-    console.log("other", unit, "dpi", dpi, outWidths[unit], outHeights[unit]);
-    console.log("update", outWidth, outHeight);
-    console.log("pixelWidth", pixelWidth, pixelHeight);
 
     const newWidths = {
       px: pixelWidth,
@@ -160,14 +152,8 @@ const Resize: React.FC<ResizeProps> = ({
     setHeightString(newHeights[unit].toString());
   };
 
-  useEffect(() => {
-    console.log("outWidths", outWidths);
-    console.log("outHeights", outHeights);
-  }, [outWidths, outHeights]);
-
   const handleChangeUnit = (unit: "px" | "in" | "cm" | "mm") => {
     setUnit(unit);
-    console.log("chagne unit", outWidths[unit].toString(), outHeights[unit]);
     setWidthString(outWidths[unit].toString());
     setHeightString(outHeights[unit].toString());
   };

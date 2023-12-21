@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dimensions, FileFormat } from "../../type";
 import AspectRatio from "./crop/aspect-ratio";
 import CropEditor from "./crop/crop-editor";
-import { type Crop } from "react-image-crop";
+import { PixelCrop, type Crop } from "react-image-crop";
+import { canvasPreview, useDebounceEffect } from "../../utils";
 
 interface CropProps {
   base64: string;
@@ -10,6 +11,11 @@ interface CropProps {
   originalFormat: FileFormat;
 }
 const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const hiddenAnchorRef = useRef<HTMLAnchorElement>(null);
+  const blobUrlRef = useRef("");
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [width, setWidth] = useState(
     dimensions?.width ? Math.round(dimensions.width / 2) : 0
   );
@@ -74,8 +80,77 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
       height,
       unit: "px",
     });
+    setCompletedCrop({
+      x: positionX,
+      y: positionY,
+      width,
+      height,
+      unit: "px",
+    });
   }, [positionX, positionY, width, height]);
 
+  useDebounceEffect(
+    async () => {
+      if (
+        completedCrop?.width &&
+        completedCrop?.height &&
+        imgRef.current &&
+        previewCanvasRef.current
+      ) {
+        // We use canvasPreview as it's much faster than imgPreview.
+        canvasPreview(imgRef.current, previewCanvasRef.current, completedCrop);
+      }
+    },
+    100,
+    [completedCrop]
+  );
+
+  const handleCrop = async () => {
+    const image = imgRef.current;
+    const previewCanvas = previewCanvasRef.current;
+    if (!image || !previewCanvas || !completedCrop) {
+      throw new Error("Crop canvas does not exist");
+    }
+
+    // This will size relative to the uploaded image
+    // size. If you want to size according to what they
+    // are looking at on screen, remove scaleX + scaleY
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+
+    const offscreen = new OffscreenCanvas(
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY
+    );
+    const ctx = offscreen.getContext("2d");
+    if (!ctx) {
+      throw new Error("No 2d context");
+    }
+
+    ctx.drawImage(
+      previewCanvas,
+      0,
+      0,
+      previewCanvas.width,
+      previewCanvas.height,
+      0,
+      0,
+      offscreen.width,
+      offscreen.height
+    );
+    // You might want { type: "image/jpeg", quality: <0 to 1> } to
+    // reduce image size
+    const blob = await offscreen.convertToBlob({
+      type: "image/png",
+    });
+
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+    }
+    blobUrlRef.current = URL.createObjectURL(blob);
+    hiddenAnchorRef.current!.href = blobUrlRef.current;
+    hiddenAnchorRef.current!.click();
+  };
   return (
     <div className="">
       <div className="xl:flex block">
@@ -172,11 +247,21 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
           <div>
             <div className="text-center mt-10">
               <button
-                onClick={() => {}}
+                onClick={handleCrop}
                 className="rounded bg-meta-5 dark:bg-meta-5 px-10 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
               >
                 Crop
               </button>
+              <a
+                href="#hidden"
+                ref={hiddenAnchorRef}
+                download
+                style={{
+                  position: "absolute",
+                  top: "-200vh",
+                  visibility: "hidden",
+                }}
+              />
               <button
                 type="reset"
                 className="rounded bg-bodydark px-4 py-2 font-semi text-[18px] text-white dark:text-bodydark2 ml-2"
@@ -195,6 +280,10 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
               aspect={aspect}
               handleChangeCropArea={handleChangeCropArea}
               initialCrop={initialCrop}
+              imgRef={imgRef}
+              setCompletedCrop={setCompletedCrop}
+              completedCrop={completedCrop}
+              previewCanvasRef={previewCanvasRef}
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { useCallback } from "react";
-import ReactCrop, { type Crop } from "react-image-crop";
+import { RefObject } from "react";
+import ReactCrop, { PixelCrop, type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
 interface CropEditorProps {
@@ -10,6 +10,10 @@ interface CropEditorProps {
   aspect: number;
   handleChangeCropArea: (x: number, y: number, w: number, h: number) => void;
   initialCrop: Crop;
+  imgRef: RefObject<HTMLImageElement>;
+  previewCanvasRef: RefObject<HTMLCanvasElement>;
+  setCompletedCrop: (a: PixelCrop) => void;
+  completedCrop?: PixelCrop;
 }
 const CropEditor: React.FC<CropEditorProps> = ({
   base64,
@@ -18,27 +22,32 @@ const CropEditor: React.FC<CropEditorProps> = ({
   aspect,
   handleChangeCropArea,
   initialCrop,
+  imgRef,
+  previewCanvasRef,
+  setCompletedCrop,
+  completedCrop,
 }) => {
-  const onCropComplete = useCallback(
-    (croppedArea: any, croppedAreaPixels: any) => {
-      console.log(croppedArea, croppedAreaPixels);
-    },
-    []
-  );
   return (
     <>
       <ReactCrop
         crop={initialCrop}
         aspect={aspect}
         onChange={(c) => handleChangeCropArea(c.x, c.y, c.width, c.height)}
-        onCropComplete={onCropComplete}
+        onComplete={(c) => setCompletedCrop(c)}
       >
         <Image
+          ref={imgRef}
           alt="Crop"
           src={base64}
           className="max-w-full"
           width={width}
           height={height}
+        />
+        <canvas
+          width={completedCrop?.width}
+          height={completedCrop?.height}
+          ref={previewCanvasRef}
+          hidden
         />
       </ReactCrop>
     </>

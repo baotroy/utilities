@@ -73,6 +73,13 @@ const Resize: React.FC<ResizeProps> = ({
     console.log("outWidth", outWidths);
   }, [outWidth, outHeight, dpi]);
 
+  useEffect(() => {
+    setOutWidth(outWidths[unit]);
+    setOutHeight(outHeights[unit]);
+    // setWidthString(outWidths[unit].toString());
+    // setHeightString(outHeights[unit].toString());
+  }, [unit]);
+
   const handleTabClick = (tab: Tabs) => {
     setActiveTab(tab);
   };
@@ -113,15 +120,14 @@ const Resize: React.FC<ResizeProps> = ({
 
   const updateOtherUnits = () => {
     const pixelWidth =
-      unit === "px"
-        ? outWidth
-        : convertOtherUnitToPixel(outWidths[unit], unit, dpi);
+      unit === "px" ? outWidth : convertOtherUnitToPixel(outWidth, unit, dpi);
     const pixelHeight =
-      unit === "px"
-        ? outHeight
-        : convertOtherUnitToPixel(outHeights[unit], unit, dpi);
+      unit === "px" ? outHeight : convertOtherUnitToPixel(outHeight, unit, dpi);
+    console.log("other", unit, "dpi", dpi, outWidths[unit], outHeights[unit]);
+    console.log("update", outWidth, outHeight);
     console.log("pixelWidth", pixelWidth, pixelHeight);
-    setOutWidths({
+
+    const newWidths = {
       px: pixelWidth,
       in:
         unit !== "in" ? convertPixelOtherUnit(pixelWidth, "in", dpi) : outWidth,
@@ -129,9 +135,10 @@ const Resize: React.FC<ResizeProps> = ({
         unit !== "cm" ? convertPixelOtherUnit(pixelWidth, "cm", dpi) : outWidth,
       mm:
         unit !== "mm" ? convertPixelOtherUnit(pixelWidth, "mm", dpi) : outWidth,
-    } as Measure);
+    };
+    setOutWidths(newWidths as Measure);
 
-    setOutHeights({
+    const newHeights = {
       px: pixelHeight,
       in:
         unit !== "in"
@@ -145,7 +152,12 @@ const Resize: React.FC<ResizeProps> = ({
         unit !== "mm"
           ? convertPixelOtherUnit(pixelHeight, "mm", dpi)
           : outHeight,
-    } as Measure);
+    };
+    setOutHeights(newHeights as Measure);
+
+    // set to width, height string
+    setWidthString(newWidths[unit].toString());
+    setHeightString(newHeights[unit].toString());
   };
 
   useEffect(() => {

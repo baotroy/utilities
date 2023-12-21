@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Dimensions, FileFormat, Measure, Unit } from "../../type";
 import Image from "next/image";
-import ResizeDimensions from "./resize-dimensions";
+import ResizeDimensions from "./resize/resize-dimensions";
+import ResizePercentage from "./resize/resize-percentage";
 import {
   convertOtherUnitToPixel,
   convertPixelOtherUnit,
   resizeImageExec,
 } from "../../utils";
-import ResizePercentage from "./resize-percentage";
 
 interface ResizeProps {
   base64: string;
@@ -27,14 +27,18 @@ const Resize: React.FC<ResizeProps> = ({
   const [activeTab, setActiveTab] = useState<Tabs>("dimensions");
   const [outWidth, setOutWidth] = useState(0);
   const [outHeight, setOutHeight] = useState(0);
+
+  const [widthString, setWidthString] = useState("0");
+  const [heightString, setHeightString] = useState("0");
+
   const [outWidths, setOutWidths] = useState<Measure>({
-    px: 0,
+    px: dimensions?.width || 0,
     in: 0,
     cm: 0,
     mm: 0,
   });
   const [outHeights, setOutHeights] = useState<Measure>({
-    px: 0,
+    px: dimensions?.height || 0,
     in: 0,
     cm: 0,
     mm: 0,
@@ -59,11 +63,16 @@ const Resize: React.FC<ResizeProps> = ({
     setOriginalHeight(dimensions?.height || 0);
     setOutHeight(dimensions?.height || 0);
     setOutWidth(dimensions?.width || 0);
+
+    setWidthString((dimensions?.width || 0).toString());
+    setHeightString((dimensions?.height || 0).toString());
   }, [dimensions]);
 
   useEffect(() => {
-    updateOthersUnit();
+    updateOtherUnits();
+    console.log("outWidth", outWidths);
   }, [outWidth, outHeight, dpi]);
+
   const handleTabClick = (tab: Tabs) => {
     setActiveTab(tab);
   };
@@ -71,34 +80,46 @@ const Resize: React.FC<ResizeProps> = ({
   const handleChangeOutputWidth = (w: string) => {
     if (w.trim() === "") w = "0";
     if (Number.isNaN(w)) {
+      console.log("w", w);
       return;
     }
+    setWidthString(w);
     setOutWidth(Number(w));
     if (lockAspectRatio && dimensions?.width && dimensions?.height) {
-      setOutHeight(
-        getValueByUnit(Number(w) / (dimensions.width / dimensions.height))
+      const nh = getValueByUnit(
+        Number(w) / (dimensions.width / dimensions.height)
       );
+      setOutHeight(nh);
+      setHeightString(nh.toString());
     }
   };
 
   const handleChangeOutputHeight = (h: string) => {
     if (h.trim() === "") h = "0";
     if (Number.isNaN(h)) {
+      console.log("h", h);
       return;
     }
+    setHeightString(h);
     setOutHeight(Number(h));
     if (lockAspectRatio && dimensions?.width && dimensions?.height) {
-      setOutWidth(
-        getValueByUnit(Number(h) * (dimensions.width / dimensions.height))
+      const nw = getValueByUnit(
+        Number(h) * (dimensions.width / dimensions.height)
       );
+      setOutWidth(nw);
+      setWidthString(nw.toString());
     }
   };
 
-  const updateOthersUnit = () => {
+  const updateOtherUnits = () => {
     const pixelWidth =
-      unit === "px" ? outWidth : convertOtherUnitToPixel(outWidth, unit, dpi);
+      unit === "px"
+        ? outWidth
+        : convertOtherUnitToPixel(outWidths[unit], unit, dpi);
     const pixelHeight =
-      unit === "px" ? outHeight : convertOtherUnitToPixel(outHeight, unit, dpi);
+      unit === "px"
+        ? outHeight
+        : convertOtherUnitToPixel(outHeights[unit], unit, dpi);
     console.log("pixelWidth", pixelWidth, pixelHeight);
     setOutWidths({
       px: pixelWidth,
@@ -127,8 +148,16 @@ const Resize: React.FC<ResizeProps> = ({
     } as Measure);
   };
 
+  useEffect(() => {
+    console.log("outWidths", outWidths);
+    console.log("outHeights", outHeights);
+  }, [outWidths, outHeights]);
+
   const handleChangeUnit = (unit: "px" | "in" | "cm" | "mm") => {
     setUnit(unit);
+    console.log("chagne unit", outWidths[unit].toString(), outHeights[unit]);
+    setWidthString(outWidths[unit].toString());
+    setHeightString(outHeights[unit].toString());
   };
 
   const getValueByUnit = (value: number) => {
@@ -207,6 +236,8 @@ const Resize: React.FC<ResizeProps> = ({
               <ResizeDimensions
                 outWidths={outWidths}
                 outHeights={outHeights}
+                widthString={widthString}
+                heightString={heightString}
                 unit={unit}
                 dpi={dpi}
                 lockAspectRatio={lockAspectRatio}
@@ -234,9 +265,9 @@ const Resize: React.FC<ResizeProps> = ({
           </div>
         </div>
         <div className="xl:flex xl:flex-1 xl:w-[cal(100%-350px)] xl:m-0 mt-8 w-full justify-center align-middle  px-4 py-6 ">
-          <div className="flex justify-center">
+          <div className=" justify-center">
             <Image
-              className="max-w-[100%]"
+              className="max-w-[500px]"
               src={base64}
               alt=""
               width={originalWidth}

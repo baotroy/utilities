@@ -1,10 +1,12 @@
 import { MdOutlineArrowCircleRight } from "react-icons/md";
-import { FileFormat, Measure, Unit } from "../../type";
+import { FileFormat, Measure, Unit } from "../../../type";
 import ExportSettings from "./export-settings";
 
 interface ResizeDimensionsProps {
   outWidths: Measure;
   outHeights: Measure;
+  widthString: string;
+  heightString: string;
   unit?: Unit;
   dpi: number;
   lockAspectRatio: boolean;
@@ -20,6 +22,8 @@ interface ResizeDimensionsProps {
 const ResizeDimensions: React.FC<ResizeDimensionsProps> = ({
   outWidths,
   outHeights,
+  widthString,
+  heightString,
   unit,
   dpi,
   lockAspectRatio,
@@ -46,7 +50,7 @@ const ResizeDimensions: React.FC<ResizeDimensionsProps> = ({
               name="width"
               required
               className="w-[100%] mt-2  p-2 rounded-lg border border-bodydark outline-bodydark dark:outline-boxdark text-[14px]"
-              value={outWidths[unit || "px"]}
+              value={widthString}
               onChange={(e) => handleChangeOutputWidth(e.target.value || "")}
             />
           </div>
@@ -71,7 +75,7 @@ const ResizeDimensions: React.FC<ResizeDimensionsProps> = ({
                 type="text"
                 id="height"
                 name="height"
-                value={outHeights[unit || "px"]}
+                value={heightString}
                 required
                 className="w-[100%] mt-2 p-2 rounded-lg border border-bodydark outline-bodydark dark:outline-boxdark text-[14px]"
                 onChange={(e) => handleChangeOutputHeight(e.target.value || "")}
@@ -130,13 +134,13 @@ const ResizeDimensions: React.FC<ResizeDimensionsProps> = ({
         <h3 className="font-bold text-[20px]">Output</h3>
         <div className="text-[14px] mt-2">
           Width: {outWidths["px"]}px <br />
-          Height: {outHeights["px"]}px
+          Height: {outHeights["px"]}px <br />
         </div>
       </div>
       <div className="text-center mt-10">
         <button
           onClick={() => resizeImage(false)}
-          className="rounded bg-meta-5 dark:bg-meta-5 px-8 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
+          className="rounded bg-meta-5 dark:bg-meta-5 px-10 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
         >
           Resize <MdOutlineArrowCircleRight className="inline-block " />
         </button>

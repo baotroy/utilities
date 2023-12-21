@@ -53,7 +53,7 @@ const ResizePercentage: React.FC<ResizePercentageProps> = ({
         <div className="text-center mt-10">
           <button
             onClick={() => resizeImagePercentage(true)}
-            className="rounded bg-meta-5 dark:bg-meta-5 px-8 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
+            className="rounded bg-meta-5 dark:bg-meta-5 px-10 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
           >
             Resize <MdOutlineArrowCircleRight className="inline-block " />
           </button>

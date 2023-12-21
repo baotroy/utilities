@@ -151,6 +151,14 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
     hiddenAnchorRef.current!.href = blobUrlRef.current;
     hiddenAnchorRef.current!.click();
   };
+
+  const handleReset = () => {
+    setWidth(dimensions?.width ? Math.round(dimensions.width / 2) : 0);
+    setHeight(dimensions?.height ? Math.round(dimensions.height / 2) : 0);
+    setPositionX(dimensions?.width ? Math.round(dimensions.width / 4) : 0);
+    setPositionY(dimensions?.height ? Math.round(dimensions.height / 4) : 0);
+  };
+
   return (
     <div className="">
       <div className="xl:flex block">
@@ -252,18 +260,9 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
               >
                 Crop
               </button>
-              <a
-                href="#hidden"
-                ref={hiddenAnchorRef}
-                download
-                style={{
-                  position: "absolute",
-                  top: "-200vh",
-                  visibility: "hidden",
-                }}
-              />
               <button
                 type="reset"
+                onClick={handleReset}
                 className="rounded bg-bodydark px-4 py-2 font-semi text-[18px] text-white dark:text-bodydark2 ml-2"
               >
                 Reset
@@ -284,6 +283,12 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
               setCompletedCrop={setCompletedCrop}
               completedCrop={completedCrop}
               previewCanvasRef={previewCanvasRef}
+            />
+            <a
+              href="#hidden"
+              ref={hiddenAnchorRef}
+              download
+              className="hidden"
             />
           </div>
         </div>

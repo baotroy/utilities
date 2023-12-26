@@ -8,6 +8,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { prettyJson } from "../utils";
 import { copyToClipboard, download } from "@/common/utils";
 const JsonPrettier = () => {
+  // @ts-ignore
   const modes = [
     "javascript",
     "java",

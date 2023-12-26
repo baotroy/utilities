@@ -7,4 +7,4 @@ export type Measure = {
     cm: number;
     mm: number;
   }
- export type Aspect =  Record<string, string | number>
+export type Aspect =  Record<string, string | number>

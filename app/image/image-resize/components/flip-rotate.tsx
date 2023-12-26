@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Dimensions, FileFormat } from "../../type";
-import { flip, rotate } from "../../utils";
+import { flip, resizeImageExec, rotate } from "../../utils";
 import { MdOutlineRotateLeft, MdOutlineRotateRight } from "react-icons/md";
 import { RiMergeCellsHorizontal, RiMergeCellsVertical } from "react-icons/ri";
 
@@ -34,6 +34,13 @@ const FlipRotate: React.FC<FlipRotateProps> = ({
     const flipBase64 = await flip(base64Data, direction, originalFormat);
     setBase64Data(flipBase64);
   };
+
+  const saveTransformImage = () => {
+    const link = document.createElement("a");
+    link.download = "transformed-image";
+    link.href = base64Data;
+    link.click();
+  };
   return (
     <div className="">
       <div className="xl:flex block">
@@ -55,7 +62,9 @@ const FlipRotate: React.FC<FlipRotateProps> = ({
               Vertically
             </button>
           </div>
-          <h3 className="xl:w-full mb-4 font-bold text-[20px]">Rotate Image</h3>
+          <h3 className="xl:w-full mb-4 mt-8 font-bold text-[20px]">
+            Rotate Image
+          </h3>
           <div className="mb-4 text-center">
             <button
               onClick={() => handleRoate(90)}
@@ -70,6 +79,14 @@ const FlipRotate: React.FC<FlipRotateProps> = ({
             >
               <MdOutlineRotateLeft size={34} />
               Counter Clock Wise
+            </button>
+          </div>
+          <div className="text-center mt-10">
+            <button
+              onClick={() => saveTransformImage()}
+              className="rounded bg-meta-5 dark:bg-meta-5 px-10 py-2 font-semi text-[18px] text-white dark:text-bodydark2"
+            >
+              Save
             </button>
           </div>
         </div>

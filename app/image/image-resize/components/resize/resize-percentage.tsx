@@ -1,5 +1,5 @@
 import { MdOutlineArrowCircleRight } from "react-icons/md";
-import { FileFormat } from "../../type";
+import { FileFormat } from "../../../type";
 import ExportSettings from "./export-settings";
 
 interface ResizePercentageProps {

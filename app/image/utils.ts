@@ -80,7 +80,7 @@ export const canvasPreview = (
   canvas: HTMLCanvasElement,
   crop: PixelCrop,
   scale = 1,
-  rotate = 0,
+  rotate = 0
 ) => {
   const TO_RADIANS = Math.PI / 180
   const ctx = canvas.getContext('2d')
@@ -138,7 +138,6 @@ export const canvasPreview = (
   ctx.restore()
 }
 
-
 export const useDebounceEffect = (
   fn: () => void,
   waitTime: number,
@@ -153,4 +152,55 @@ export const useDebounceEffect = (
       clearTimeout(t)
     }
   }, deps)
+}
+
+export const rotate = (srcBase64: string, degrees: number, outFormat: string):  Promise<string>  => {
+  const canvas = document.createElement("canvas");
+  const ctx    = canvas.getContext("2d");
+  const image  = new Image();
+  image.src = srcBase64;
+
+  return new Promise((resolve, reject) => {
+    if (ctx === null) {
+      return reject(new Error("Invalid base64 string"));
+    }
+    image.onload = function () {
+      canvas.width  = degrees % 180 === 0 ? image.width : image.height;
+      canvas.height = degrees % 180 === 0 ? image.height : image.width;
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(degrees * Math.PI / 180);
+      ctx.drawImage(image, image.width / -2, image.height / -2);
+
+      resolve(canvas.toDataURL(outFormat, 1))
+    };
+  });
+}
+
+export const flip = (srcBase64: string, direction: "horizontal" | "vertical", outFormat: string):  Promise<string>  => {
+  const canvas = document.createElement("canvas");
+  const ctx    = canvas.getContext("2d");
+  const image  = new Image();
+  image.src = srcBase64;
+
+  return new Promise((resolve, reject) => {
+    if (ctx === null) {
+      return reject(new Error("Invalid base64 string"));
+    }
+    image.onload = function () {
+      canvas.width  = image.width;
+      canvas.height = image.height;
+
+      if (direction === "horizontal") {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      } else {
+        ctx.translate(0, canvas.height);
+        ctx.scale(1, -1);
+      }
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      resolve(canvas.toDataURL(outFormat, 1))
+    };
+  });
 }

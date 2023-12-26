@@ -22,8 +22,8 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
   const [height, setHeight] = useState(
     dimensions?.height ? Math.round(dimensions.height / 2) : 0
   );
-  const [originalWidth] = useState(dimensions?.width || 0);
-  const [originalHeight] = useState(dimensions?.height || 0);
+  const [originalWidth, setOriginalWidth] = useState(dimensions?.width || 0);
+  const [originalHeight, setOriginalHeight] = useState(dimensions?.height || 0);
   const [aspect, setAspect] = useState(1);
   const [positionX, setPositionX] = useState(
     dimensions?.width ? Math.round(dimensions.width / 4) : 0
@@ -152,11 +152,18 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
     hiddenAnchorRef.current!.click();
   };
 
+  // reset config when file reload
+  useEffect(() => {
+    handleReset();
+  }, [base64, dimensions]);
+
   const handleReset = () => {
     setWidth(dimensions?.width ? Math.round(dimensions.width / 2) : 0);
     setHeight(dimensions?.height ? Math.round(dimensions.height / 2) : 0);
     setPositionX(dimensions?.width ? Math.round(dimensions.width / 4) : 0);
     setPositionY(dimensions?.height ? Math.round(dimensions.height / 4) : 0);
+    setOriginalWidth(dimensions?.width || 0);
+    setOriginalHeight(dimensions?.height || 0);
   };
 
   return (
@@ -271,7 +278,7 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
           </div>
         </div>
         <div className="xl:flex xl:flex-1 xl:w-[cal(100%-350px)] xl:m-0 mt-8 w-full justify-center align-middle  px-4 py-6 ">
-          <div className="justify-center">
+          <div className="text-center">
             <CropEditor
               base64={base64}
               width={originalWidth}

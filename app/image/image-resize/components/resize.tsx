@@ -263,7 +263,7 @@ const Resize: React.FC<ResizeProps> = ({
           </div>
         </div>
         <div className="xl:flex xl:flex-1 xl:w-[cal(100%-350px)] xl:m-0 mt-8 w-full justify-center align-middle  px-4 py-6 ">
-          <div className=" justify-center">
+          <div className="text-center">
             <Image
               className="max-w-[500px]"
               src={base64}

@@ -1,6 +1,6 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Resize from "./components/resize";
 import { getImageDimensions } from "../utils";
 import { Dimensions, FileFormat } from "../type";
@@ -8,6 +8,7 @@ import Toast from "react-hot-toast";
 import { MdCrop, MdPhotoSizeSelectLarge, MdRotateLeft } from "react-icons/md";
 import { bytesToSize } from "@/common/utils";
 import Crop from "./components/crop";
+import FlipRotate from "./components/flip-rotate";
 
 type Tabs = "resize" | "crop" | "rotate";
 
@@ -30,6 +31,9 @@ const ImageResize = () => {
         const b64 = reader.result as string;
         try {
           setBase64(b64);
+          getImageDimensions(b64).then((dimens) => {
+            setDimensions(dimens);
+          });
           setFormat(file.type as FileFormat);
         } catch (error: any) {
           Toast.error(error.message);
@@ -37,13 +41,6 @@ const ImageResize = () => {
       };
     }
   };
-  useEffect(() => {
-    if (base64.trim() !== "") {
-      getImageDimensions(base64).then((demens) => {
-        setDimensions(demens);
-      });
-    }
-  }, [base64]);
   const handleTabClick = (tab: Tabs) => {
     setActiveTab(tab);
   };
@@ -75,7 +72,8 @@ const ImageResize = () => {
                     onClick={() => handleTabClick("resize")}
                   >
                     <div className="flex items-center">
-                      <MdPhotoSizeSelectLarge className="mr-1" /> Resize
+                      <MdPhotoSizeSelectLarge className="mr-1" size={20} />{" "}
+                      Resize
                     </div>
                   </button>
                   <button
@@ -85,7 +83,7 @@ const ImageResize = () => {
                     onClick={() => handleTabClick("crop")}
                   >
                     <div className="flex items-center">
-                      <MdCrop className="mr-1" /> Crop
+                      <MdCrop className="mr-1" size={20} /> Crop
                     </div>
                   </button>
                   <button
@@ -95,7 +93,7 @@ const ImageResize = () => {
                     onClick={() => handleTabClick("rotate")}
                   >
                     <div className="flex items-center">
-                      <MdRotateLeft className="mr-1" /> Rotate
+                      <MdRotateLeft className="mr-1" size={20} /> Flip & Rotate
                     </div>
                   </button>
                 </div>
@@ -118,7 +116,13 @@ const ImageResize = () => {
                     originalFormat={format}
                   />
                 )}
-                {activeTab === "rotate" && <p>Content for Tab 3</p>}
+                {activeTab === "rotate" && (
+                  <FlipRotate
+                    base64={base64}
+                    dimensions={dimensions}
+                    originalFormat={format}
+                  />
+                )}
               </div>
             </div>
           </>

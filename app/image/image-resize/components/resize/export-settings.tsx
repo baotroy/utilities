@@ -1,4 +1,4 @@
-import { FileFormat } from "../../type";
+import { FileFormat } from "../../../type";
 
 interface ExportSettingsProps {
   handleChangeOutputFormat: (f: FileFormat) => void;

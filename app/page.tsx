@@ -1,9 +1,9 @@
-import ECommerce from "@/components/Dashboard/E-commerce";
+// import ECommerce from "@/components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import Head from "next/head";
 export const metadata: Metadata = {
-  title: "TailAdmin | Next.js E-commerce Dashboard Template",
-  description: "This is Home Blog page for TailAdmin Next.js",
+  title: "Home page",
+  description: "This is Home page",
   // other metadata
 };
 
@@ -13,7 +13,8 @@ export default function Home() {
       <Head>
         <title>My page title</title>
       </Head>
-      <ECommerce />
+      {/* <ECommerce /> */}
+      <h1>Coming Soon</h1>
     </>
   );
 }

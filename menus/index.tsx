@@ -88,6 +88,12 @@ const menus: menuProps[] = [
         href: "/dev/json-prettier",
         icon: null,
       },
+      {
+        label: "JWT Decoder",
+        // slug: "convert-case",
+        href: "/dev/jwt-decoder",
+        icon: null,
+      },
     ],
   },
   {

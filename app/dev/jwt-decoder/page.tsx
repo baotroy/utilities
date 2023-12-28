@@ -1,13 +1,7 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import {
-  base64UrlDecode,
-  createJwt,
-  prettyJson,
-  validJSON,
-  verifyJwt,
-} from "../utils";
+import { base64UrlDecode, createJwt, prettyJson, validJSON } from "../utils";
 import { TypeAlgorithm, algorithms } from "../type";
 import clsx from "clsx";
 // import { copyToClipboard, download } from "@/common/utils";
@@ -32,11 +26,12 @@ const JwtDecoder = () => {
     prettyJson(`{"alg": "${defaultAlgorithm}", "typ": "JWT"}`)
   );
   const [payload, setPayload] = useState(`{
-    "id": "123456",
+    "sub": "1234567890",
     "name": "John Doe",
-    "iat": 1672531200
+    "iat": 1516239022
   }`);
-  const [secret, setSecret] = useState("your-256-bit-secret");
+  const defaultSecret = "your-256-bit-secret";
+  const [secret, setSecret] = useState(defaultSecret);
   const [verified, setVerified] = useState(false);
   // States error
   const [errorHeader, setErrorHeader] = useState(false);
@@ -49,22 +44,27 @@ const JwtDecoder = () => {
   const decodeToken = () => {
     let errHeader,
       errPayload = false;
-    const payloads = base64UrlDecode(token.split(".")[1]);
-    if (validJSON(payloads)) {
-      setPayload(prettyJson(payloads, tabSize));
-    } else {
-      errPayload = true;
-      setPayload(prettyJson("{}", tabSize));
-    }
 
     const headers = base64UrlDecode(token.split(".")[0]);
-    if (validJSON(headers)) {
+    if (validHeader(headers)) {
+      console.log("h1");
       setHeader(prettyJson(headers, tabSize));
       setAlgorithm(JSON.parse(headers).alg);
     } else {
       errHeader = true;
+      console.log("h2");
       setHeader(prettyJson("{}", tabSize));
     }
+    const payloads = base64UrlDecode(token.split(".")[1]);
+    console.log("payloads", typeof payloads, payloads);
+    if (validPayload(payloads)) {
+      setPayload(prettyJson(payloads, tabSize));
+    } else {
+      errPayload = true;
+      //   setPayload(prettyJson("{}", tabSize));
+      setPayload(payloads);
+    }
+
     setErrorToken(errHeader || errPayload);
   };
 
@@ -87,21 +87,44 @@ const JwtDecoder = () => {
     }
   };
 
-  useEffect(() => {
-    if (validHeader(header) && validPayload(payload)) {
-      const token = createJwt(
-        JSON.parse(payload),
-        algorithm as TypeAlgorithm,
-        secret
-      );
+  // Update token when header or payload or secret change
+  const updateToken = (
+    pHeader: string,
+    pPayload: string,
+    pSecret: string,
+    pAlgorithm: TypeAlgorithm
+  ) => {
+    if (!pHeader || !pPayload) {
+      return setToken("");
+    }
+    if (validHeader(pHeader) && validPayload(pPayload)) {
+      const token = createJwt(JSON.parse(pPayload), pAlgorithm, pSecret);
       setToken(token);
     } else {
       setToken("");
     }
-  }, [algorithm, header, payload, secret]);
+  };
+  useEffect(() => {
+    updateToken(header, payload, secret, algorithm);
+  }, [algorithm]);
 
   useEffect(() => {
-    const verified = verifyJwt(token, secret || "", algorithm);
+    decodeToken();
+    // const verified = verifyJwt(token, secret || "", algorithm);
+    if (header && payload) {
+      if (validJSON(header) && validJSON(payload)) {
+        const tmpToken = createJwt(
+          JSON.parse(payload),
+          algorithm as TypeAlgorithm,
+          secret || defaultSecret
+        );
+        setVerified(tmpToken === token);
+      } else {
+        setVerified(false);
+      }
+    } else {
+      setVerified(false);
+    }
     console.log("verified", verified);
   }, [token]);
 
@@ -110,9 +133,17 @@ const JwtDecoder = () => {
     target: "payload" | "header"
   ) => {
     if (target === "header") {
+      console.log("h3");
       setHeader(value);
+      updateToken(value, payload, secret, algorithm);
+    } else {
+      setPayload(value);
+      updateToken(header, value, secret, algorithm);
     }
-    setPayload(value);
+  };
+  const handleUpdateSecret = (value: string) => {
+    setSecret(value);
+    updateToken(header, payload, value, algorithm);
   };
   return (
     <>
@@ -121,7 +152,6 @@ const JwtDecoder = () => {
         Algorithm
         <select
           className="ml-2"
-          defaultValue={algorithm}
           value={algorithm}
           onChange={(e) => setAlgorithm(e.target.value as TypeAlgorithm)}
         >
@@ -139,7 +169,6 @@ const JwtDecoder = () => {
             <textarea
               rows={20}
               placeholder=""
-              defaultValue={token}
               value={token}
               onChange={(e) => handleChangeToken(e.target.value)}
               spellCheck={false}
@@ -198,7 +227,7 @@ const JwtDecoder = () => {
               placeholder=""
               defaultValue={secret}
               value={secret}
-              onChange={(e) => setSecret(e.target.value)}
+              onChange={(e) => handleUpdateSecret(e.target.value)}
               className={textareaStyle}
             ></textarea>
           </div>

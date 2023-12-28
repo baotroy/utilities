@@ -1,7 +1,6 @@
 import { parse } from "@prantlf/jsonlint";
 import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { TypeAlgorithm } from "./type";
-import crypto from "crypto";
 // JSON
 export function prettyJson(str: string, indent = 2): string {
   try {
@@ -26,6 +25,7 @@ export function validJSON(str: string): boolean {
     JSON.parse(str);
     return true;
   } catch (error) {
+    console.error(error, str, typeof str);
     return false;
   }
 }
@@ -48,32 +48,16 @@ export const base64UrlDecode = (input: string): string => {
   return decoded;
 };
 
-export const createJwt = (payload: string | object | Buffer, algorithm: TypeAlgorithm, secret?: Secret) : string => {
-  const signOpts : {algorithm: TypeAlgorithm | "none"} = {
-    algorithm,
-  }
-  if (!secret) {
-    signOpts.algorithm = "none";
-    return jwt.sign(payload, null, { algorithm: "none" });
-  }
+export const createJwt = (payload: string | object | Buffer, algorithm: TypeAlgorithm, secret: Secret) : string => {
   return jwt.sign(payload, secret, {algorithm});
 };
 
-export const verifyJwt = (token: string, secret: Secret, algorithms: TypeAlgorithm) : JwtPayload |string=> {
-  try {
-    console.log(token, secret)
-    const res = jwt.verify(token, secret, {algorithms: [algorithms] });
-    console.log(res)
-    return res;
-  } catch (error: any) {
-    console.error(error)
-    return error.message;
-  }
-}
-
-
-export function HMACSHA256(key: string, data: string): string {
-  const hmac = crypto.createHmac("sha256", key);
-  hmac.update(data);
-  return hmac.digest("hex");
-}
+// export const verifyJwt = (token: string, secret: Secret, algorithms: TypeAlgorithm) : JwtPayload | string=> {
+//   try {
+//     const res = jwt.verify(token, secret, {algorithms: [algorithms] });
+//     return res;
+//   } catch (error: any) {
+//     console.error(error)
+//     return {};
+//   }
+// }

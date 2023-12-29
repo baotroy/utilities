@@ -1,5 +1,5 @@
 import { parse } from "@prantlf/jsonlint";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { TypeAlgorithm } from "./type";
 // JSON
 export function prettyJson(str: string, indent = 2): string {

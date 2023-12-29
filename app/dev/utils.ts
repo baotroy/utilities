@@ -25,7 +25,7 @@ export function validJSON(str: string): boolean {
     JSON.parse(str);
     return true;
   } catch (error) {
-    console.error(error, str, typeof str);
+    // console.error(error, str, typeof str);
     return false;
   }
 }

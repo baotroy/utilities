@@ -10,6 +10,7 @@ import {
 } from "../utils";
 import { TypeAlgorithm, algorithms } from "../type";
 import clsx from "clsx";
+import { MdCheckCircleOutline, MdOutlineCancel } from "react-icons/md";
 
 const JwtDecoder = () => {
   const errorStyle = "bg-[#ffc4cc] text-[#f3005b]";
@@ -79,7 +80,6 @@ const JwtDecoder = () => {
       setPayloadHash(newHashes[1]);
 
       const decode = base64UrlDecode(newHashes[1]);
-      console.log("decode", decode);
       if (validJSON(decode)) {
         setPayload(prettyJson(decode, tabSize));
         setErrorPayload(false);
@@ -93,19 +93,17 @@ const JwtDecoder = () => {
       setSecretHash(newHashes[2]);
     }
 
-    console.log("header hash", headerHash);
-    console.log("payload hash", payloadHash);
     setToken(newToken);
   };
 
   useEffect(() => {
     const nHeader = `{"alg":"${algorithm}","typ":"JWT"}`;
-    console.log("nHeader", nHeader);
     setHeader(nHeader);
     setHeaderHash(base64UrlEncode(nHeader));
 
     const token = createJwt(JSON.parse(validPayload), algorithm, secret);
     updateToken(token);
+    setVerifiedSecretHash(token.split(".")[2]);
   }, [algorithm]);
 
   const handleInputHeaderChange = (value: string) => {
@@ -139,7 +137,6 @@ const JwtDecoder = () => {
     setSecret(value);
     const token = createJwt(JSON.parse(validPayload), algorithm, value);
     const hashes = token.split(".");
-    console.log(token);
     setSecret(value);
     setSecretHash(hashes[2]);
     setVerifiedSecretHash(hashes[2]);
@@ -166,8 +163,6 @@ const JwtDecoder = () => {
 
   useEffect(() => {
     const tokens = token.split(".");
-    console.log("newHashes[2]", tokens[2]);
-    console.log("newHashes[2] Ver", verifiedSecretHash);
     setVerified(tokens[2] === verifiedSecretHash);
   }, [token, verifiedSecretHash]);
 
@@ -185,9 +180,9 @@ const JwtDecoder = () => {
       <div className="w-full mb-4">
         Algorithm
         <select
-          className="ml-2"
           value={algorithm}
           onChange={(e) => setAlgorithm(e.target.value as TypeAlgorithm)}
+          className="rounded p-2 mx-3 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-[14px] dark:text-bodydark1"
         >
           {algorithms.map((item) => (
             <option key={item} value={item}>
@@ -262,13 +257,31 @@ const JwtDecoder = () => {
               placeholder=""
               defaultValue={secret}
               value={secret}
+              spellCheck={false}
               onChange={(e) => handleUpdateSecret(e.target.value)}
               className={textareaStyle}
             ></textarea>
           </div>
         </div>
       </div>
-      <p>{verified ? "Verified" : "Not verified"}</p>
+      <p
+        className={clsx(
+          "text-[20px]",
+          verified ? "text-success" : "text-danger"
+        )}
+      >
+        {verified ? (
+          <span className="flex">
+            <MdCheckCircleOutline />
+            &nbsp;Signature Verified
+          </span>
+        ) : (
+          <span>
+            <MdOutlineCancel />
+            &nbsp;Invalid Signature
+          </span>
+        )}
+      </p>
     </>
   );
 };

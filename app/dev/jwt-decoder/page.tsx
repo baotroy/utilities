@@ -28,7 +28,7 @@ const JwtDecoder = () => {
 
   const defaultAlgorithm: TypeAlgorithm = "HS256";
   const defaultHeader = `{"alg":"${defaultAlgorithm}","typ":"JWT"}`;
-  const defaultPayload = `{"name":"John Doe","iat":1516239022}`;
+  const defaultPayload = `{"name":"Foo Bar","iat":1704067200}`;
 
   const [tabSize] = useState(2);
 
@@ -55,7 +55,7 @@ const JwtDecoder = () => {
   // States error
   const [errorHeader, setErrorHeader] = useState(false);
   const [errorPayload, setErrorPayload] = useState(false);
-  const [errorToken, setErrorToken] = useState(false);
+  // const [errorToken, setErrorToken] = useState(false);
 
   // User changes token
   const handleChangeToken = (newToken: string) => {

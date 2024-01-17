@@ -48,10 +48,44 @@ export const base64UrlDecode = (input: string): string => {
   return decoded;
 };
 
-export const createJwt = (payload: string | object | Buffer, algorithm: TypeAlgorithm, secret: Secret) : string => {
-  return jwt.sign(payload, secret, {algorithm});
+export const createJwt = (
+  payload: string | object | Buffer,
+  algorithm: TypeAlgorithm,
+  secret: Secret
+): string => {
+  return jwt.sign(payload, secret, { algorithm });
 };
 
+// export const jwtDecode = (token: string) => {
+//   // if (typeof token !== "string") {
+//   //     throw new InvalidTokenError("Invalid token specified: must be a string");
+//   // }
+//   // options || (options = {});
+//   const part = token.split(".")[0];
+//   // if (typeof part !== "string") {
+//   //     throw new InvalidTokenError(`Invalid token specified: missing part #${pos + 1}`);
+//   // }
+//   let decoded;
+//   try {
+//     decoded = base64UrlDecode(part);
+//   } catch (e) {
+//     ret
+//     // throw new InvalidTokenError(
+//     //   `Invalid token specified: invalid base64 for part #${pos + 1} (${
+//     //     e.message
+//     //   })`
+//     // );
+//   }
+//   try {
+//     return JSON.parse(decoded);
+//   } catch (e) {
+//     // throw new InvalidTokenError(
+//     //   `Invalid token specified: invalid json for part #${pos + 1} (${
+//     //     e.message
+//     //   })`
+//     // );
+//   }
+// };
 // export const verifyJwt = (token: string, secret: Secret, algorithms: TypeAlgorithm) : JwtPayload | string=> {
 //   try {
 //     const res = jwt.verify(token, secret, {algorithms: [algorithms] });

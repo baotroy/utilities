@@ -10,7 +10,7 @@ import {
 } from "../utils";
 import { TypeAlgorithm, algorithms } from "../type";
 import clsx from "clsx";
-// import { copyToClipboard, download } from "@/common/utils";
+
 const JwtDecoder = () => {
   const errorStyle = "bg-[#ffc4cc] text-[#f3005b]";
   const h3Style = "text-[26px] mb-2";
@@ -24,24 +24,32 @@ const JwtDecoder = () => {
                         py-3 px-5 outline-none
                         resize-none
                         `;
+
   const defaultAlgorithm: TypeAlgorithm = "HS256";
+  const defaultHeader = `{"alg":"${defaultAlgorithm}","typ":"JWT"}`;
+  const defaultPayload = `{"name":"John Doe","iat":1516239022}`;
+
   const [tabSize] = useState(2);
 
   const [algorithm, setAlgorithm] = useState<TypeAlgorithm>(defaultAlgorithm);
-  const [header, setHeader] = useState(
-    `{"alg": "${defaultAlgorithm}", "typ": "JWT"}`
-  );
-  const [payload, setPayload] = useState(
-    `{"name": "John Doe","iat": 1516239022}`
-  );
-  const defaultSecret = "your-256-bit-secret";
+  const [header, setHeader] = useState(defaultHeader);
+  const [payload, setPayload] = useState(defaultPayload);
+  const [validPayload, setValidPayload] = useState(defaultPayload);
+
+  const defaultSecret = "aaa";
   const [secret, setSecret] = useState(defaultSecret);
-  const [headerHash, setHeaderHash] = useState(base64UrlEncode(header));
-  const [payloadHash, setPayloadHash] = useState(base64UrlEncode(payload));
-  const [secretHash, setSecretHash] = useState(base64UrlEncode(secret));
-  const [token, setToken] = useState(
-    `${headerHash}.${payloadHash}.${secretHash}`
+  const defaultToken = createJwt(
+    JSON.parse(defaultPayload),
+    defaultAlgorithm,
+    defaultSecret
   );
+  const tokens = defaultToken.split(".");
+  const [headerHash, setHeaderHash] = useState(tokens[0]);
+  const [payloadHash, setPayloadHash] = useState(tokens[1]);
+  const [secretHash, setSecretHash] = useState(tokens[2]);
+  const [verifiedSecretHash, setVerifiedSecretHash] = useState(tokens[2]);
+
+  const [token, setToken] = useState(defaultToken);
   const [verified, setVerified] = useState(true);
   // States error
   const [errorHeader, setErrorHeader] = useState(false);
@@ -57,6 +65,11 @@ const JwtDecoder = () => {
       const decode = base64UrlDecode(newHashes[0]);
       if (validJSON(decode)) {
         setHeader(decode);
+        // check if algorithm is changed
+        const decodeJson = JSON.parse(decode);
+        if (decodeJson.alg !== algorithm) {
+          setAlgorithm(decodeJson.alg);
+        }
       } else {
         setHeader(prettyJson("{}", tabSize));
       }
@@ -79,205 +92,40 @@ const JwtDecoder = () => {
     if (newHashes[2] && newHashes[2] !== secretHash) {
       setSecretHash(newHashes[2]);
     }
+
     console.log("header hash", headerHash);
     console.log("payload hash", payloadHash);
     setToken(newToken);
   };
 
-  // const decodeToken = () => {
-  //   let errHeader,
-  //     errPayload = false;
-  //   console.log("token", token);
-  //   const [headerHash, payloadHash, secretHash] = token.split(".");
-
-  //   console.log("headerHash", headerHash);
-  //   // return;
-  //   const headers = base64UrlDecode(headerHash);
-  //   console.log("headers", headers);
-
-  //   if (headers) {
-  //     if (validHeader(headers)) {
-  //       console.log("h1");
-  //       setHeader(headers);
-  //       setHeaderHash(headerHash);
-  //       setAlgorithm(JSON.parse(headers).alg);
-  //     } else {
-  //       errHeader = true;
-  //       console.log("h2");
-  //       setHeader(prettyJson("{}", tabSize));
-  //       setHeaderHash("");
-  //     }
-  //   }
-
-  //   const payloads = base64UrlDecode(payloadHash);
-  //   if (payloads) {
-  //     if (validPayload(payloads)) {
-  //       setPayload(prettyJson(payloads, tabSize));
-  //       setPayloadHash(payloadHash);
-  //     } else {
-  //       errPayload = true;
-  //       setPayload(payloads);
-  //       setPayloadHash("");
-  //     }
-  //   }
-
-  //   setErrorToken(errHeader || errPayload);
-  // };
-
-  // const validHeader = (s: string): boolean => {
-  //   if (validJSON(s)) {
-  //     // setErrorHeader(false);
-  //     return true;
-  //   } else {
-  //     setErrorHeader(true);
-  //     return false;
-  //   }
-  // };
-  // const validPayload = (s: string): boolean => {
-  //   if (validJSON(s)) {
-  //     // setErrorPayload(false);
-  //     return true;
-  //   } else {
-  //     setErrorPayload(true);
-  //     return false;
-  //   }
-  // };
-
-  // Update token when header or payload or secret change
-  // const updateToken = (
-  //   pHeader?: string,
-  //   pPayload?: string,
-  //   pSecret?: string
-  // ) => {
-  //   if (pHeader) {
-  //     if (validHeader(pHeader)) {
-  //       setHeaderHash(base64UrlEncode(JSON.stringify(pHeader)));
-  //       setHeader(pHeader);
-  //       setErrorHeader(false);
-  //     } else {
-  //       setErrorHeader(true);
-  //     }
-  //   }
-
-  //   if (pPayload) {
-  //     if (validPayload(pPayload)) {
-  //       setPayloadHash(base64UrlEncode(JSON.stringify(pPayload)));
-  //       setPayload(pPayload);
-  //       setErrorHeader(false);
-  //     } else {
-  //       setErrorPayload(true);
-  //     }
-  //   }
-
-  //   if (pSecret) {
-  //     if (validHeader(header) && validPayload(payload)) {
-  //       const token = createJwt(JSON.parse(payload), algorithm, pSecret);
-  //       const hashes = token.split(".");
-  //       setHeaderHash(hashes[0]);
-  //       setPayloadHash(hashes[1]);
-  //       setSecretHash(hashes[2]);
-  //       setSecret(pSecret);
-  //       setToken(token);
-  //     }
-  //   }
-
-  //   // if (algorithm === pAlgorithm) {
-  //   //   setHeaderHash(pHeader);
-  //   //   setPayloadHash(hashes[1]);
-  //   //   setSecretHash(hashes[2]);
-  //   //   return
-  //   // }
-
-  //   // if (!pHeader || !pPayload) {
-  //   //   return setToken("");
-  //   // }
-
-  //   // if (validHeader(pHeader) && validPayload(pPayload)) {
-  //   //   const token = createJwt(JSON.parse(pPayload), pAlgorithm, pSecret);
-  //   //   const hashes = token.split(".");
-  //   //   setHeaderHash(hashes[0]);
-  //   //   setPayloadHash(hashes[1]);
-  //   //   setSecretHash(hashes[2]);
-  //   //   setToken(token);
-  //   // } else {
-  //   //   setToken("");
-  //   // }
-  // };
-
-  // useEffect(() => {
-  // const nHeader = `{"alg": "${algorithm}", "typ": "JWT"}`;
-  // updateToken(header);
-  // setHeader(nHeader);
-  // }, [header]);
-
-  // useEffect(() => {
-  //   const nHeader = `{"alg": "${algorithm}", "typ": "JWT"}`;
-  //   setHeader(nHeader);
-  //   setHeaderHash(base64UrlEncode(nHeader));
-  // }, [algorithm]);
-
-  // useEffect(() => {
-  //   if (validJSON(header) && validJSON(payload)) {
-  //     const tmpToken = createJwt(
-  //       JSON.parse(payload),
-  //       algorithm as TypeAlgorithm,
-  //       secret || defaultSecret
-  //     );
-  //     setVerified(tmpToken === `${headerHash}.${payloadHash}.${secretHash}`);
-  //   } else {
-  //     setVerified(false);
-  //   }
-  // }, [header, payload, secret, headerHash, payloadHash, secretHash]);
-
   useEffect(() => {
-    // decodeToken();
-    // const verified = verifyJwt(token, secret || "", algorithm);
-    // if (header && payload) {
-    //   if (validJSON(header) && validJSON(payload)) {
-    //     const tmpToken = createJwt(
-    //       JSON.parse(payload),
-    //       algorithm as TypeAlgorithm,
-    //       secret || defaultSecret
-    //     );
-    //     setVerified(tmpToken === `${headerHash}.${payloadHash}.${secretHash}`);
-    //   } else {
-    //     setVerified(false);
-    //   }
-    // } else {
-    //   setVerified(false);
-    // }
-    // console.log("verified", verified);
-  }, [token]);
+    const nHeader = `{"alg":"${algorithm}","typ":"JWT"}`;
+    console.log("nHeader", nHeader);
+    setHeader(nHeader);
+    setHeaderHash(base64UrlEncode(nHeader));
 
-  const handleInputJSONChange = (
-    value: string,
-    target: "payload" | "header"
-  ) => {
-    if (target === "header") {
-      console.log("h3");
-      setHeader(value);
-      // updateToken(value, payload, secret, algorithm);
-    } else {
-      setPayload(value);
-      // updateToken(undefined, value);
-    }
-  };
-  
+    const token = createJwt(JSON.parse(validPayload), algorithm, secret);
+    updateToken(token);
+  }, [algorithm]);
+
   const handleInputHeaderChange = (value: string) => {
-    // if (target === "header") {
-    //   console.log("h3");
-    //   setHeader(value);
-    //   // updateToken(value, payload, secret, algorithm);
-    // } else {
-    //   setPayload(value);
-    //   // updateToken(undefined, value);
-    // }
+    setHeader(value);
+    if (validJSON(value)) {
+      setErrorHeader(false);
+      // setValidHeader(value);
+      setHeaderHash(base64UrlEncode(value));
+      setToken(`${base64UrlEncode(value)}.${payloadHash}.${secretHash}`);
+    } else {
+      setErrorHeader(true);
+      setToken("");
+    }
   };
 
   const handleInputPayloadChange = (value: string) => {
     setPayload(value);
     if (validJSON(value)) {
       setErrorPayload(false);
+      setValidPayload(value);
       setPayloadHash(base64UrlEncode(value));
       setToken(`${headerHash}.${base64UrlEncode(value)}.${secretHash}`);
     } else {
@@ -287,9 +135,41 @@ const JwtDecoder = () => {
   };
 
   const handleUpdateSecret = (value: string) => {
+    value = value || defaultSecret;
     setSecret(value);
-    // updateToken(undefined, undefined, value);
+    const token = createJwt(JSON.parse(validPayload), algorithm, value);
+    const hashes = token.split(".");
+    console.log(token);
+    setSecret(value);
+    setSecretHash(hashes[2]);
+    setVerifiedSecretHash(hashes[2]);
+    updateToken(token);
   };
+
+  const updateToken = (token: string) => {
+    const hashes = token.split(".");
+    setHeaderHash(hashes[0]);
+    setHeader(base64UrlDecode(hashes[0]));
+    setPayloadHash(hashes[1]);
+    setValidPayload(base64UrlDecode(hashes[1]));
+
+    // setSecretHash(hashes[2]);
+    // setVerifiedSecretHash(hashes[2]);
+    setToken(token);
+
+    // decode data
+    // const decodeHeader = base64UrlDecode(hashes[0]);
+    // const decodePayload = base64UrlDecode(hashes[1]);
+    // handleInputHeaderChange(decodeHeader);
+    // handleInputPayloadChange(decodePayload);
+  };
+
+  useEffect(() => {
+    const tokens = token.split(".");
+    console.log("newHashes[2]", tokens[2]);
+    console.log("newHashes[2] Ver", verifiedSecretHash);
+    setVerified(tokens[2] === verifiedSecretHash);
+  }, [token, verifiedSecretHash]);
 
   const showJSON = (s: string) => {
     try {
@@ -354,7 +234,7 @@ const JwtDecoder = () => {
               placeholder=""
               defaultValue={showJSON(header)}
               value={showJSON(header)}
-              onChange={(e) => handleInputJSONChange(e.target.value, "header")}
+              onChange={(e) => handleInputHeaderChange(e.target.value)}
               spellCheck={false}
               className={clsx(textareaStyle, errorHeader && errorStyle)}
             ></textarea>

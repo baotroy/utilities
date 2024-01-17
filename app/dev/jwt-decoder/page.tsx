@@ -109,6 +109,13 @@ const JwtDecoder = () => {
   const handleInputHeaderChange = (value: string) => {
     setHeader(value);
     if (validJSON(value)) {
+      const json = JSON.parse(value);
+      const { alg } = json;
+      if (!algorithms.includes(alg)) {
+        setVerified(false);
+        setToken("");
+        return;
+      }
       setErrorHeader(false);
       // setValidHeader(value);
       setHeaderHash(base64UrlEncode(value));
@@ -276,7 +283,7 @@ const JwtDecoder = () => {
             &nbsp;Signature Verified
           </span>
         ) : (
-          <span>
+          <span className="flex">
             <MdOutlineCancel />
             &nbsp;Invalid Signature
           </span>

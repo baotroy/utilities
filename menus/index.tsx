@@ -8,6 +8,7 @@ interface itemProps {
   label: string;
   href: string;
   icon?: IconType | null;
+  breadcrumbUseLabel?: boolean;
   // slug: string;
   children?: childProps[];
 }
@@ -94,6 +95,13 @@ const menus: menuProps[] = [
         href: "/dev/jwt-decoder",
         icon: null,
       },
+      {
+        label: "MongoDB ObjectId ↔ Timestamp Converter",
+        // slug: "convert-case",
+        href: "/dev/mongo-object-time",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {
@@ -125,6 +133,14 @@ const menus: menuProps[] = [
     ],
   },
 ];
+
+export const menuItems = menus.reduce(
+  (acc: itemProps[], curr: menuProps): itemProps[] => {
+    return [...acc, ...curr.items];
+  },
+  []
+);
+
 export default menus;
 
 // color picker

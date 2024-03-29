@@ -37,7 +37,7 @@ const JwtDecoder = () => {
   const [payload, setPayload] = useState(defaultPayload);
   const [validPayload, setValidPayload] = useState(defaultPayload);
 
-  const defaultSecret = "aaa";
+  const defaultSecret = "secret";
   const [secret, setSecret] = useState(defaultSecret);
   const defaultToken = createJwt(
     JSON.parse(defaultPayload),

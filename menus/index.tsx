@@ -105,7 +105,7 @@ const menus: menuProps[] = [
       {
         label: "Basic Authentication Header Generator",
         // slug: "convert-case",
-        href: "/dev/basic-authentication-header-generator",
+        href: "/dev/basic-authentication-header",
         icon: null,
         breadcrumbUseLabel: true,
       },

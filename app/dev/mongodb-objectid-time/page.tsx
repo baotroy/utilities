@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import MongoObjectTimeComponent from "../components/mongo-object-time";
+import MongoObjectTimeComponent from "../components/mongodb-object-time";
 
 export const metadata: Metadata = {
   title: "Convert MongoDB ObjectId and Time",

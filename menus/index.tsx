@@ -98,7 +98,7 @@ const menus: menuProps[] = [
       {
         label: "MongoDB ObjectId to Timestamp",
         // slug: "convert-case",
-        href: "/dev/mongo-object-time",
+        href: "/dev/mongodb-objectid-time",
         icon: null,
         breadcrumbUseLabel: true,
       },

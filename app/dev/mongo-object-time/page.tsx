@@ -103,7 +103,7 @@ const MongoObjectTime = () => {
               onChange={(e) => handleInputObjectId(e.target.value)}
             />
             <div className="flex">
-              <span className="bg-gray-2  dark:bg-graydark border border-bodydark  dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
+              <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
                 <MdContentCopy size={20} onClick={() => handleCopy(false)} />
               </span>
             </div>
@@ -114,11 +114,11 @@ const MongoObjectTime = () => {
               type="text"
               readOnly
               value={`ObjectId("${mObjectId}")`}
-              className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+              className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
               onFocus={onFocus}
             />
             <div className="flex">
-              <span className="bg-gray-2  dark:bg-graydark border border-bodydark  dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
+              <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
                 <MdContentCopy size={20} onClick={() => handleCopy(true)} />
               </span>
             </div>
@@ -138,7 +138,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.y)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -151,7 +151,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.m)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -164,7 +164,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.d)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -177,7 +177,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.h)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -190,7 +190,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.min)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -203,7 +203,7 @@ const MongoObjectTime = () => {
                       onChange={(e) =>
                         handleInputTime(e.target.value, TypeDate.s)
                       }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -214,7 +214,7 @@ const MongoObjectTime = () => {
                       type="text"
                       value={date.toISOString()}
                       onFocus={onFocus}
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>
@@ -225,7 +225,7 @@ const MongoObjectTime = () => {
                       type="text"
                       value={Math.round(date.getTime() / 1000)}
                       onFocus={onFocus}
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                     />
                   </td>
                 </tr>

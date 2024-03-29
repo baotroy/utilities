@@ -96,9 +96,16 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
-        label: "MongoDB ObjectId ↔ Timestamp Converter",
+        label: "MongoDB ObjectId to Timestamp",
         // slug: "convert-case",
         href: "/dev/mongo-object-time",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Basic Authentication Header Generator",
+        // slug: "convert-case",
+        href: "/dev/basic-authentication-header-generator",
         icon: null,
         breadcrumbUseLabel: true,
       },

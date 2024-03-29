@@ -1,3 +1,4 @@
+import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 
 export const copyToClipboard = (content: string) => {
@@ -49,4 +50,9 @@ export const download = (
 export const getSizeFileFromBase64 = (str: string) => {
   const numberEq = str.slice(str.length - 5).split("=").length - 1;
   return str.length * (3 / 4) - numberEq;
+};
+
+export const getPageTitle = (pathname: string): string => {
+  const pathElements = pathname.split("/");
+  return pathElements[pathElements.length - 1].split("-").join(" ");
 };

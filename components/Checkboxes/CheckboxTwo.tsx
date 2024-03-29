@@ -1,26 +1,41 @@
 "use client";
-import { useState } from "react";
 
-const CheckboxTwo = () => {
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+import clsx from "clsx";
 
+interface CheckboxTwoProps {
+  label: string;
+  labelClass?: string;
+  isChecked: boolean;
+  onChange: (isChecked: boolean) => void;
+}
+
+const CheckboxTwo: React.FC<CheckboxTwoProps> = ({
+  label,
+  labelClass,
+  isChecked = false,
+  onChange,
+}) => {
   return (
-    <div>
+    <div className="flex">
       <label
-        htmlFor="checkboxLabelTwo"
-        className="flex cursor-pointer select-none items-center"
+        htmlFor={`checkboxLabelTwo${label}`}
+        className={clsx(
+          "flex cursor-pointer select-none items-center",
+          labelClass
+        )}
       >
         <div className="relative">
           <input
             type="checkbox"
-            id="checkboxLabelTwo"
+            id={`checkboxLabelTwo${label}`}
             className="sr-only"
+            checked={isChecked}
             onChange={() => {
-              setIsChecked(!isChecked);
+              onChange(!isChecked);
             }}
           />
           <div
-            className={`mr-4 flex h-5 w-5 items-center justify-center rounded border ${
+            className={`mr-2 flex h-5 w-5 items-center justify-center rounded border ${
               isChecked && "border-primary bg-gray dark:bg-transparent"
             }`}
           >
@@ -42,7 +57,7 @@ const CheckboxTwo = () => {
             </span>
           </div>
         </div>
-        Checkbox Text
+        {label}
       </label>
     </div>
   );

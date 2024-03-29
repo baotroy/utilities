@@ -97,7 +97,9 @@ const ConvertCase = () => {
           border-[1.5px] 
           border-stroke  
           dark:border-strokedark
-          py-3 px-5 font-medium outline-none "
+          py-3 px-5 outline-none
+          font-normal
+          "
         ></textarea>
       </div>
       <div>

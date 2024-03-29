@@ -13,7 +13,7 @@ const ImageToBase64 = () => {
     json: "JSON -- {file:{mime,data}}",
     xml: "XML -- <file></file>",
   };
-  
+
   const h3Style = "font-bold text-20 mb-2";
   const [selectedFormat, setSelectedFormat] = useState("txt");
   const [base64, setBase64] = useState("");
@@ -40,22 +40,22 @@ const ImageToBase64 = () => {
   };
   const formatBase64 = () => {
     switch (selectedFormat) {
-    case "txt":
-      return base64.split("base64,")[1];
-    case "uri":
-      return base64;
-    case "html_hyperlink":
-      return `<a href="${base64}">File</a>`;
-    case "json":
-      return prettyJson(
-        JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
-      );
-    case "xml":
-      return formatXml(
-        `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
-      );
-    default:
-      return base64;
+      case "txt":
+        return base64.split("base64,")[1];
+      case "uri":
+        return base64;
+      case "html_hyperlink":
+        return `<a href="${base64}">File</a>`;
+      case "json":
+        return prettyJson(
+          JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
+        );
+      case "xml":
+        return formatXml(
+          `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
+        );
+      default:
+        return base64;
     }
   };
 
@@ -158,7 +158,7 @@ const ImageToBase64 = () => {
                 border-[1.5px] 
                 border-stroke  
                 dark:border-strokedark
-                py-3 px-5 font-medium outline-none "
+                py-3 px-5 font-normal outline-none "
             ></textarea>
           </div>
           {/* <div>

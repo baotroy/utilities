@@ -1,4 +1,3 @@
-// import BigNumber from "bignumber.js";
 import { Web3 } from "web3";
 import { ethUnitMap } from "web3-utils";
 import { trimEnd } from "lodash";

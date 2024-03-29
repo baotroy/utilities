@@ -2,8 +2,8 @@
 import { Metadata } from "next";
 import Head from "next/head";
 export const metadata: Metadata = {
-  title: "Home page",
-  description: "This is Home page",
+  title: "Home - Utilities for developers and more.",
+  description: "Utilities for developers and more.",
   // other metadata
 };
 

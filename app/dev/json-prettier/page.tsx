@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import JsonPrettierComponent from "../components/json-prettier";
 
 export const metadata: Metadata = {
   title: "JSON Prettier",
@@ -6,6 +7,8 @@ export const metadata: Metadata = {
     "Online JSON Formatter / Beautifier and JSON Validator will format JSON data, and helps to validate",
 };
 
-const JsonPrettier = () => {};
+const JsonPrettier = () => {
+  return <JsonPrettierComponent />;
+};
 
 export default JsonPrettier;

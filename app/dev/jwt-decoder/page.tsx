@@ -246,7 +246,7 @@ const JwtDecoder = () => {
               PAYLOAD
             </p>
             <textarea
-              rows={5}
+              rows={6}
               placeholder=""
               defaultValue={showJSON(payload)}
               value={showJSON(payload)}

@@ -9,9 +9,9 @@ module.exports = {
   ],
   darkMode: "class",
   theme: {
-    fontFamily: {
-      satoshi: ["Satoshi", "sans-serif"],
-    },
+    // fontFamily: {
+    //   satoshi: ["sans-serif"],
+    // },
     colors: {
       current: "currentColor",
       transparent: "transparent",

@@ -48,6 +48,11 @@ module.exports = {
       success: "#219653",
       danger: "#D34053",
       warning: "#FFA70B",
+      "red-600": "#DC2626",
+      "amber-600": "#D97706",
+      "amber-200": "#FDE68A",
+      "lime-200": "#D9F99D",
+      "lime-600": "#65A30D",
     },
     screens: {
       "2xsm": "375px",

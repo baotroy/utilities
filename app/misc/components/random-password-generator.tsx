@@ -5,14 +5,24 @@ import { useEffect, useState } from "react";
 import { MdContentCopy } from "react-icons/md";
 import CheckboxTwo from "@/components/Checkboxes/CheckboxTwo";
 import { HiMinus, HiOutlinePlus } from "react-icons/hi2";
+import clsx from "clsx";
 
 export default function RandomPasswordGeneratorComponent() {
+  const securityLevels = ["Very Weak", "Weak", "Good", "Strong", "Very Strong"];
+  const securityLevelColors = [
+    "bg-red-600",
+    "bg-amber-600",
+    "bg-amber-200	",
+    "bg-lime-200",
+    "bg-lime-600",
+  ];
   const [password, setPassword] = useState("");
   const [length, setLength] = useState(15);
   const [uppercase, setUppercase] = useState(true);
   const [lowercase, setLowercase] = useState(true);
   const [numbers, setNumbers] = useState(true);
   const [symbols, setSymbols] = useState(false);
+  const [securityLevel, setSecurityLevel] = useState(4);
 
   const handleCopy = () => {
     copyToClipboard(password);
@@ -44,6 +54,21 @@ export default function RandomPasswordGeneratorComponent() {
     setPassword(generatePassword());
   }, [length, uppercase, lowercase, numbers, symbols]);
 
+  useEffect(() => {
+    // 1, 5, 8, 10, 12
+    if (length < 5) {
+      setSecurityLevel(0);
+    } else if (length < 8) {
+      setSecurityLevel(1);
+    } else if (length < 10) {
+      setSecurityLevel(2);
+    } else if (length < 12) {
+      setSecurityLevel(3);
+    } else {
+      setSecurityLevel(4);
+    }
+  }, [length]);
+
   return (
     <>
       <Breadcrumb pageName="" />
@@ -56,8 +81,16 @@ export default function RandomPasswordGeneratorComponent() {
             type="text"
             readOnly
             value={password}
-            className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+            className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-bodydark dark:border-body border-r-0"
           />
+          <span
+            className={clsx(
+              "border-t border-b border-bodydark dark:border-body text-[13px] font-semibold text-black w-[120px] flex justify-center items-center",
+              securityLevelColors[securityLevel]
+            )}
+          >
+            {securityLevels[securityLevel]}
+          </span>
           <div className="flex">
             <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
               <MdContentCopy size={20} onClick={() => handleCopy()} />
@@ -74,7 +107,7 @@ export default function RandomPasswordGeneratorComponent() {
               <button
                 className=" rounded-full border-bodydark border"
                 onClick={() => {
-                  setLength(length - 1);
+                  setLength(length > 1 ? length - 1 : length);
                 }}
               >
                 <HiMinus className="m-2" />
@@ -94,7 +127,7 @@ export default function RandomPasswordGeneratorComponent() {
               <button
                 className="rounded-full border-bodydark border"
                 onClick={() => {
-                  setLength(length + 1);
+                  setLength(length < 50 ? length + 1 : length);
                 }}
               >
                 <HiOutlinePlus className="m-2" />

@@ -56,6 +56,12 @@ const menus: menuProps[] = [
       //   icon: null,
       // },
       {
+        label: "Number Conversion",
+        // slug: "ethereum-convert-units",
+        href: "/number/number-conversion",
+        icon: null,
+      },
+      {
         label: "Ethereum Unit Converter",
         // slug: "ethereum-convert-units",
         href: "/number/ethereum-unit-converter",
@@ -142,6 +148,12 @@ const menus: menuProps[] = [
         href: "/misc/random-password-generator",
         icon: null,
       },
+      {
+        label: "RGB to HEX",
+        // slug: "image-resize",
+        href: "/misc/rgb-to-hex",
+        icon: null,
+      },
     ],
   },
 ];
@@ -159,3 +171,11 @@ export default menus;
 // MongoDB ObjectId ↔ Timestamp Converter
 // UUID Generator
 // passwordsgenerator *
+// number conversation (hex, binary, decimal, octal)
+// rgb to hex
+// cron guru
+// string to slug
+// string to kebab-case
+// string to snake_case
+// string to camelCase
+// string to PascalCase

@@ -52,7 +52,7 @@ module.exports = {
       "amber-600": "#D97706",
       "amber-200": "#FDE68A",
       "lime-200": "#D9F99D",
-      "lime-600": "#65A30D",
+      "green-500": "#22C55E",
     },
     screens: {
       "2xsm": "375px",

@@ -14,7 +14,7 @@ export default function RandomPasswordGeneratorComponent() {
     "bg-amber-600",
     "bg-amber-200	",
     "bg-lime-200",
-    "bg-lime-600",
+    "bg-green-500",
   ];
   const [password, setPassword] = useState("");
   const [length, setLength] = useState(15);

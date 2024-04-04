@@ -181,3 +181,11 @@ span.flatpickr-weekday,
 textarea {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.custom-input {
+  @apply w-100 p-1.5 outline-none border border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark
+}
+
+.custom-input.error {
+  @apply bg-red-600
+}

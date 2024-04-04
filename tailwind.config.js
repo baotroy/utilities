@@ -53,6 +53,9 @@ module.exports = {
       "amber-200": "#FDE68A",
       "lime-200": "#D9F99D",
       "green-500": "#22C55E",
+      "true-red": "#FF0000",
+      "true-green": "#00FF00",
+      "true-blue": "#0000FF",
     },
     screens: {
       "2xsm": "375px",

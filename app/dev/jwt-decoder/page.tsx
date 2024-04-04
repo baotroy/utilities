@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import JsonPrettierComponent from "../components/json-prettier";
 
 export const metadata: Metadata = {
   title: "JWT Decoder",
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const JwtDecoder = () => {
-  return <JsonPrettierComponent />;
+  return <JwtDecoder />;
 };
 
 export default JwtDecoder;

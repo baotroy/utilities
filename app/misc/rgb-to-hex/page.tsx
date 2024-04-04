@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import RandomPasswordGeneratorComponent from "../components/random-password-generator";
+import RgbToHexComponent from "./rgb-to-hex";
 
 export const metadata: Metadata = {
   title: "RGB to HEX Converter",
@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const RandomPasswordGenerator = () => {
-  return <RandomPasswordGeneratorComponent />;
+const RgbToHex = () => {
+  return <RgbToHexComponent />;
 };
 
-export default RandomPasswordGenerator;
+export default RgbToHex;

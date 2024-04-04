@@ -148,12 +148,12 @@ const menus: menuProps[] = [
         href: "/misc/random-password-generator",
         icon: null,
       },
-      {
-        label: "RGB to HEX",
-        // slug: "image-resize",
-        href: "/misc/rgb-to-hex",
-        icon: null,
-      },
+      // {
+      //   label: "RGB to HEX",
+      //   // slug: "image-resize",
+      //   href: "/misc/rgb-to-hex",
+      //   icon: null,
+      // },
     ],
   },
 ];

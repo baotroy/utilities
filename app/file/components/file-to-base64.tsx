@@ -161,11 +161,6 @@ export default function File2Base64Component() {
                     py-3 px-5 font-normal outline-none "
             ></textarea>
           </div>
-          {/* <div>
-                {formatData && (
-                  <div>{bytesToSize(getSizeFileFromBase64(base64))}</div>
-                )}
-              </div> */}
         </div>
         <div className="mb-4"></div>
       </div>

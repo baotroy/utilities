@@ -5,7 +5,7 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 
 import LinkItem from "./LinkItem";
 import ChildrenLinkItems from "./ChildrenListItems";
-import menus from "@/menus";
+import menus from "@/common/menu";
 
 interface SidebarProps {
   sidebarOpen: boolean;

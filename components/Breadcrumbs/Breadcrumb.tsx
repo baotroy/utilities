@@ -1,7 +1,7 @@
 import Link from "next/link";
 import convertCase, { CaseType } from "@/app/string/utils";
 import { usePathname } from "next/navigation";
-import { menuItems } from "@/menus/index";
+import { menuItems } from "@/common/menu";
 
 interface BreadcrumbProps {
   pageName?: string;

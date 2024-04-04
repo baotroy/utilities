@@ -1,5 +1,4 @@
-import { Web3 } from "web3";
-import { ethUnitMap } from "web3-utils";
+import { ethUnitMap, toWei, fromWei } from "web3-utils";
 import { trimEnd } from "lodash";
 export const ethUnitDecimals = {
   wei: -18,
@@ -39,10 +38,7 @@ const convertToWei = (
   from: keyof typeof ethUnitDecimals
 ): string => {
   try {
-    const result = Web3.utils.toWei(
-      weiValue.toString(),
-      from as keyof typeof ethUnitMap
-    );
+    const result = toWei(weiValue.toString(), from as keyof typeof ethUnitMap);
     return trimEnd(result, ".");
   } catch (error) {
     return "0";
@@ -53,7 +49,7 @@ const convertFromWei = (
   to: keyof typeof ethUnitMap
 ): string => {
   try {
-    const result = Web3.utils.fromWei(weiValue.toString(), to);
+    const result = fromWei(weiValue.toString(), to);
     return trimEnd(result, ".");
   } catch (error) {
     return "0";

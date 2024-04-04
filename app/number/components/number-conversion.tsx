@@ -1,13 +1,9 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
-import { NumberConverter } from "number-converter";
-import { set } from "lodash";
+import BN from "bignumber.js";
 
 export default function NumberConversionComponent() {
-  const errorStyle = "bg-[#ffc4cc]";
-  // type TypeNumber = "Binary" | "Octal" | "Decimal" | "Hexadecimal";
-
   const numbers = ["Binary", "Octal", "Decimal", "Hexadecimal"] as const;
   const name2base = {
     Binary: 2,
@@ -25,17 +21,11 @@ export default function NumberConversionComponent() {
   const [value, setValue] = useState("");
 
   const convert = () => {
-    // todo
-    const numberConverter = new NumberConverter(
-      from.toUpperCase(),
-      to.toUpperCase()
-    );
-
     setError(false);
     try {
-      setResult(numberConverter.convert(value));
+      const bn = BN(value, name2base[from as (typeof numbers)[number]]);
+      setResult(bn.toString(name2base[to as (typeof numbers)[number]]));
     } catch (e) {
-      // setResult("Invalid number");
       setError(true);
       setResult("");
     }
@@ -84,7 +74,7 @@ export default function NumberConversionComponent() {
               type="text"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className={error ? errorStyle : ""}
+              className={error ? "bg-error" : ""}
             />
             <span>{name2base[from as (typeof numbers)[number]]}</span>
           </div>

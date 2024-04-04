@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply font-normal text-base text-body bg-whiten relative z-1;
+    @apply font-normal text-base text-black relative z-1;
   }
 }
 
@@ -178,14 +178,36 @@ span.flatpickr-weekday,
   right: 45px;
 }
 
+.circular.label{
+  min-width: 2em;
+  min-height: 2em;
+  padding: .5em .74em !important;
+  line-height: 1em;
+  text-align: center;
+  border-radius: 500rem;
+}
+.label {
+  font-size: .7rem;
+  color: #fff;
+  font-weight: 700;
+}
+
 textarea {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .custom-input {
-  @apply w-100 p-1.5 outline-none border border-t-bodydark  border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark
+  @apply rounded border border-bodydark px-2 py-[5px] outline-bodydark dark:outline-boxdark
 }
 
 .custom-input.error {
   @apply bg-red-600
+}
+
+.custom-button {
+  @apply rounded  px-3 py-1.5 font-medium text-[14px] text-white
+}
+
+.custom-button.primary {
+  @apply bg-primary
 }

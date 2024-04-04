@@ -1,85 +1,129 @@
 "use client";
 
 import TextBoxComponent from "@/components/Input/TextBox";
-import ColorLabel from "./color-label";
-import { Dispatch, SetStateAction, useState } from "react";
-import { isNumber } from "@/common/utils";
-import { set } from "lodash";
+import ColorCircle from "./color-circle";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { copyToClipboard, isNumber } from "@/common/utils";
+import ButtonComponent from "@/components/Input/Button";
+import rgbHex from "rgb-hex";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 export default function RgbToHexComponent() {
   const [red, setRed] = useState("");
   const [green, setGreen] = useState("");
   const [blue, setBlue] = useState("");
-
-  const [errorRed, setErrorRed] = useState(false);
-  const [errorGreen, setErrorGreen] = useState(false);
-  const [errorBlue, setErrorBlue] = useState(false);
+  const [hex, setHex] = useState("");
 
   const onHandleChange = (
     value: string,
-    setValue: Dispatch<SetStateAction<string>>,
-    setError: Dispatch<SetStateAction<boolean>>
+    setValue: Dispatch<SetStateAction<string>>
   ) => {
+    if (value === "") {
+      setValue("");
+      return;
+    }
+
     if (isNumber(value)) {
-      setError(false);
       setValue(value);
-    } else {
-      setError(true);
     }
   };
 
   const onHandleRedChange = (value: string) => {
-    onHandleChange(value, setRed, setErrorRed);
+    onHandleChange(value, setRed);
   };
 
   const onHandleGreenChange = (value: string) => {
-    onHandleChange(value, setGreen, setErrorGreen);
+    onHandleChange(value, setGreen);
   };
 
   const onHandleBlueChange = (value: string) => {
-    onHandleChange(value, setBlue, setErrorBlue);
+    onHandleChange(value, setBlue);
+  };
+
+  useEffect(() => {
+    convertToHex();
+  }, [red, green, blue]);
+
+  const convertToHex = () => {
+    if (!red && !green && !blue) {
+      setHex("");
+    } else {
+      const hex = rgbHex(
+        parseInt(red || "0"),
+        parseInt(green || "0"),
+        parseInt(blue || "0")
+      );
+      setHex(`#${hex.toUpperCase()}`);
+    }
   };
 
   return (
     <>
-      <div className="w-1/2">
+      <Breadcrumb pageName="" />
+      <div className="w-1/2 m-auto">
         <div className="flex">
           <div className="w-1/3">
-            <ColorLabel color="Red" bgColor="bg-true-red" />
+            <ColorCircle color="R" label="Red" bgColor="#ff0000" />
           </div>
           <div className="w-1/3">
-            <ColorLabel color="Green" bgColor="bg-true-green" />
+            <ColorCircle color="G" label="Green" bgColor="#00ff00" />
           </div>
           <div className="w-1/3">
-            <ColorLabel color="Blue" bgColor="bg-true-blue" />
+            <ColorCircle color="B" label="Blue" bgColor="#0000ff" />
           </div>
         </div>
         <div className="flex">
-          <div className="w-1/3">
+          <div className="w-1/3 mr-2">
             <TextBoxComponent
               handleOnChange={(e) => onHandleRedChange(e.target.value)}
-              placeholder="255"
+              placeholder="0"
               maxLength={3}
-              isError={errorRed}
+              value={red}
+              additionalClass="w-full"
             />
           </div>
-          <div className="w-1/3">
+          <div className="w-1/3 mr-2">
             <TextBoxComponent
               handleOnChange={(e) => onHandleGreenChange(e.target.value)}
-              placeholder="255"
+              placeholder="0"
               maxLength={3}
-              isError={errorGreen}
+              value={green}
+              additionalClass="w-full"
             />
           </div>
-          <div className="w-1/3">
+          <div className="w-1/3 mr-2">
             <TextBoxComponent
               handleOnChange={(e) => onHandleBlueChange(e.target.value)}
-              placeholder="255"
+              placeholder="0"
               maxLength={3}
-              isError={errorBlue}
+              value={blue}
+              additionalClass="w-full"
             />
           </div>
         </div>
+        {hex && (
+          <div className="mt-4">
+            <div className="text-center">
+              <ColorCircle color="R" bgColor="#ff0000" label={red} />
+              <ColorCircle color="G" bgColor="#00ff00" label={green} />
+              <ColorCircle color="B" bgColor="#0000ff" label={blue} />
+            </div>
+            <div className="mt-8 text-center">
+              <strong>{hex}</strong>{" "}
+              <ButtonComponent
+                label="Copy"
+                handleOnClick={() => copyToClipboard(hex)}
+                additionalClass="primary"
+              />
+            </div>
+            <div className="mt-4">
+              <div
+                className={"w-25 h-25 m-auto rounded-full"}
+                style={{ backgroundColor: hex }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -22,7 +22,7 @@ module.exports = {
       bodydark: "#AEB7C0",
       bodydark1: "#DEE4EE",
       bodydark2: "#8A99AF",
-      primary: "#3C50E0",
+      primary: "#0071e3",
       secondary: "#80CAEE",
       stroke: "#E2E8F0",
       gray: "#EFF4FB",
@@ -53,9 +53,6 @@ module.exports = {
       "amber-200": "#FDE68A",
       "lime-200": "#D9F99D",
       "green-500": "#22C55E",
-      "true-red": "#FF0000",
-      "true-green": "#00FF00",
-      "true-blue": "#0000FF",
     },
     screens: {
       "2xsm": "375px",

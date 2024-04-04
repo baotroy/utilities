@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import JwtDecoderComponent from "../components/jwt-decoder";
 
 export const metadata: Metadata = {
   title: "JWT Decoder",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const JwtDecoder = () => {
-  return <JwtDecoder />;
+  return <JwtDecoderComponent />;
 };
 
 export default JwtDecoder;

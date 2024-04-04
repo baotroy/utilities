@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { ChangeEvent } from "react";
 
-interface TextInputComponentProps {
+interface TextBoxProps {
   handleOnChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   value: string;
   placeholder?: string;
@@ -11,7 +11,7 @@ interface TextInputComponentProps {
   isError?: boolean;
 }
 
-const TextBoxComponent: React.FC<TextInputComponentProps> = ({
+const TextBox: React.FC<TextBoxProps> = ({
   placeholder = "",
   value,
   handleOnChange = () => {},
@@ -21,15 +21,17 @@ const TextBoxComponent: React.FC<TextInputComponentProps> = ({
   isError = false,
 }) => {
   return (
-    <input
-      placeholder={placeholder}
-      maxLength={maxLength}
-      type="text"
-      className={clsx("custom-input", additionalClass, isError && "error")}
-      value={value}
-      readOnly={readonly}
-      onChange={(e) => handleOnChange(e)}
-    />
+    <>
+      <input
+        placeholder={placeholder}
+        maxLength={maxLength}
+        type="text"
+        className={clsx("custom-input", additionalClass, isError && "error")}
+        value={value}
+        readOnly={readonly}
+        onChange={(e) => handleOnChange(e)}
+      />
+    </>
   );
 };
-export default TextBoxComponent;
+export default TextBox;

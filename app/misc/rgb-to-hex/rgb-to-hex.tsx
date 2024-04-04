@@ -4,9 +4,10 @@ import TextBoxComponent from "@/components/Input/TextBox";
 import ColorCircle from "./color-circle";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { copyToClipboard, isNumber } from "@/common/utils";
-import ButtonComponent from "@/components/Input/Button";
+import Button from "@/components/Input/Button";
 import rgbHex from "rgb-hex";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { MdContentCopy } from "react-icons/md";
 
 export default function RgbToHexComponent() {
   const [red, setRed] = useState("");
@@ -23,7 +24,7 @@ export default function RgbToHexComponent() {
       return;
     }
 
-    if (isNumber(value)) {
+    if (isNumber(value) && parseInt(value) <= 255) {
       setValue(value);
     }
   };
@@ -110,10 +111,15 @@ export default function RgbToHexComponent() {
             </div>
             <div className="mt-8 text-center">
               <strong>{hex}</strong>{" "}
-              <ButtonComponent
+              <Button
                 label="Copy"
                 handleOnClick={() => copyToClipboard(hex)}
                 additionalClass="primary"
+                icon={{
+                  icon: MdContentCopy,
+                  position: "left",
+                  size: 20,
+                }}
               />
             </div>
             <div className="mt-4">

@@ -53,7 +53,8 @@ module.exports = {
       "amber-200": "#FDE68A",
       "lime-200": "#D9F99D",
       "green-500": "#22C55E",
-      error: "#ffc4cc",
+      error: "#ff5e84",
+      reset: "#DEE4EF",
     },
     screens: {
       "2xsm": "375px",

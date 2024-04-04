@@ -1,11 +1,18 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BN from "bignumber.js";
+import SelectBox from "@/components/Input/SelectBox";
+import TextBox from "@/components/Input/TextBox";
+import Button from "@/components/Input/Button";
+import { MdOutlineClear, MdOutlineSwapVert } from "react-icons/md";
+import { LiaEqualsSolid } from "react-icons/lia";
+import Copy from "@/components/common/copy";
+import { copyToClipboard } from "@/common/utils";
 
 export default function NumberConversionComponent() {
-  const numbers = ["Binary", "Octal", "Decimal", "Hexadecimal"] as const;
-  const name2base = {
+  const numbers = ["Binary", "Octal", "Decimal", "Hexadecimal"];
+  const name2base: Record<string, number> = {
     Binary: 2,
     Octal: 8,
     Decimal: 10,
@@ -20,15 +27,21 @@ export default function NumberConversionComponent() {
 
   const [value, setValue] = useState("");
 
+  useEffect(() => {
+    if (result) {
+      convert();
+    }
+  }, [from, to]);
+
   const convert = () => {
     setError(false);
-    try {
-      const bn = BN(value, name2base[from as (typeof numbers)[number]]);
-      setResult(bn.toString(name2base[to as (typeof numbers)[number]]));
-    } catch (e) {
+    const bn = BN(value, name2base[from]);
+    if (bn.isNaN()) {
       setError(true);
       setResult("");
+      return;
     }
+    setResult(bn.toString(name2base[to]));
   };
 
   const reset = () => {
@@ -43,52 +56,97 @@ export default function NumberConversionComponent() {
     reset();
   };
 
+  const handleCopy = () => {
+    copyToClipboard(result);
+  };
   return (
     <>
       <Breadcrumb />
-      <div className="w-1/2">
+      <div className="w-1/2 m-auto">
         <div className="flex ">
-          <div className="w-1/2">From</div>
+          <div className="w-1/2 mr-4">From</div>
           <div className="w-1/2">To</div>
         </div>
         <div className="flex">
-          <div className="w-1/2">
-            <select value={from} onChange={(e) => setFrom(e.target.value)}>
-              {numbers.map((number) => (
-                <option key={number}>{number}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-1/2">
-            <select value={to} onChange={(e) => setTo(e.target.value)}>
-              {numbers.map((number) => (
-                <option key={number}>{number}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="">
-          <div>Enter {from.toLowerCase()} number</div>
-          <div>
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className={error ? "bg-error" : ""}
+          <div className="w-1/2 mr-4">
+            <SelectBox
+              items={numbers}
+              value={from}
+              handleOnChange={(e) => setFrom(e.target.value)}
+              additionalClass="w-full"
             />
-            <span>{name2base[from as (typeof numbers)[number]]}</span>
+          </div>
+          <div className="w-1/2">
+            <SelectBox
+              items={numbers}
+              value={to}
+              handleOnChange={(e) => setTo(e.target.value)}
+              additionalClass="w-full"
+            />
           </div>
         </div>
-        <div className="flex">
-          <button onClick={convert}>Convert</button>
-          <button onClick={reset}>Reset</button>
-          <button onClick={swap}>Swap</button>
-        </div>
         <div className="">
-          <div>{to} number</div>
-          {/* <input type="text" value={result} readOnly /> */}
-          <textarea rows={4} readOnly value={result}></textarea>
-          <span>{name2base[to as (typeof numbers)[number]]}</span>
+          <div className="my-3">Enter {from.toLowerCase()} number</div>
+          <div className="flex">
+            <TextBox
+              value={value}
+              handleOnChange={(e) => setValue(e.target.value)}
+              isError={error}
+              additionalClass="w-full no-border-right"
+            />
+            <span className="suffix-label">
+              {name2base[from as (typeof numbers)[number]]}
+            </span>
+          </div>
+        </div>
+        <div className="flex mt-4">
+          <Button
+            handleOnClick={convert}
+            label="Convert"
+            additionalClass="mr-2"
+            icon={{
+              icon: LiaEqualsSolid,
+              position: "left",
+              size: 20,
+            }}
+          />
+          <Button
+            handleOnClick={reset}
+            label="Reset"
+            type="reset"
+            additionalClass="mr-2"
+            icon={{
+              icon: MdOutlineClear,
+              position: "left",
+              size: 20,
+            }}
+          />
+          <Button
+            handleOnClick={swap}
+            label="Swap"
+            type="outline"
+            icon={{
+              icon: MdOutlineSwapVert,
+              position: "left",
+              size: 20,
+            }}
+          />
+        </div>
+        <div>
+          <div className="my-3">
+            {to} number{" "}
+            {result ? <span>({result.toString().length} digits)</span> : null}
+          </div>
+          <div className="flex">
+            <span className="prefix-label">{name2base[to]}</span>
+            <textarea
+              rows={4}
+              disabled
+              value={result}
+              className="custom-input w-full no-border-x"
+            ></textarea>
+            <Copy handleCopy={handleCopy} />
+          </div>
         </div>
       </div>
     </>

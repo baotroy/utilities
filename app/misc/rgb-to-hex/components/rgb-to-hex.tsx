@@ -1,6 +1,6 @@
 "use client";
 
-import TextBoxComponent from "@/components/Input/TextBox";
+import TextBox from "@/components/Input/TextBox";
 import ColorCircle from "./color-circle";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { copyToClipboard, isNumber } from "@/common/utils";
@@ -75,8 +75,8 @@ export default function RgbToHexComponent() {
         </div>
         <div className="flex">
           <div className="w-1/3 mr-2">
-            <TextBoxComponent
-              handleOnChange={(e) => onHandleRedChange(e.target.value)}
+            <TextBox
+              onChange={(e) => onHandleRedChange(e.target.value)}
               placeholder="0"
               maxLength={3}
               value={red}
@@ -84,8 +84,8 @@ export default function RgbToHexComponent() {
             />
           </div>
           <div className="w-1/3 mr-2">
-            <TextBoxComponent
-              handleOnChange={(e) => onHandleGreenChange(e.target.value)}
+            <TextBox
+              onChange={(e) => onHandleGreenChange(e.target.value)}
               placeholder="0"
               maxLength={3}
               value={green}
@@ -93,8 +93,8 @@ export default function RgbToHexComponent() {
             />
           </div>
           <div className="w-1/3 mr-2">
-            <TextBoxComponent
-              handleOnChange={(e) => onHandleBlueChange(e.target.value)}
+            <TextBox
+              onChange={(e) => onHandleBlueChange(e.target.value)}
               placeholder="0"
               maxLength={3}
               value={blue}

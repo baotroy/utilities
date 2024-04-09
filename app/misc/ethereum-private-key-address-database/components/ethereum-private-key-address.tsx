@@ -1,17 +1,25 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Button from "@/components/Input/Button";
+import TextBox from "@/components/Input/TextBox";
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { getKeysListFromPage, getAddressFromPrivateKey, TOTAL_PAGES } from ".";
+import {
+  getKeysListFromPage,
+  getAddressFromPrivateKey,
+  TOTAL_PAGES,
+  PAGE_SIZE,
+} from ".";
 import Paginator from "./paginator";
 import { useEffect, useState } from "react";
-import TextBox from "@/components/Input/TextBox";
 import BigNumber from "bignumber.js";
 BigNumber.config({ ROUNDING_MODE: 2 }); // ROUND CEIL
 
 import { getBalances, parseBalance } from "@/common/utils";
 import { MdOutlineStar } from "react-icons/md";
+import clsx from "clsx";
+import PaginatorBox from "./paginatorBox";
 
 const EthereumPrivateKeyAddressComponent = () => {
   const getValidPage = (page: BigNumber | number | string): BigNumber => {
@@ -27,26 +35,41 @@ const EthereumPrivateKeyAddressComponent = () => {
     }
     return t;
   };
+
   const { push } = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const p = searchParams.get("p");
-  const [page, setPage] = useState<BigNumber>(getValidPage(p || 1));
-  const [tempPage, setTempPage] = useState<BigNumber>(page);
+  const rpc = searchParams.get("rpc");
+  const [page, setPage] = useState<BigNumber>(getValidPage(p || 1)); // must use BigNumber cuz of large amount of keys
+  const [tempPage, setTempPage] = useState(page.toString(10));
   const [keys, setKeys] = useState<string[]>([]);
   const [addresses, setAddresses] = useState<string[]>([]);
   const [balances, setBalances] = useState<string[]>([]);
+  const [customRpc, setCustomRpc] = useState<string>(rpc || "");
 
   useEffect(() => {
     setKeys(getKeysListFromPage(page));
     setAddresses(
       getKeysListFromPage(page).map((key) => getAddressFromPrivateKey(key))
     );
-    setTempPage(page);
+    setTempPage(page.toString(10));
+
+    // push router
+    pushRouter();
   }, [page]);
 
+  const pushRouter = () => {
+    const query = {
+      p: page.toString(10),
+      rpc: customRpc.trim(),
+    };
+    const searchParams = new URLSearchParams(query);
+    push(`${pathname}?${searchParams.toString()}`);
+  };
+
   useEffect(() => {
-    getBalances(addresses, 1).then((bals) => {
+    getBalances(addresses, 1, customRpc.trim()).then((bals) => {
       setBalances(bals);
     });
   }, [addresses]);
@@ -56,48 +79,54 @@ const EthereumPrivateKeyAddressComponent = () => {
   };
 
   const goToPage = () => {
-    setPage(getValidPage(tempPage));
-    push(`${pathname}?p=${tempPage.toString(10)}`);
+    if (tempPage !== "") {
+      setPage(getValidPage(tempPage));
+      pushRouter();
+    } else {
+      setTempPage(page.toString(10));
+    }
   };
 
   const handleInputPage = (value: string): void => {
-    if (!BigNumber(value).isNaN()) {
-      setTempPage(BigNumber(value));
+    if (!BigNumber(value).isNaN() || value === "") {
+      setTempPage(value);
+    }
+  };
+
+  const handlePageKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      goToPage();
     }
   };
 
   const randomPage = () => {
     const newPage = BigNumber.random().multipliedBy(TOTAL_PAGES).integerValue();
     setPage(newPage);
-    push(`${pathname}?p=${newPage.toString(10)}`);
   };
 
   return (
     <>
       <Breadcrumb pageName="" />
       <div>
-        <div className="float-right mb-5 flex">
-          <Paginator currentPage={page} handleOnClick={handlePageChange} />
+        <div className="float-right mb-5">
+          <i className="text-sm">Use your RPC</i>
           <TextBox
-            value={tempPage.toString(10)}
-            additionalClass="mx-2 flex h-8 text-sm"
-            handleOnChange={(e) => handleInputPage(e.target.value)}
+            value={customRpc}
+            additionalClass="mx-2 w-[300px]"
+            onChange={(e) => setCustomRpc(e.target.value)}
+            placeholder="https://mainnet.infura.io/v3/your-api-key"
           />
-          <Button
-            label="Go to"
-            handleOnClick={goToPage}
-            additionalClass="mr-2 flex h-8 text-sm"
-          />
-          <Button
-            label="Feel luck"
-            handleOnClick={randomPage}
-            type="warning"
-            additionalClass="flex h-8 text-sm"
-            icon={{
-              icon: MdOutlineStar,
-              position: "left",
-              size: 20,
-            }}
+        </div>
+        <div className="clear-both"></div>
+        <div className="float-right mb-5 flex">
+          <PaginatorBox
+            page={page}
+            handlePageChange={handlePageChange}
+            handleInputPage={handleInputPage}
+            tempPage={tempPage}
+            handlePageKeyDown={handlePageKeyDown}
+            goToPage={goToPage}
+            randomPage={randomPage}
           />
         </div>
         <div>
@@ -114,7 +143,12 @@ const EthereumPrivateKeyAddressComponent = () => {
                 <tr key={index}>
                   <td className="text-left">{key}</td>
                   <td className="text-left">{addresses[index]}</td>
-                  <td className="text-right">
+                  <td
+                    className={clsx(
+                      "text-right",
+                      !balances[index] ? "text-danger" : ""
+                    )}
+                  >
                     {parseBalance(balances[index])}
                   </td>
                 </tr>
@@ -122,31 +156,31 @@ const EthereumPrivateKeyAddressComponent = () => {
             </tbody>
           </table>
         </div>
+
         <div className="mt-5 float-right flex">
-          <Paginator currentPage={page} handleOnClick={handlePageChange} />
-          <TextBox
-            value={tempPage.toString(10)}
-            additionalClass="mx-2 flex h-8 text-sm"
-            handleOnChange={(e) => handleInputPage(e.target.value)}
-          />
-          <Button
-            label="Go to"
-            handleOnClick={goToPage}
-            additionalClass="mr-2 flex h-8 text-sm"
-          />
-          <Button
-            label="Feel luck"
-            handleOnClick={randomPage}
-            type="warning"
-            additionalClass="flex h-8 text-sm"
-            icon={{
-              icon: MdOutlineStar,
-              position: "left",
-              size: 20,
-            }}
+          <PaginatorBox
+            page={page}
+            handlePageChange={handlePageChange}
+            handleInputPage={handleInputPage}
+            tempPage={tempPage}
+            handlePageKeyDown={handlePageKeyDown}
+            goToPage={goToPage}
+            randomPage={randomPage}
           />
         </div>
         <div className="clear-both"></div>
+        <div>
+          <p className="text-body text-xs mt-4">
+            <i>
+              {" "}
+              You are viewing page: {page.toString(10)}
+              <br />
+              There are {PAGE_SIZE} records per page
+              <br /> To have a better experience, please use your own RPC, this
+              site will not store your RPC
+            </i>
+          </p>
+        </div>
       </div>
     </>
   );

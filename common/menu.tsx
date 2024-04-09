@@ -155,7 +155,7 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
-        label: "RGB to HEX",
+        label: "RGB to Hex",
         // slug: "image-resize",
         href: "/misc/rgb-to-hex",
         icon: null,

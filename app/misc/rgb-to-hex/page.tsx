@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import RgbToHexComponent from "./rgb-to-hex";
+import RgbToHexComponent from "./components/rgb-to-hex";
 
 export const metadata: Metadata = {
   title: "RGB to HEX Converter",

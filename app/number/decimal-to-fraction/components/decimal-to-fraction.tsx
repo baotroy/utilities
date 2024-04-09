@@ -101,7 +101,7 @@ export default function DecimalToFractionComponent() {
               <TextBox
                 type="number"
                 value={decimal}
-                handleOnChange={(e) => setDecimal(e.target.value)}
+                onChange={(e) => setDecimal(e.target.value)}
                 // isError={error}
                 additionalClass="w-full"
               />
@@ -154,9 +154,7 @@ export default function DecimalToFractionComponent() {
               <TextBox
                 type="number"
                 value={decimal}
-                handleOnChange={() => {}}
-                // handleOnChange={(e) => setDecimal(e.target.value)}
-                // isError={error}
+                onChange={() => {}}
                 additionalClass="w-full"
                 defaultValue=""
               />

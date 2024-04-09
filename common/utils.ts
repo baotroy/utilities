@@ -89,6 +89,8 @@ const _ethGetBalances = (addresses: string[], chainId: number) => {
 const _getMulticallRequests = (addresses: string[], chainId: number) => {
   // const { tokens: tokenAddresses } = chainConfig[chainId];
   const options = [_ethGetBalances(addresses, chainId)];
+  // this code is used for getting balances of popular tokens which specified in chainConfig
+  // disable temporarily
   // for (const tokenAddress of tokenAddresses) {
   //   for (const address of addresses) {
   //     options.push({
@@ -106,8 +108,6 @@ const createMulticallContract = (
   multicallAddress: string,
   provider: JsonRpcProvider
 ) => {
-  // const { multicallAddress } = chainConfig[chainId];
-
   return new Contract(multicallAddress, abiMulticall, provider);
 };
 
@@ -137,7 +137,6 @@ const multicall = async (
         { success, returnData }: { success: any; returnData: any },
         i: number
       ) => {
-        console.log("successs", i);
         if (!success || returnData === "0x") return null;
         const currentContract = options[i];
         const iface = Interface.from(currentContract.abi);

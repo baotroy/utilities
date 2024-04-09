@@ -5,7 +5,8 @@ interface TextBoxProps {
   value?: string | number;
   defaultValue?: string;
   type?: string;
-  handleOnChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   additionalClass?: string;
   maxLength?: number;
@@ -17,7 +18,8 @@ const TextBox: React.FC<TextBoxProps> = ({
   placeholder = "",
   type = "text",
   value,
-  handleOnChange,
+  onChange,
+  onKeyDown,
   additionalClass,
   maxLength,
   readonly = false,
@@ -32,7 +34,8 @@ const TextBox: React.FC<TextBoxProps> = ({
         className={clsx("custom-input", additionalClass, isError && "error")}
         value={value}
         readOnly={readonly}
-        onChange={handleOnChange}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
       />
     </>
   );

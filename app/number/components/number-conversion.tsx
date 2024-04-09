@@ -90,7 +90,7 @@ export default function NumberConversionComponent() {
           <div className="flex">
             <TextBox
               value={value}
-              handleOnChange={(e) => setValue(e.target.value)}
+              onChange={(e) => setValue(e.target.value)}
               isError={error}
               additionalClass="w-full no-border-right"
             />

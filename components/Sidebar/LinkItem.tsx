@@ -41,9 +41,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
           font-normal
           leading-tight
           `,
-          isFocus
-            ? "text-bodydark2 dark:text-white"
-            : "text-graydark dark:text-bodydark2"
+          isFocus ? "italic" : "text-graydark dark:text-bodydark2"
         )}
         onClick={handleClick}
       >

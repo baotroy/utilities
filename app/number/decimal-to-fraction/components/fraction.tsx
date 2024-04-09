@@ -32,8 +32,7 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
                   value={whole.toString()}
                   type="number"
                   additionalClass="text-center w-20 mr-1"
-                  // readonly={readonly}
-                  handleOnChange={handleIntegerChange}
+                  onChange={handleIntegerChange}
                 />
               </td>
             )}
@@ -43,8 +42,7 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
                   value={numerator.toString()}
                   type="number"
                   additionalClass="text-center mb-1 w-30"
-                  // readonly={readonly}
-                  handleOnChange={handleNumberatorChange}
+                  onChange={handleNumberatorChange}
                 />
               </td>
             )}
@@ -56,8 +54,7 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
                   value={denominator.toString()}
                   type="number"
                   additionalClass="text-center mt-1 w-30"
-                  // readonly={readonly}
-                  handleOnChange={handleDenominatorChange}
+                  onChange={handleDenominatorChange}
                 />
               )}
             </td>

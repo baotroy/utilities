@@ -2,8 +2,10 @@ import clsx from "clsx";
 import { ChangeEvent } from "react";
 
 interface TextBoxProps {
+  value?: string | number;
+  defaultValue?: string;
+  type?: string;
   handleOnChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  value: string;
   placeholder?: string;
   additionalClass?: string;
   maxLength?: number;
@@ -13,8 +15,9 @@ interface TextBoxProps {
 
 const TextBox: React.FC<TextBoxProps> = ({
   placeholder = "",
+  type = "text",
   value,
-  handleOnChange = () => {},
+  handleOnChange,
   additionalClass,
   maxLength,
   readonly = false,
@@ -25,11 +28,11 @@ const TextBox: React.FC<TextBoxProps> = ({
       <input
         placeholder={placeholder}
         maxLength={maxLength}
-        type="text"
+        type={type}
         className={clsx("custom-input", additionalClass, isError && "error")}
         value={value}
         readOnly={readonly}
-        onChange={(e) => handleOnChange(e)}
+        onChange={handleOnChange}
       />
     </>
   );

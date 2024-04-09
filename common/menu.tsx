@@ -55,10 +55,16 @@ const menus: menuProps[] = [
       //   href: "/number/convert-case",
       //   icon: null,
       // },
+      // {
+      //   label: "Number Conversion",
+      //   // slug: "ethereum-convert-units",
+      //   href: "/number/number-conversion",
+      //   icon: null,
+      // },
       {
-        label: "Number Conversion",
+        label: "Decimal to Fraction Converter",
         // slug: "ethereum-convert-units",
-        href: "/number/number-conversion",
+        href: "/number/decimal-to-fraction",
         icon: null,
       },
       {
@@ -154,6 +160,11 @@ const menus: menuProps[] = [
         href: "/misc/rgb-to-hex",
         icon: null,
       },
+      {
+        label: "Ethereum Private Key Address Database",
+        href: "/misc/ethereum-private-key-address-database",
+        icon: null,
+      },
     ],
   },
 ];
@@ -171,7 +182,8 @@ export default menus;
 // MongoDB ObjectId ↔ Timestamp Converter
 // UUID Generator
 // passwordsgenerator *
-// number conversation (hex, binary, decimal, octal)
+// number conversation (hex, binary, decimal, octal) *
+// Decimal to Fraction Converter
 // rgb to hex
 // cron guru
 // string to slug

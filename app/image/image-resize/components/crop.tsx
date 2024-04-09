@@ -10,7 +10,7 @@ interface CropProps {
   dimensions?: Dimensions;
   originalFormat: FileFormat;
 }
-const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
+const CropImage: React.FC<CropProps> = ({ base64, dimensions }) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const hiddenAnchorRef = useRef<HTMLAnchorElement>(null);
@@ -304,4 +304,4 @@ const Crop: React.FC<CropProps> = ({ base64, dimensions }) => {
   );
 };
 
-export default Crop;
+export default CropImage;

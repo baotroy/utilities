@@ -1,5 +1,15 @@
-import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
+import { getProvider } from "./provider";
+import abiMulticall from "./abis/multicall";
+import {
+  Interface,
+  Contract,
+  JsonRpcProvider,
+  parseUnits,
+  formatUnits,
+} from "ethers";
+import chainConfig from "./chainConfig";
+import abiBalances from "./abis/balances";
 
 export const copyToClipboard = (content: string) => {
   if (content === "") return;
@@ -55,4 +65,91 @@ export const getSizeFileFromBase64 = (str: string) => {
 export const getPageTitle = (pathname: string): string => {
   const pathElements = pathname.split("/");
   return pathElements[pathElements.length - 1].split("-").join(" ");
+};
+
+export const getBalances = async (
+  addresses: string[],
+  chainId: number,
+  customRpc?: string
+): Promise<string[]> => {
+  return multicall(addresses, chainId, customRpc);
+};
+
+const _ethGetBalances = (addresses: string[], chainId: number) => {
+  const { balanceContract } = chainConfig[chainId];
+
+  return {
+    address: balanceContract,
+    abi: abiBalances,
+    functionName: "getBalances",
+    args: [addresses],
+  };
+};
+
+const _getMulticallRequests = (addresses: string[], chainId: number) => {
+  // const { tokens: tokenAddresses } = chainConfig[chainId];
+  const options = [_ethGetBalances(addresses, chainId)];
+  // for (const tokenAddress of tokenAddresses) {
+  //   for (const address of addresses) {
+  //     options.push({
+  //       address: tokenAddress,
+  //       abi: abiErc20,
+  //       functionName: "balanceOf",
+  //       args: [address],
+  //     });
+  //   }
+  // }
+  return options;
+};
+
+const createMulticallContract = (
+  multicallAddress: string,
+  provider: JsonRpcProvider
+) => {
+  // const { multicallAddress } = chainConfig[chainId];
+
+  return new Contract(multicallAddress, abiMulticall, provider);
+};
+
+const multicall = async (
+  addresses: string[],
+  chainId: number,
+  customProvider?: string
+) => {
+  const provider = getProvider(chainId, customProvider);
+  const options = _getMulticallRequests(addresses, chainId);
+  const { multicallAddress } = chainConfig[chainId];
+  const contract = createMulticallContract(multicallAddress, provider);
+  const callsData = options.map((currentContract) => {
+    const iface = Interface.from(currentContract.abi);
+    return {
+      target: currentContract.address,
+      callData: iface.encodeFunctionData(
+        currentContract.functionName,
+        currentContract.args || []
+      ),
+    };
+  });
+  const callResult = await contract.tryAggregate.staticCall(false, callsData);
+  const result = callResult
+    .map(
+      (
+        { success, returnData }: { success: any; returnData: any },
+        i: number
+      ) => {
+        console.log("successs", i);
+        if (!success || returnData === "0x") return null;
+        const currentContract = options[i];
+        const iface = Interface.from(currentContract.abi);
+        return iface
+          .decodeFunctionResult(currentContract.functionName, returnData)
+          .toString();
+      }
+    )
+    .flat(2);
+  return result[0].split(","); // ether balaces return array at index 0
+};
+
+export const parseBalance = (balance: string): string => {
+  return formatUnits(balance || 0);
 };

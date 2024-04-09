@@ -31,7 +31,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
               Home /
             </Link>
           </li>
-          <li className="font-medium text-bodydark2">
+          <li className="font-medium">
             {convertCase(pageName, CaseType.Title)}
           </li>
         </ol>

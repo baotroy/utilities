@@ -107,7 +107,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             return (
               <div key={index}>
                 {group.groupName && (
-                  <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                  <h3 className="mb-2 ml-2 text-sm font-semibold">
                     {group.groupName}
                   </h3>
                 )}

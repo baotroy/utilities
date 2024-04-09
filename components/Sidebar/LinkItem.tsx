@@ -48,7 +48,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
         onClick={handleClick}
       >
         {Icon && <Icon size={20} />}
-        {convertCase(label, CaseType.Title)}
+        {label}
         {isParent &&
           (isOpen ? (
             <MdKeyboardArrowUp size={20} />

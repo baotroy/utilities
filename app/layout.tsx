@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import ToasterContext from "@/context/ToasterContext";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GTAG!} />
       <body suppressHydrationWarning={true}>
         <ToasterContext />
         <div className="dark:bg-boxdark-2 dark:text-bodydark">

@@ -5,7 +5,6 @@ import {
   Interface,
   Contract,
   JsonRpcProvider,
-  parseUnits,
   formatUnits,
 } from "ethers";
 import chainConfig from "./chainConfig";

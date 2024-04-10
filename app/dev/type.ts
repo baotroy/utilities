@@ -1,5 +1,3 @@
-export default {};
-
 export const algorithms = [
   "HS256",
   "HS384",
@@ -15,4 +13,4 @@ export const algorithms = [
   // "PS512",
 ] as const;
 
-export type TypeAlgorithm = typeof algorithms[number];
+export type TypeAlgorithm = (typeof algorithms)[number];

@@ -173,7 +173,13 @@ const EthereumPrivateKeyAddressComponent = () => {
           <p className="text-body text-xs mt-4">
             <i>
               {" "}
-              You are viewing page: {page.toString(10)}
+              You are viewing page {page.toString(10)} (
+              {page.toString(10).length > 10 ? (
+                <strong>{page.toString(10).length} digits</strong>
+              ) : (
+                <></>
+              )}
+              )
               <br />
               There are {PAGE_SIZE} records per page
               <br /> To have a better experience, please use your own RPC, this

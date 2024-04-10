@@ -75,9 +75,6 @@ export default function EpochConverterComponent() {
   };
 
   const handleConvertHumanDateToTimestamp = () => {
-    console.log(
-      `${inputYear}-${inputMonth}-${inputDay} ${inputHour}:${inputMinute}:${inputSecond}`
-    );
     if (
       !dayjs(
         `${inputYear}-${inputMonth}-${inputDay} ${inputHour}:${inputMinute}:${inputSecond}`
@@ -86,10 +83,6 @@ export default function EpochConverterComponent() {
       Toast.error("Invalid timestamp");
       return;
     }
-    console.log(
-      `${inputYear}-${inputMonth}-${inputDay} ${inputHour}:${inputMinute}:${inputSecond}`,
-      locale
-    );
     const unixTimestamp = createTimeUnix(
       `${inputYear}-${inputMonth}-${inputDay} ${inputHour}:${inputMinute}:${inputSecond}`,
       locale === "GMT"

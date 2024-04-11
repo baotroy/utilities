@@ -68,7 +68,7 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   useEffect(() => {
     getBalances(addresses, 1, customRpc.trim()).then((bals) => {
-      setBalances(bals);
+      setBalances(bals.map((b) => parseBalance(b)));
     });
   }, [addresses]);
 
@@ -144,10 +144,13 @@ const EthereumPrivateKeyAddressComponent = () => {
                   <td
                     className={clsx(
                       "text-right",
-                      !balances[index] ? "text-danger" : ""
+                      balances[index] === "0" || !balances[index]
+                        ? ""
+                        : "text-danger",
+                      balances[index]
                     )}
                   >
-                    {parseBalance(balances[index])}
+                    {balances[index]}
                   </td>
                 </tr>
               ))}

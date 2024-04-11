@@ -2,10 +2,11 @@
 import { copyToClipboard } from "@/common/utils";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useEffect, useState } from "react";
-import { MdContentCopy } from "react-icons/md";
+import { MdContentCopy, MdRefresh } from "react-icons/md";
 import CheckboxTwo from "@/components/Checkboxes/CheckboxTwo";
 import { HiMinus, HiOutlinePlus } from "react-icons/hi2";
 import clsx from "clsx";
+import Button from "@/components/Input/Button";
 
 export default function RandomPasswordGeneratorComponent() {
   const securityLevels = ["Very Weak", "Weak", "Good", "Strong", "Very Strong"];
@@ -91,6 +92,18 @@ export default function RandomPasswordGeneratorComponent() {
           >
             {securityLevels[securityLevel]}
           </span>
+          <div className="flex">
+            <Button
+              type="outline"
+              label=""
+              icon={{
+                position: "left",
+                icon: MdRefresh,
+              }}
+              additionalClass="no-border-x"
+              handleOnClick={() => setPassword(generatePassword())}
+            />
+          </div>
           <div className="flex">
             <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
               <MdContentCopy size={20} onClick={() => handleCopy()} />

@@ -150,7 +150,7 @@ const EthereumPrivateKeyAddressComponent = () => {
                       balances[index]
                     )}
                   >
-                    {balances[index]}
+                    {balances[index] ? balances[index] : "—"}
                   </td>
                 </tr>
               ))}

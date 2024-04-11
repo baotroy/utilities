@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Dimensions, FileFormat } from "../../type";
-import { flip, resizeImageExec, rotate } from "../../utils";
+import { flip, rotate } from "../../utils";
 import { MdOutlineRotateLeft, MdOutlineRotateRight } from "react-icons/md";
 import { RiMergeCellsHorizontal, RiMergeCellsVertical } from "react-icons/ri";
 

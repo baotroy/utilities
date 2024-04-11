@@ -1,12 +1,7 @@
 import toast from "react-hot-toast";
 import { getProvider } from "./provider";
 import abiMulticall from "./abis/multicall";
-import {
-  Interface,
-  Contract,
-  JsonRpcProvider,
-  formatUnits,
-} from "ethers";
+import { Interface, Contract, JsonRpcProvider, formatUnits } from "ethers";
 import chainConfig from "./chainConfig";
 import abiBalances from "./abis/balances";
 
@@ -149,5 +144,6 @@ const multicall = async (
 };
 
 export const parseBalance = (balance: string): string => {
+  if (balance.length === 0) return "";
   return formatUnits(balance || 0);
 };

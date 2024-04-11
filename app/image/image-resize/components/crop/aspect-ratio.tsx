@@ -1,5 +1,4 @@
 import { Aspect, Dimensions } from "@/app/image/type";
-import { useState } from "react";
 
 interface AspectRatioProps {
   dimensions?: Dimensions;

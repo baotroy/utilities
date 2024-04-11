@@ -1,4 +1,5 @@
-import { ethUnitMap, toWei, fromWei } from "web3-utils";
+import { ethUnitMap } from "web3-utils";
+import { parseUnits as toWei, formatUnits as fromWei } from "ethers";
 import { trimEnd } from "lodash";
 export const ethUnitDecimals = {
   wei: -18,
@@ -39,7 +40,7 @@ const convertToWei = (
 ): string => {
   try {
     const result = toWei(weiValue.toString(), from as keyof typeof ethUnitMap);
-    return trimEnd(result, ".");
+    return trimEnd(result.toString(), ".");
   } catch (error) {
     return "0";
   }

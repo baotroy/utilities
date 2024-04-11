@@ -3,7 +3,6 @@ import React from "react";
 import { IconType } from "react-icons";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import clsx from "clsx";
-import convertCase, { CaseType } from "@/app/string/utils";
 
 interface LinkItemProps {
   label: string;

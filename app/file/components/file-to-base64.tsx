@@ -40,22 +40,22 @@ export default function File2Base64Component() {
   };
   const formatBase64 = () => {
     switch (selectedFormat) {
-      case "txt":
-        return base64.split("base64,")[1];
-      case "uri":
-        return base64;
-      case "html_hyperlink":
-        return `<a href="${base64}">File</a>`;
-      case "json":
-        return prettyJson(
-          JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
-        );
-      case "xml":
-        return formatXml(
-          `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
-        );
-      default:
-        return base64;
+    case "txt":
+      return base64.split("base64,")[1];
+    case "uri":
+      return base64;
+    case "html_hyperlink":
+      return `<a href="${base64}">File</a>`;
+    case "json":
+      return prettyJson(
+        JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
+      );
+    case "xml":
+      return formatXml(
+        `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
+      );
+    default:
+      return base64;
     }
   };
 

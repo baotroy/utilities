@@ -1,6 +1,5 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Button from "@/components/Input/Button";
 import TextBox from "@/components/Input/TextBox";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -11,13 +10,11 @@ import {
   TOTAL_PAGES,
   PAGE_SIZE,
 } from ".";
-import Paginator from "./paginator";
 import { useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
 BigNumber.config({ ROUNDING_MODE: 2 }); // ROUND CEIL
 
 import { getBalances, parseBalance } from "@/common/utils";
-import { MdOutlineStar } from "react-icons/md";
 import clsx from "clsx";
 import PaginatorBox from "./paginatorBox";
 
@@ -50,6 +47,7 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   useEffect(() => {
     setKeys(getKeysListFromPage(page));
+    setBalances([]);
     setAddresses(
       getKeysListFromPage(page).map((key) => getAddressFromPrivateKey(key))
     );

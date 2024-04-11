@@ -14,7 +14,7 @@ export interface ChildLinkItemProps {
 const ChildLinkItem: React.FC<ChildLinkItemProps> = ({
   label,
   href,
-  icon: Icon,
+  // icon,
   currentPathname,
 }) => {
   return (

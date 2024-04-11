@@ -40,7 +40,7 @@ export default function JsonPrettierComponent() {
           <AceEditor
             width="100%"
             mode="json"
-            theme="github"
+            theme="eclipse"
             name="blah0"
             onChange={(value) => handleOnChangeInput(value)}
             fontSize={14}

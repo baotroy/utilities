@@ -140,7 +140,8 @@ const multicall = async (
       }
     )
     .flat(2);
-  return result[0].split(","); // ether balaces return array at index 0
+
+  return result[0]?.split(","); // ether balaces return array at index 0
 };
 
 export const parseBalance = (balance: string): string => {

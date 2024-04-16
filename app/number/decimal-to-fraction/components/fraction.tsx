@@ -15,7 +15,6 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
   numerator,
   denominator,
   whole = "",
-  readonly = false,
   enableWhole = false,
   handleIntegerChange,
   handleNumberatorChange,
@@ -34,9 +33,10 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
                   additionalClass="text-center w-20 mr-1"
                   onChange={handleIntegerChange}
                 />
+                {enableWhole}
               </td>
             )}
-            {!readonly && (
+            {
               <td id="td13" className="border-b-2">
                 <TextBox
                   value={numerator.toString()}
@@ -45,18 +45,18 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
                   onChange={handleNumberatorChange}
                 />
               </td>
-            )}
+            }
           </tr>
           <tr>
             <td id="td21">
-              {!readonly && (
+              {
                 <TextBox
                   value={denominator.toString()}
                   type="number"
                   additionalClass="text-center mt-1 w-30"
                   onChange={handleDenominatorChange}
                 />
-              )}
+              }
             </td>
           </tr>
         </tbody>

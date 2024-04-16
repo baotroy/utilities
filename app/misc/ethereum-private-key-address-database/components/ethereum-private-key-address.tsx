@@ -68,7 +68,7 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   useEffect(() => {
     getBalances(addresses, 1, customRpc.trim()).then((bals) => {
-      setBalances(bals.map((b) => parseBalance(b)));
+      if (bals) setBalances(bals.map((b) => parseBalance(b)));
     });
   }, [addresses]);
 

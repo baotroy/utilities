@@ -24,9 +24,9 @@ export default function DecimalToFractionComponent() {
 
   // const [error, setError] = useState(false);
 
-  useEffect(() => {
-    convert();
-  }, [from, to, decimal]);
+  // useEffect(() => {
+  //   convert();
+  // }, [from, to, decimal]);
 
   const convert = () => {
     if (from === "Decimal") {
@@ -37,7 +37,11 @@ export default function DecimalToFractionComponent() {
       const fraction = new Fraction(decimal);
       console.log("🚀 ~ convert ~ fraction:", fraction);
       if (fraction.n > fraction.d) {
-        setResultFracWhole(((fraction.s * fraction.n) / fraction.d).toString());
+        setResultFracWhole(
+          Math.floor((fraction.s * fraction.n) / fraction.d).toString()
+        );
+      } else {
+        setResultFracWhole("");
       }
 
       if (fraction.n % fraction.d !== 0) {

@@ -121,6 +121,13 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
+      {
+        label: "Ethereum Input Data Decoder",
+        // slug: "convert-case",
+        href: "/dev/ethereum-input-data-decoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {

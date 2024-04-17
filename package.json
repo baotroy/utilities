@@ -2,6 +2,9 @@
   "name": "utilities",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -24,6 +27,7 @@
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "eslint-config-next": "13.4.12",
+    "ethereum-input-data-decoder": "^0.4.2",
     "ethers": "^6.11.1",
     "fraction.js": "^4.3.7",
     "jsonwebtoken": "^8.5.1",

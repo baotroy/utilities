@@ -1,4 +1,5 @@
 "use client";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Button from "@/components/Input/Button";
 import TextArea from "@/components/Input/TextArea";
 import InputDataDecoder from "ethereum-input-data-decoder";
@@ -28,6 +29,7 @@ const EthereumInputDataDecoderComponent: FC<
   };
   return (
     <>
+      <Breadcrumb pageName="" />
       <div className="flex w-full">
         <div className="w-1/3 mr-3">
           <label htmlFor="" className="text-sm">

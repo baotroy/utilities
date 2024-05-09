@@ -28,7 +28,7 @@ export default function JwtDecoderComponent() {
 
   const defaultAlgorithm: TypeAlgorithm = "HS256";
   const defaultHeader = `{"alg":"${defaultAlgorithm}","typ":"JWT"}`;
-  const defaultPayload = "{'name':'Foo Bar','iat':1704067200}";
+  const defaultPayload = `{"name":"Foo Bar","iat":1704067200}`;
 
   const [tabSize] = useState(2);
 

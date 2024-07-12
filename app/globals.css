@@ -198,6 +198,9 @@ textarea {
 *:focus {
  outline: none;
 }
+
+
+
 .custom-input {
  @apply rounded border border-bodydark px-2 py-[6px] outline-bodydark dark:outline-boxdark
 }
@@ -286,4 +289,3 @@ textarea {
 .suffix-label {
  @apply py-[6px] px-3 bg-gray-2 border border-bodydark rounded-tr-lg rounded-br-lg text-sm content-center
 }
-

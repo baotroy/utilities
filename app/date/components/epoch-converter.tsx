@@ -50,7 +50,7 @@ export default function EpochConverterComponent() {
     return () => clearInterval(id);
   }, []);
   const handleMouseEnter = () => {
-    clearInterval(intervalId);
+    clearInterval(0); // eslint-disable-line no-use-before-define
   };
 
   const handleMouseLeave = () => {

@@ -15,8 +15,7 @@ const FunctionToHexComponent: FC<
   const [functions, setFunctions] = useState([]);
   const [views, setViews] = useState<string[]>([]);
 
-  const doDecode = () => {
-
+  const doEncode = () => {
     try {
       const jsonAbi = JSON.parse(abi);
       const functions = jsonAbi.filter((item: any) => item.type === "function" && item.stateMutability === "nonpayable");
@@ -83,7 +82,7 @@ const FunctionToHexComponent: FC<
         </div>
       </div>
       <div className="text-right mt-2">
-        <Button label="Decode" handleOnClick={doDecode} />
+        <Button label="Encode" handleOnClick={doEncode} />
       </div>
     </>
   );

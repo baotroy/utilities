@@ -128,6 +128,13 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
+      {
+        label: "Encode Function",
+        // slug: "convert-case",
+        href: "/dev/encode-function",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {

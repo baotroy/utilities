@@ -289,3 +289,10 @@ textarea {
 .suffix-label {
  @apply py-[6px] px-3 bg-gray-2 border border-bodydark rounded-tr-lg rounded-br-lg text-sm content-center
 }
+
+.code {
+  font-family: 'Courier New', Courier, monospace;
+}
+.table-code {
+  table-layout: auto;
+}

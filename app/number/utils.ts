@@ -1,4 +1,4 @@
-import { ethUnitMap } from "web3-utils";
+import { ethUnitMap, encodePacked } from "web3-utils";
 import { parseUnits as toWei, formatUnits as fromWei } from "ethers";
 import { trimEnd } from "lodash";
 export const ethUnitDecimals = {

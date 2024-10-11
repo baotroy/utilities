@@ -62,7 +62,7 @@ export default function NumberConversionComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="w-1/2 m-auto">
+      <div className="w-full m-auto">
         <div className="flex ">
           <div className="w-1/2 mr-4">From</div>
           <div className="w-1/2">To</div>

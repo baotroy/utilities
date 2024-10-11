@@ -55,12 +55,12 @@ const menus: menuProps[] = [
       //   href: "/number/convert-case",
       //   icon: null,
       // },
-      // {
-      //   label: "Number Conversion",
-      //   // slug: "ethereum-convert-units",
-      //   href: "/number/number-conversion",
-      //   icon: null,
-      // },
+      {
+        label: "Number Conversion",
+        // slug: "ethereum-convert-units",
+        href: "/number/number-conversion",
+        icon: null,
+      },
       {
         label: "Decimal to Fraction Converter",
         // slug: "ethereum-convert-units",

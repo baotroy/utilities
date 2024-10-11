@@ -1,8 +1,8 @@
-// import ECommerce from "@/components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import Head from "next/head";
+import NumberConversionComponent from "./number/components/number-conversion";
 export const metadata: Metadata = {
-  title: "Home - Utilities for developers and more.",
+  title: "Holaa - Utilities for developers and more.",
   description: "Utilities for developers and more.",
   // icons: {
   //   icon: "/favicon.jpg",
@@ -20,10 +20,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>My page title</title>
+        <title></title>
       </Head>
-      {/* <ECommerce /> */}
-      <h1>Coming Soon</h1>
+      <h1 className="text-2xl font-bold">Latest Function</h1>
+      <NumberConversionComponent />
     </>
   );
 }

@@ -75,7 +75,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <Link href="/">
           {/* <Image width={176} height={32} src={"/images/logo/logo.svg"} alt="Logo" /> */}
-          Utilities
+          Holaa!!
         </Link>
 
         <button
@@ -102,7 +102,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       </div>
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
+        <nav className="py-4 px-4 lg:px-6">
           {menus.map((group, index) => {
             return (
               <div key={index}>

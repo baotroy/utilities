@@ -28,7 +28,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
         <ol className="flex items-center gap-2">
           <li>
             <Link className="font-medium" href="/">
-              Home /
+              Home {pathname !== "/" ? "/" : ""}
             </Link>
           </li>
           <li className="font-medium">

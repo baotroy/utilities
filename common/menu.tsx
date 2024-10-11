@@ -122,12 +122,19 @@ const menus: menuProps[] = [
         breadcrumbUseLabel: true,
       },
       {
-        label: "Ethereum Input Data Decoder",
+        label: "Callata Decoder",
         // slug: "convert-case",
         href: "/dev/ethereum-input-data-decoder",
         icon: null,
         breadcrumbUseLabel: true,
       },
+      // {
+      //   label: "Universal Calldata Decoder",
+      //   // slug: "convert-case",
+      //   href: "/dev/universal-calldata-decoder",
+      //   icon: null,
+      //   breadcrumbUseLabel: true,
+      // },
       {
         label: "Encode Function",
         // slug: "convert-case",

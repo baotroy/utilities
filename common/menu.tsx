@@ -127,12 +127,12 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
-      {
-        label: "Universal Calldata Decoder",
-        href: "/dev/universal-calldata-decoder",
-        icon: null,
-        breadcrumbUseLabel: true,
-      },
+      // {
+      //   label: "Universal Calldata Decoder",
+      //   href: "/dev/universal-calldata-decoder",
+      //   icon: null,
+      //   breadcrumbUseLabel: true,
+      // },
       {
         label: "Encode Function",
         // slug: "convert-case",

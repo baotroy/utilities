@@ -6,6 +6,8 @@ import { copyToClipboard } from "@/common/utils";
 import clsx from "clsx";
 import BigNumber from "bignumber.js";
 import { convertNumberBetweenEtherUnit, ethUnitDecimals } from "@/app/number/utils";
+import { dedeInputDataNoAbi } from "./utils";
+import ResultComponent from "./ResultComponent";
 
 enum Uint {
   ether = "ETH",
@@ -15,12 +17,42 @@ enum Uint {
 interface ItemProps {
   component: Component,
   values: string | any[]
-  deep?: number
+  deep: number
 }
 
 const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
   deep++;
-  const { baseType, components, type } = component;
+  const { baseType, components, type, arrayChildren } = component;
+  console.log("🚀 -----------------------------------------------------🚀")
+  console.log("🚀 ~ file: item.tsx:26 ~ arrayChildren:", arrayChildren)
+  console.log("🚀 -----------------------------------------------------🚀")
+
+
+  const [childFunctionName, setChildFunctionName] = useState<string>("");
+  const [childComponent, setChildComponent] = useState<Component>();
+  const [childInputValues, setChildInputValues] = useState<any>();
+
+  useEffect(() => {
+    if (type === "bytes" && typeof values === "string") {
+      console.log(value)
+      dedeInputDataNoAbi(values).then((response) => {
+        const [functionName, component, decodeData] = response;
+        console.log("🚀 --------------------------------------------------------------------🚀")
+        console.table({ functionName, component, decodeData })
+
+        console.log("🚀 --------------------------------------------------------------------🚀")
+
+        if (functionName && component && decodeData) {
+          setChildComponent(component);
+          setChildFunctionName(functionName);
+          setChildInputValues(decodeData);
+        }
+      }).catch(() => {
+        throw new Error("Unable to decode data");
+      })
+    }
+  }, []);
+
   const [sltUint, setSltUint] = useState("wei");
   const [value, setValue] = useState<string>(typeof values !== "object" ? values.toString() : "");
   const handleCopy = (v: string) => {
@@ -29,20 +61,20 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
   const handleUnitChange = (newUnit: string) => {
     convertData(sltUint, newUnit);
     setSltUint(newUnit as Uint);
-    
+
   }
 
 
   const convertData = (fromUnit: string, toUnit: string) => {
-    console.log("cover",value, fromUnit.toLowerCase(), toUnit.toLowerCase())
-    
+    console.log("cover", value, fromUnit.toLowerCase(), toUnit.toLowerCase())
+
     if (typeof values !== "object") {
 
       if (baseType.includes("uint")) {
         const newValue = convertNumberBetweenEtherUnit(
-          value, 
-          fromUnit.toLowerCase() as  keyof typeof ethUnitDecimals, 
-          toUnit.toLowerCase() as  keyof typeof ethUnitDecimals);
+          value,
+          fromUnit.toLowerCase() as keyof typeof ethUnitDecimals,
+          toUnit.toLowerCase() as keyof typeof ethUnitDecimals);
         setValue(newValue);
       }
     }
@@ -73,9 +105,10 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
             <div className="mb-2">{type}</div>
             <div className="flex">
               <div className="w-full">
-                <input
-                  type="text"
-                  className="
+                {
+                  baseType !== "array" && (<input
+                    type="text"
+                    className="
                       w-full p-1.5 
                       outline-none 
                       border-t 
@@ -87,9 +120,26 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
                       border-bodydark 
                       rounded-tl-lg 
                       rounded-bl-lg"
-                  value={value}
-                  onChange={() => { }}
-                />
+                    value={value}
+                    onChange={() => { }}
+                  />)
+                }
+
+                {
+                  baseType === "array" && (
+                    <div className="flex flex-col">
+                      {/* {
+                        arrayChildren && <Item
+                          component={arrayChildren}
+                          values={values}
+                          deep={deep}
+                        />
+                      } */}
+                    </div>
+                  )
+                }
+
+
               </div>
               <div className="flex">
                 <span className="bg-gray-2  dark:bg-graydark border border-bodydark  block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
@@ -110,6 +160,17 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
                 ) : null
               }
             </div>
+            {/* child case of data is bytes */}
+            {
+              childComponent !== undefined
+              && childFunctionName !== ""
+              && <ResultComponent
+                functionName={childFunctionName}
+                component={childComponent}
+                value={childInputValues}
+                deep={deep}
+              />
+            }
           </div>
         </>
       )

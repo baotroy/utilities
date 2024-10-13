@@ -3,78 +3,40 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Button from "@/components/Input/Button";
 import TextArea from "@/components/Input/TextArea";
 import axios from "axios";
-// import InputDataDecoder from "ethereum-input-data-decoder";
-import { Interface, N } from "ethers";
+import { Interface } from "ethers";
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
 import { Component } from "./type";
 import Item from "./Item";
-import { result } from "lodash";
 import { copyToClipboard } from "@/common/utils";
+import { dedeInputDataNoAbi } from "./utils";
+import ResultComponent from "./ResultComponent";
 interface UniversalCallDataDecoderProps { }
 const UniversalCallDataDecoderComponent: FC<
   UniversalCallDataDecoderProps
 > = () => {
-  const [inputData, setInputData] = useState("0x04e45aaf000000000000000000000000e4864c1a5c3d941ff973a489fe2167b1c51e8bf1000000000000000000000000acb5413c06c303f968df20e83851cb0465c946fc0000000000000000000000000000000000000000000000000000000000000bb80000000000000000000000000a936a3a1746f3a3fed69a3ea9f3604adc7d3e1f000000000000000000000000000000000000000000000000fa5af46b840c000000000000000000000000000000000000000000000000008d6d30ced0b0f840010000000000000000000000000000000000000000000000000000000000000000");
-  const signatureDataApi = "https://api.openchain.xyz/signature-database/v1/lookup?function="
+  const [inputData, setInputData] = useState("0x82ad56cb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000120000000000000000000000000dc6ff44d5d932cbd77b52e5612ba0529dc6226f1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044095ea7b300000000000000000000000021c4928109acb0659a88ae5329b5374a3024694c000000000000000000000000000000000000000000000000487d8e184ab141e00000000000000000000000000000000000000000000000000000000000000000000000000000000021c4928109acb0659a88ae5329b5374a3024694c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000024b6b55f25000000000000000000000000000000000000000000000000487d8e184ab141e000000000000000000000000000000000000000000000000000000000");
+  
   const [component, setComponent] = useState<Component>();
   const [functionName, setFunctionName] = useState<string>("");
   const [inputValues, setInputValues] = useState<any>();
-  const doDecode = () => {
-    const funcName = inputData.substring(0, 10);
-    axios.get(signatureDataApi + funcName).then((response) => {
-      try {
-        const funcRes = response.data.result.function[funcName][0].name
-
-        const functionName = funcRes.split("(")[0];
-
-        const iface = new Interface([`function ${funcRes}`]);
-        const parsedData = iface.parseTransaction({ data: inputData });
-        console.log("🚀 ----------------------------------------------------------------------------------🚀")
-        console.log("🚀 ~ file: universal-call-data-decoder.tsx:33 ~ axios.get ~ parsedData:", parsedData)
-        console.log("🚀 ----------------------------------------------------------------------------------🚀")
-
-
-        const decodeData = iface.decodeFunctionData(functionName, inputData);
-        console.log("🚀 ----------------------------------------------------------------------------------🚀")
-        console.log("🚀 ~ file: universal-call-data-decoder.tsx:39 ~ axios.get ~ decodeData:", decodeData)
-        console.log("🚀 ----------------------------------------------------------------------------------🚀")
-
-        setInputValues(decodeData);
-        setFunctionName(functionName);
-
-        const components = parsedData?.fragment?.inputs.map((input) => {
-          return {
-            name: input.name,
-            type: input.type,
-            baseType: input.baseType,
-            components: input.components,
-          } as Component
-        })
-        console.log("🚀 -----------------------------------------------------------------------------------🚀")
-        console.log("🚀 ~ file: universal-call-data-decoder.tsx:50 ~ components ~ parsedData:", parsedData)
-        console.log("🚀 -----------------------------------------------------------------------------------🚀")
-
-        setComponent({
-          type: "function",
-          baseType: "",
-          components: components as Component[],
-        });
-        toast.success("Data decoded successfully");
-      } catch (e) {
-        console.log(e)
-        reset();
-        toast.success("Data decoded successfully");
-      }
-    }).catch(() => {
+  const doDecode = async () => {
+    try {
+      const [functionName, component, decodeData] = await dedeInputDataNoAbi(inputData);
+      setComponent(component);
+      setFunctionName(functionName);
+      setInputValues(decodeData);
+    } catch (e) {
       toast.error("Unable to decode data");
-    });
-    const reset = () => {
-      setComponent(undefined);
-      setFunctionName("");
+      reset()
     }
-
   };
+
+  const reset = () => {
+    setComponent(undefined);
+    setFunctionName("");
+  }
+
   return (
     <>
       <Breadcrumb pageName="" />
@@ -97,24 +59,7 @@ const UniversalCallDataDecoderComponent: FC<
           handleOnClick={() => copyToClipboard(inputData)} />
         <Button label="Decode" handleOnClick={doDecode} />
       </div>
-      <div>
-        {
-          functionName && (
-            <div>
-              <span className="text-bodydark">
-              function
-              </span>
-              <p className="font-semibold"> {functionName}</p>
-            </div>
-          )
-        }
-        {
-          component !== undefined && <Item
-            component={component}
-            values={inputValues as any}
-          />
-        }
-      </div>
+      <ResultComponent functionName={functionName} component={component} value={inputValues} deep={0} />
     </>
   );
 };

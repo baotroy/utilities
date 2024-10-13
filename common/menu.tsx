@@ -62,7 +62,7 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
-        label: "Decimal to Fraction Converter",
+        label: "Decimal to Fraction",
         // slug: "ethereum-convert-units",
         href: "/number/decimal-to-fraction",
         icon: null,
@@ -122,9 +122,14 @@ const menus: menuProps[] = [
         breadcrumbUseLabel: true,
       },
       {
-        label: "Ethereum Input Data Decoder",
-        // slug: "convert-case",
+        label: "Calldata Decoder",
         href: "/dev/ethereum-input-data-decoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Universal Calldata Decoder",
+        href: "/dev/universal-calldata-decoder",
         icon: null,
         breadcrumbUseLabel: true,
       },

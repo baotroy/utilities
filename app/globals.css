@@ -296,3 +296,19 @@ textarea {
 .table-code {
   table-layout: auto;
 }
+
+.bg-level-1 {
+ @apply bg-gray-50
+}
+.bg-level-2 {
+  @apply bg-gray-100
+ }
+ .bg-level-3 {
+  @apply bg-gray-200
+ }
+ .bg-level-4 {
+  @apply bg-gray-300
+ }
+ .bg-level-5 {
+  @apply bg-gray-400
+ }

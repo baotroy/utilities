@@ -55,6 +55,12 @@ module.exports = {
       "green-500": "#22C55E",
       error: "#ff5e84",
       reset: "#DEE4EF",
+      "gray-50": "#f9fafb",
+      "gray-100": "#f3f4f6",
+      "gray-200": "#e5e7eb",
+      "gray-300": "#d1d5db",
+      "gray-400": "#9ca3af",
+      "gray-500": "#6b7280",
     },
     screens: {
       "2xsm": "375px",

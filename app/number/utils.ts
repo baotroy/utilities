@@ -1,6 +1,3 @@
-import { ethUnitMap, fromDecimal } from "web3-utils";
-import { parseUnits as toWei, formatUnits as fromWei } from "ethers";
-import { trimEnd } from "lodash";
 import BigNumber from "bignumber.js";
 BigNumber.set({ DECIMAL_PLACES: 30 })
 export const ethUnitDecimals = {
@@ -29,16 +26,16 @@ export const convertEthereumUnits = (
     result[unit as keyof typeof ethUnitDecimals] =
       unit.toString() === from.toString()
         ? value
-        : convertToOtherUnit(value || "0", from, unit as keyof typeof ethUnitDecimals);
+        : convertNumberBetweenEtherUnit(value || "0", from, unit as keyof typeof ethUnitDecimals);
   }
   return result;
 };
 
-const convertToOtherUnit = (
+export const convertNumberBetweenEtherUnit = (
   value: string,
   from: keyof typeof ethUnitDecimals,
   to: keyof typeof ethUnitDecimals
-) => {
+): string => {
   const fromDecimal = ethUnitDecimals[from as keyof typeof ethUnitDecimals];
   const toDecimal = ethUnitDecimals[to as keyof typeof ethUnitDecimals];
   const result = BigNumber(value).multipliedBy(BigNumber(10).pow(fromDecimal - toDecimal));

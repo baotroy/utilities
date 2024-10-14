@@ -5,3 +5,8 @@ export interface Component {
   arrayChildren?: Component,
   value?: any
 }
+export interface IFunctionFragement {
+  type: string,
+  name: string
+  inputs: any[],
+}

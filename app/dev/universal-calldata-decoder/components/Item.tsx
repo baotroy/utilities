@@ -7,7 +7,7 @@ import clsx from "clsx";
 import BigNumber from "bignumber.js";
 import { convertNumberBetweenEtherUnit, ethUnitDecimals } from "@/app/number/utils";
 import { dedeInputDataNoAbi } from "./utils";
-import ResultComponent from "./ResultComponent";
+import ResultComponent from "./FunctionComponent";
 
 enum Uint {
   ether = "ETH",
@@ -28,30 +28,30 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
   console.log("🚀 -----------------------------------------------------🚀")
 
 
-  const [childFunctionName, setChildFunctionName] = useState<string>("");
-  const [childComponent, setChildComponent] = useState<Component>();
-  const [childInputValues, setChildInputValues] = useState<any>();
+  // const [childFunctionName, setChildFunctionName] = useState<string>("");
+  // const [childComponent, setChildComponent] = useState<Component>();
+  // const [childInputValues, setChildInputValues] = useState<any>();
 
-  useEffect(() => {
-    if (type === "bytes" && typeof values === "string") {
-      console.log(value)
-      dedeInputDataNoAbi(values).then((response) => {
-        const [functionName, component, decodeData] = response;
-        console.log("🚀 --------------------------------------------------------------------🚀")
-        console.table({ functionName, component, decodeData })
+  // useEffect(() => {
+  //   if (type === "bytes" && typeof values === "string") {
+  //     console.log(value)
+  //     dedeInputDataNoAbi(values).then((response) => {
+  //       const [functionName, component, decodeData] = response;
+  //       console.log("🚀 --------------------------------------------------------------------🚀")
+  //       console.table({ functionName, component, decodeData })
 
-        console.log("🚀 --------------------------------------------------------------------🚀")
+  //       console.log("🚀 --------------------------------------------------------------------🚀")
 
-        if (functionName && component && decodeData) {
-          setChildComponent(component);
-          setChildFunctionName(functionName);
-          setChildInputValues(decodeData);
-        }
-      }).catch(() => {
-        throw new Error("Unable to decode data");
-      })
-    }
-  }, []);
+  //       if (functionName && component && decodeData) {
+  //         setChildComponent(component);
+  //         setChildFunctionName(functionName);
+  //         setChildInputValues(decodeData);
+  //       }
+  //     }).catch(() => {
+  //       throw new Error("Unable to decode data");
+  //     })
+  //   }
+  // }, []);
 
   const [sltUint, setSltUint] = useState("wei");
   const [value, setValue] = useState<string>(typeof values !== "object" ? values.toString() : "");

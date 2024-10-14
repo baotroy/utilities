@@ -1,13 +1,11 @@
 import { FC } from "react";
-import { Component } from "./type"
+import { Component, IFunctionFragement } from "./type"
 import Item from "./Item";
 interface ResultComponentProps {
-  functionName: string;
-  component: Component | undefined;
-  value: string | any[];
-  deep: number;
+  fragment: IFunctionFragement
 }
-const ResultComponent: FC<ResultComponentProps> = ({ functionName, component, value, deep = 0 }) => {
+const ResultComponent: FC<ResultComponentProps> = ({ fragment }) => {
+  const { name: functionName, inputs: value } = fragment;
   return (
     <div>
       {
@@ -21,11 +19,13 @@ const ResultComponent: FC<ResultComponentProps> = ({ functionName, component, va
         )
       }
       {
-        component !== undefined && <Item
-          component={component}
-          values={value as any}
-          deep={deep}
-        />
+        fragment.inputs.map((input, index) => {
+          return <Item key={index}
+            component={input}
+            values={value[index]}
+            deep={0}
+          />;
+        })
       }
     </div>
   )

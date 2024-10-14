@@ -2,15 +2,12 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Button from "@/components/Input/Button";
 import TextArea from "@/components/Input/TextArea";
-import axios from "axios";
-import { Interface } from "ethers";
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
-import { Component, IFunctionFragement } from "./type";
-import Item from "./Item";
+import { IFunctionFragement } from "./type";
 import { copyToClipboard } from "@/common/utils";
 import { decodeFunctionDataNoABI } from "./utils";
-import ResultComponent from "./FunctionComponent";
+import FunctionComponent from "./FunctionComponent";
 interface UniversalCallDataDecoderProps { }
 const UniversalCallDataDecoderComponent: FC<
   UniversalCallDataDecoderProps
@@ -22,17 +19,22 @@ const UniversalCallDataDecoderComponent: FC<
   // const [functionName, setFunctionName] = useState<string>("");
   // const [inputValues, setInputValues] = useState<any>();
   const doDecode = async () => {
-    const initFunc = await decodeFunctionDataNoABI(inputData);
-    setFunc(initFunc);
+    try {
+      const initFunc = await decodeFunctionDataNoABI(inputData, true);
+
+      setFunc(initFunc);
+    } catch (error) {
+      toast.error("Unable to decode the input data");
+    }
     // setComponent(component);
     // setFunctionName(functionName);
     // setInputValues(decodeData);
   };
 
-  const reset = () => {
-    // setComponent(undefined);
-    // setFunctionName("");
-  }
+  // const reset = () => {
+  // setComponent(undefined);
+  // setFunctionName("");
+  // }
 
   return (
     <>
@@ -56,7 +58,7 @@ const UniversalCallDataDecoderComponent: FC<
           handleOnClick={() => copyToClipboard(inputData)} />
         <Button label="Decode" handleOnClick={doDecode} />
       </div>
-      {func&&<ResultComponent fragment={func} />}
+      {func && <FunctionComponent fragment={func} />}
     </>
   );
 };

@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { Component, IFunctionFragement } from "./type"
 import Item from "./Item";
-interface ResultComponentProps {
+interface FunctionComponentProps {
   fragment: IFunctionFragement
 }
-const ResultComponent: FC<ResultComponentProps> = ({ fragment }) => {
+const FunctionComponent: FC<FunctionComponentProps> = ({ fragment }) => {
   const { name: functionName, inputs: value } = fragment;
   return (
     <div>
@@ -21,8 +21,12 @@ const ResultComponent: FC<ResultComponentProps> = ({ fragment }) => {
       {
         fragment.inputs.map((input, index) => {
           return <Item key={index}
-            component={input}
-            values={value[index]}
+            name={input.name}
+            baseType={input.baseType}
+            type={input.type}
+            value={input.value}
+            funcFragment={input.functionFragment}
+            arrayChildren={input.arrayChildren}
             deep={0}
           />;
         })
@@ -31,4 +35,4 @@ const ResultComponent: FC<ResultComponentProps> = ({ fragment }) => {
   )
 }
 
-export default ResultComponent;
+export default FunctionComponent;

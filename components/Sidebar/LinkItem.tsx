@@ -12,6 +12,7 @@ interface LinkItemProps {
   isParent?: boolean;
   isOpen?: boolean;
   icon: IconType | null | undefined;
+  isBeta?: boolean;
   handleClick?: (e: any) => void;
 }
 
@@ -22,6 +23,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
   isParent,
   isOpen,
   icon: Icon,
+  isBeta,
   handleClick,
 }) => {
   return (
@@ -45,7 +47,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
         onClick={handleClick}
       >
         {Icon && <Icon size={20} />}
-        {label}
+        {label}{isBeta && <span className="text-xs ml-1 text-gray-500 italic">(beta)</span>}
         {isParent &&
           (isOpen ? (
             <MdKeyboardArrowUp size={20} />

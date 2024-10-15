@@ -5,7 +5,7 @@ import BN from "bignumber.js";
 import SelectBox from "@/components/Input/SelectBox";
 import TextBox from "@/components/Input/TextBox";
 import Button from "@/components/Input/Button";
-import { MdOutlineClear, MdOutlineSwapVert } from "react-icons/md";
+import { MdOutlineClear, MdOutlineSwapHoriz, MdOutlineSwapVert } from "react-icons/md";
 import { LiaEqualsSolid } from "react-icons/lia";
 import Copy from "@/components/common/copy";
 import { copyToClipboard } from "@/common/utils";
@@ -64,16 +64,30 @@ export default function NumberConversionComponent() {
       <Breadcrumb />
       <div className="w-full m-auto">
         <div className="flex ">
-          <div className="w-1/2 mr-4">From</div>
+          <div className="w-1/2">From</div>
+          <div className="flex w-[54px] !mx-[8px]">&nbsp;</div>
           <div className="w-1/2">To</div>
         </div>
         <div className="flex">
-          <div className="w-1/2 mr-4">
+          <div className="w-1/2">
             <SelectBox
               items={numbers}
               value={from}
               handleOnChange={(e) => setFrom(e.target.value)}
               additionalClass="w-full"
+            />
+          </div>
+          <div>
+            <Button
+              handleOnClick={swap}
+              label=""
+              type="outline"
+              additionalClass="mx-2 !py-[4px]"
+              icon={{
+                icon: MdOutlineSwapHoriz,
+                position: "left",
+                size: 20,
+              }}
             />
           </div>
           <div className="w-1/2">
@@ -117,16 +131,6 @@ export default function NumberConversionComponent() {
             additionalClass="mr-2"
             icon={{
               icon: MdOutlineClear,
-              position: "left",
-              size: 20,
-            }}
-          />
-          <Button
-            handleOnClick={swap}
-            label="Swap"
-            type="outline"
-            icon={{
-              icon: MdOutlineSwapVert,
               position: "left",
               size: 20,
             }}

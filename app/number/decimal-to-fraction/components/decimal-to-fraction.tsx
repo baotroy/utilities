@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import SelectBox from "@/components/Input/SelectBox";
 import TextBox from "@/components/Input/TextBox";
 import Button from "@/components/Input/Button";
-import { MdOutlineClear, MdOutlineSwapVert } from "react-icons/md";
+import { MdOutlineClear, MdOutlineSwapHoriz } from "react-icons/md";
 import { LiaEqualsSolid } from "react-icons/lia";
 import FractionComponent from "./fraction";
 import Fraction from "fraction.js";
@@ -22,7 +22,6 @@ export default function DecimalToFractionComponent() {
   const [resultFracNum, setResultFracNum] = useState("");
   const [resultFracDen, setResultFracDen] = useState("");
 
-  // const [error, setError] = useState(false);
 
   useEffect(() => {
     convert();
@@ -75,18 +74,32 @@ export default function DecimalToFractionComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="w-1/2 m-auto">
-        <div className="flex ">
-          <div className="w-1/2 mr-4">From</div>
+      <div className="m-auto">
+        <div className="flex">
+          <div className="flex w-1/2">From</div>
+          <div className="flex w-[54px] !mx-[8px]">&nbsp;</div>
           <div className="w-1/2">To</div>
         </div>
         <div className="flex">
-          <div className="w-1/2 mr-4">
+          <div className="w-1/2 ">
             <SelectBox
               items={numbers}
               value={from}
               handleOnChange={(e) => setFrom(e.target.value)}
               additionalClass="w-full"
+            />
+          </div>
+          <div>
+            <Button
+              handleOnClick={swap}
+              label=""
+              type="outline"
+              additionalClass="mx-2 !py-[4px]"
+              icon={{
+                icon: MdOutlineSwapHoriz,
+                position: "left",
+                size: 20,
+              }}
             />
           </div>
           <div className="w-1/2">
@@ -98,83 +111,76 @@ export default function DecimalToFractionComponent() {
             />
           </div>
         </div>
-        <div className="">
-          <div className="my-3">Enter {from.toLowerCase()}</div>
-          <div className="flex">
-            {from === "Decimal" ? (
-              <TextBox
-                type="number"
-                value={decimal}
-                onChange={(e) => setDecimal(e.target.value)}
-                // isError={error}
-                additionalClass="w-full"
-              />
-            ) : (
-              <FractionComponent
-                whole={resultFracWhole}
-                numerator={resultFracNum}
-                denominator={resultFracDen}
-              />
-            )}
+        {from === "Decimal" ? <>
+          <div className="">
+            <div className="my-3">Enter {from.toLowerCase()}</div>
+            <div className="flex">
+              {from === "Decimal" ? (
+                <TextBox
+                  type="number"
+                  value={decimal}
+                  onChange={(e) => setDecimal(e.target.value)}
+                  additionalClass="w-full"
+                />
+              ) : (
+                <FractionComponent
+                  whole={resultFracWhole}
+                  numerator={resultFracNum}
+                  denominator={resultFracDen}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex mt-4">
-          <Button
-            handleOnClick={convert}
-            label="Convert"
-            additionalClass="mr-2"
-            icon={{
-              icon: LiaEqualsSolid,
-              position: "left",
-              size: 20,
-            }}
-          />
-          <Button
-            handleOnClick={resetDecimal}
-            label="Reset"
-            type="reset"
-            additionalClass="mr-2"
-            icon={{
-              icon: MdOutlineClear,
-              position: "left",
-              size: 20,
-            }}
-          />
-          <Button
-            handleOnClick={swap}
-            label="Swap"
-            type="outline"
-            icon={{
-              icon: MdOutlineSwapVert,
-              position: "left",
-              size: 20,
-            }}
-          />
-        </div>
-        <div>
-          <div className="my-3">{to} result</div>
-          <div className="flex">
-            {to === "Decimal" && decimal ? (
-              <TextBox
-                type="number"
-                value={decimal}
-                onChange={() => {}}
-                additionalClass="w-full"
-                defaultValue=""
-              />
-            ) : (
-              <FractionComponent
-                whole={resultFracWhole}
-                numerator={resultFracNum}
-                denominator={resultFracDen}
-                handleIntegerChange={() => {}}
-                handleNumberatorChange={() => {}}
-                handleDenominatorChange={() => {}}
-                readonly
-              />
-            )}
+          <div className="flex mt-4">
+            <Button
+              handleOnClick={convert}
+              label="Convert"
+              additionalClass="mr-2"
+              icon={{
+                icon: LiaEqualsSolid,
+                position: "left",
+                size: 20,
+              }}
+            />
+            <Button
+              handleOnClick={resetDecimal}
+              label="Reset"
+              type="reset"
+              additionalClass="mr-2"
+              icon={{
+                icon: MdOutlineClear,
+                position: "left",
+                size: 20,
+              }}
+            />
+
           </div>
-        </div>
+          <div>
+            <div className="my-3">{to} result</div>
+            <div className="flex">
+              {to === "Decimal" && decimal ? (
+                <TextBox
+                  type="number"
+                  value={decimal}
+                  onChange={() => { }}
+                  additionalClass="w-full"
+                  defaultValue=""
+                />
+              ) : (
+                <FractionComponent
+                  whole={resultFracWhole}
+                  numerator={resultFracNum}
+                  denominator={resultFracDen}
+                  handleIntegerChange={() => { }}
+                  handleNumberatorChange={() => { }}
+                  handleDenominatorChange={() => { }}
+                  readonly
+                />
+              )}
+            </div>
+          </div>
+        </> : <>Coming soon</>
+        }
       </div>
     </>
   );

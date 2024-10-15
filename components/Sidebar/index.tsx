@@ -61,7 +61,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       z-999 
       flex 
       h-screen
-      w-72.5
+      w-full lg:w-72.5
       flex-col
       overflow-y-hidden
       duration-300 
@@ -156,8 +156,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             icon={item.icon}
                             handleClick={() => setSidebarOpen(false)}
                             isFocus={pathname === item.href}
+                            isBeta={item.beta}
                           />
-                          {item.beta && (<sub>(beta)</sub>)}
+                          
                         </>
                       );
                     }

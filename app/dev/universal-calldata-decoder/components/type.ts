@@ -1,6 +1,6 @@
-export interface Component {
+export interface IFunctionFragement {
   type: string,
-  baseType: string;
-  components: Component[] | null;
-  // values?: any[]
+  name: string
+  inputs: any[],
+  functionFragment?: IFunctionFragement
 }

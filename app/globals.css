@@ -298,17 +298,37 @@ textarea {
 }
 
 .bg-level-1 {
- @apply bg-gray-50
+ @apply bg-gray-100
 }
 .bg-level-2 {
-  @apply bg-gray-100
- }
- .bg-level-3 {
   @apply bg-gray-200
  }
- .bg-level-4 {
+ .bg-level-3 {
   @apply bg-gray-300
  }
- .bg-level-5 {
+ .bg-level-4 {
   @apply bg-gray-400
  }
+ .bg-level-5 {
+  @apply bg-gray-500
+ }
+
+ .loader {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #FFF;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  }
+
+  @keyframes rotation {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+  } 

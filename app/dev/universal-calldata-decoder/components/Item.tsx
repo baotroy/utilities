@@ -1,10 +1,9 @@
-import { FC, useEffect, useState } from "react";
-import { Component } from "./type";
-
+import { FC, useState } from "react";
+import {  IFunctionFragement } from "./type";
 import { MdContentCopy } from "react-icons/md";
 import { copyToClipboard } from "@/common/utils";
 import clsx from "clsx";
-import BigNumber from "bignumber.js";
+import FunctionComponent from "./FunctionComponent";
 import { convertNumberBetweenEtherUnit, ethUnitDecimals } from "@/app/number/utils";
 
 enum Uint {
@@ -13,36 +12,50 @@ enum Uint {
 }
 
 interface ItemProps {
-  component: Component,
-  values: string | any[]
-  deep?: number
+  name: string;
+  type: string;
+  baseType: string;
+  value: string;
+  components?: ItemProps[];
+  funcFragment?: IFunctionFragement
+  arrayChildren?: ItemProps[],
+  childIndex?: number,
+  depth: number
 }
 
-const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
-  deep++;
-  const { baseType, components, type } = component;
+const Item: FC<ItemProps> = ({
+  name,
+  type,
+  baseType,
+  value,
+  funcFragment,
+  arrayChildren,
+  components,
+  childIndex,
+  depth = 0,
+}) => {
+  depth++;
+
   const [sltUint, setSltUint] = useState("wei");
-  const [value, setValue] = useState<string>(typeof values !== "object" ? values.toString() : "");
+  const [values, setValue] = useState(value);
   const handleCopy = (v: string) => {
     copyToClipboard(v);
   };
   const handleUnitChange = (newUnit: string) => {
     convertData(sltUint, newUnit);
     setSltUint(newUnit as Uint);
-    
+
   }
 
-
   const convertData = (fromUnit: string, toUnit: string) => {
-    console.log("cover",value, fromUnit.toLowerCase(), toUnit.toLowerCase())
-    
+
     if (typeof values !== "object") {
 
       if (baseType.includes("uint")) {
         const newValue = convertNumberBetweenEtherUnit(
-          value, 
-          fromUnit.toLowerCase() as  keyof typeof ethUnitDecimals, 
-          toUnit.toLowerCase() as  keyof typeof ethUnitDecimals);
+          value,
+          fromUnit.toLowerCase() as keyof typeof ethUnitDecimals,
+          toUnit.toLowerCase() as keyof typeof ethUnitDecimals);
         setValue(newValue);
       }
     }
@@ -50,28 +63,15 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
 
   return <>
     {
-      components !== null ? (
-        <>
-          <div className={clsx(`p-5 w-full bg-level-${deep} rounded-lg`)}>
-            <div className="">{baseType}</div>
-            <div className="block">
-              {
-                components?.map((component, index) => {
-                  return <Item key={index}
-                    component={component}
-                    values={values[index]}
-                    deep={deep}
-                  />;
-                })
-              }
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className={clsx(`block p-5 my-4 bg-level-${deep} rounded-lg`)}>
-            <div className="mb-2">{type}</div>
-            <div className="flex">
+
+      <div className={clsx(`block px-4 my-3 bg-level-${depth} rounded-lg py-4`)}>
+        <div className="mb-1 mt-2">{type}
+          {childIndex !== undefined && ` (index: ${childIndex})`}
+          {arrayChildren?.length && ` (length: ${arrayChildren.length})`}
+        </div>
+        <div className="flex">
+          {baseType !== "array" && (
+            <>
               <div className="w-full">
                 <input
                   type="text"
@@ -87,34 +87,86 @@ const Item: FC<ItemProps> = ({ component, values, deep = 0 }) => {
                       border-bodydark 
                       rounded-tl-lg 
                       rounded-bl-lg"
-                  value={value}
+                  value={values.toString()}
                   onChange={() => { }}
                 />
+
+
               </div>
               <div className="flex">
                 <span className="bg-gray-2  dark:bg-graydark border border-bodydark  block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
                   <MdContentCopy size={20} onClick={() => handleCopy(value.toString())} />
                 </span>
               </div>
+            </>
+          )
+          }
+          {
+            baseType.includes("uint") ? (
+              <div className="ml-2">
+                <select value={sltUint} className="p-1.5 rounded-lg border-bodydark border" onChange={(e) => handleUnitChange(e.target.value)}>
+                  {
+                    Object.keys(Uint).map((unit, index) => {
+                      return <option key={index}  value={unit}>{Uint[unit as keyof typeof Uint]}</option>
+                    })
+                  }
+                </select>
+              </div>
+            ) : null
+          }
+        </div>
+
+        {
+          baseType === "array" && (
+            <div className="flex flex-col">
               {
-                baseType.includes("uint") ? (
-                  <div className="ml-2">
-                    <select className="p-1.5 rounded-lg border-bodydark border" onChange={(e) => handleUnitChange(e.target.value)}>
-                      {
-                        Object.keys(Uint).map((unit, index) => {
-                          return <option key={index} selected={sltUint === unit.toLowerCase()} value={unit}>{Uint[unit as keyof typeof Uint]}</option>
-                        })
-                      }
-                    </select>
-                  </div>
-                ) : null
+                arrayChildren?.map((item, index) => <Item
+                  key={index}
+                  name={item.name}
+                  baseType={item.baseType}
+                  type={item.type}
+                  value={item.value}
+                  funcFragment={item.funcFragment}
+                  arrayChildren={item.arrayChildren}
+                  components={item.components}
+                  childIndex={index}
+                  depth={depth}
+                />)
               }
             </div>
-          </div>
-        </>
-      )
+          )
+        }
 
-
+        {
+          components && (
+            <div className="flex flex-col">
+              {
+                components?.map((item, index) => <Item
+                  key={index}
+                  name={item.name}
+                  baseType={item.baseType}
+                  type={item.type}
+                  value={item.value}
+                  funcFragment={item.funcFragment}
+                  arrayChildren={item.arrayChildren}
+                  components={item.components}
+                  depth={depth}
+                />)
+              }
+            </div>
+          )
+        }
+        {
+          funcFragment && (
+            <div className="flex flex-col">
+              <FunctionComponent
+                fragment={funcFragment}
+                isChild={true}
+              />
+            </div>
+          )
+        }
+      </div>
     }
   </>;
 };

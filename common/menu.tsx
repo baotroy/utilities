@@ -11,6 +11,7 @@ interface itemProps {
   breadcrumbUseLabel?: boolean;
   // slug: string;
   children?: childProps[];
+  beta?: boolean;
 }
 interface menuProps {
   groupName: string | null;
@@ -132,6 +133,7 @@ const menus: menuProps[] = [
         href: "/dev/universal-calldata-decoder",
         icon: null,
         breadcrumbUseLabel: true,
+        beta: true,
       },
       {
         label: "Encode Function",

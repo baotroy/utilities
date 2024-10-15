@@ -6,6 +6,7 @@ interface TextAreaProps {
   defaultValue?: string;
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   additionalClass?: string;
   maxLength?: number;
@@ -19,6 +20,7 @@ const TextArea: React.FC<TextAreaProps> = ({
   value,
   onChange,
   onKeyDown,
+  onPaste,
   additionalClass,
   maxLength,
   readonly = false,
@@ -45,6 +47,7 @@ const TextArea: React.FC<TextAreaProps> = ({
         value={value}
         onChange={onChange}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
         spellCheck={false}
         className={clsx("custom-input", additionalClass, isError && "error")}
       ></textarea>

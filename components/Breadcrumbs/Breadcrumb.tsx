@@ -2,6 +2,7 @@ import Link from "next/link";
 import convertCase, { CaseType } from "@/app/string/utils";
 import { usePathname } from "next/navigation";
 import { menuItems } from "@/common/menu";
+import { useState } from "react";
 
 interface BreadcrumbProps {
   pageName?: string;
@@ -9,6 +10,7 @@ interface BreadcrumbProps {
 const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
   const pathname = usePathname();
   const pathElements = pathname.split("/");
+  const [isBeta, setIsBeta] = useState(false);
   let pageTitle = "";
   if (!pageName) {
     const menu = menuItems.find((menu) => menu.href === pathname);
@@ -17,11 +19,14 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
     if (menu?.breadcrumbUseLabel) {
       pageTitle = menu.label;
     }
+    if (menu?.beta !== isBeta) {
+      setIsBeta(menu?.beta || false);
+    }
   }
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-title-md2 font-semibold text-graydark dark:text-bodydark2">
-        {convertCase(pageTitle, CaseType.Title)}
+        {convertCase(pageTitle, CaseType.Title)}{isBeta && <i> (beta)</i>}
       </h2>
 
       <nav>

@@ -23,7 +23,6 @@ const EthereumInputDataDecoderComponent: FC<
 
       setOutput(JSON.stringify(parsed, null, 2));
     } catch (e) {
-      // console.error(e);
       setOutput("");
     }
   };
@@ -44,7 +43,7 @@ const EthereumInputDataDecoderComponent: FC<
         </div>
         <div className="w-1/3  mr-3">
           <label htmlFor="" className="text-sm">
-            Input Data
+            Calldata
           </label>
           <TextArea
             rows={35}

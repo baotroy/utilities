@@ -102,7 +102,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       </div>
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="py-4 px-4 lg:px-6">
+        <nav className="py-4 px-4">
           {menus.map((group, index) => {
             return (
               <div key={index}>
@@ -134,7 +134,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                   icon={item.icon}
                                   isFocus={
                                     pathname === item.href
-                                    // || pathname.includes(item.slug)
                                   }
                                 />
                                 <ChildrenLinkItems
@@ -149,13 +148,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       );
                     } else {
                       return (
-                        <LinkItem
-                          key={index}
-                          label={item.label}
-                          href={item.href}
-                          icon={item.icon}
-                          isFocus={pathname === item.href}
-                        />
+                        <>
+                          <LinkItem
+                            key={index}
+                            label={item.label}
+                            href={item.href}
+                            icon={item.icon}
+                            handleClick={() => setSidebarOpen(false)}
+                            isFocus={pathname === item.href}
+                          />
+                          {item.beta && (<sub>(beta)</sub>)}
+                        </>
                       );
                     }
                   })}

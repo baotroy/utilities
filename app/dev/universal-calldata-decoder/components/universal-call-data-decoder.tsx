@@ -12,51 +12,51 @@ interface UniversalCallDataDecoderProps { }
 const UniversalCallDataDecoderComponent: FC<
   UniversalCallDataDecoderProps
 > = () => {
-  const [inputData, setInputData] = useState("0x82ad56cb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000120000000000000000000000000dc6ff44d5d932cbd77b52e5612ba0529dc6226f1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044095ea7b300000000000000000000000021c4928109acb0659a88ae5329b5374a3024694c000000000000000000000000000000000000000000000000487d8e184ab141e00000000000000000000000000000000000000000000000000000000000000000000000000000000021c4928109acb0659a88ae5329b5374a3024694c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000024b6b55f25000000000000000000000000000000000000000000000000487d8e184ab141e000000000000000000000000000000000000000000000000000000000");
-
+  const [inputData, setInputData] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [func, setFunc] = useState<IFunctionFragement | null>();
-  // const [component, setComponent] = useState<Component>();
-  // const [functionName, setFunctionName] = useState<string>("");
-  // const [inputValues, setInputValues] = useState<any>();
-  const doDecode = async () => {
+
+  const doDecode = async (calldata: string) => {
+    setIsLoading(true);
     try {
-      const initFunc = await decodeFunctionDataNoABI(inputData, true);
+      const initFunc = await decodeFunctionDataNoABI(calldata, true);
 
       setFunc(initFunc);
     } catch (error) {
       toast.error("Unable to decode the input data");
+    } finally {
+      setIsLoading(false);
     }
-    // setComponent(component);
-    // setFunctionName(functionName);
-    // setInputValues(decodeData);
   };
 
-  // const reset = () => {
-  // setComponent(undefined);
-  // setFunctionName("");
-  // }
-
+  const handleOnPaste = (e: any) => {
+    if (inputData !== e.clipboardData.getData("text/plain")) {
+      setInputData(e.clipboardData.getData("text/plain"));
+      doDecode(e.clipboardData.getData("text/plain"));
+    }
+  }
   return (
     <>
       <Breadcrumb pageName="" />
       <div className="w-full">
         <div className="">
           <label htmlFor="" className="text-sm">
-            Input Data
+            Calldata
           </label>
           <TextArea
             rows={5}
             additionalClass="w-full text-sm leading-4"
             onChange={(e) => setInputData(e.target.value)}
+            onPaste={(e) => handleOnPaste(e)}
             value={inputData}
           />
         </div>
 
       </div>
-      <div className="text-right mt-2">
+      <div className="text-right mt-4 mb-4">
         <Button label="Copy" additionalClass="mr-2" type="success"
           handleOnClick={() => copyToClipboard(inputData)} />
-        <Button label="Decode" handleOnClick={doDecode} />
+        <Button label="Decode" handleOnClick={() => doDecode(inputData)} isLoading={isLoading} />
       </div>
       {func && <FunctionComponent fragment={func} />}
     </>

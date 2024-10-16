@@ -6,6 +6,7 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 import LinkItem from "./LinkItem";
 import ChildrenLinkItems from "./ChildrenListItems";
 import menus from "@/common/menu";
+import { MdOutlineEmail } from "react-icons/md";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -107,11 +108,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             return (
               <div key={index}>
                 {group.groupName && (
-                  <h3 className="mb-2 ml-2 text-sm font-semibold">
+                  <h3 className="mb-1 ml-2 text-sm font-semibold">
                     {group.groupName}
                   </h3>
                 )}
-                <ul className="mb-4 flex flex-col gap-1.5">
+                <ul className="mb-2 flex flex-col gap-1">
                   {group.items.map((item, index) => {
                     if (item.children?.length) {
                       return (
@@ -158,7 +159,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             isFocus={pathname === item.href}
                             isBeta={item.beta}
                           />
-                          
+
                         </>
                       );
                     }
@@ -167,6 +168,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </div>
             );
           })}
+          
         </nav>
       </div>
     </aside>

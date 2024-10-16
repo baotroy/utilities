@@ -7,6 +7,8 @@ FROM ${NODE} AS deps
 RUN apk add --no-cache libc6-compat g++ make py3-pip
 WORKDIR /app
 
+ENV NODE_ENV production
+
 COPY package.json yarn.lock* ./
 RUN yarn --frozen-lockfile
 

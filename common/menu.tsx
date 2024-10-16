@@ -122,6 +122,13 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
+      // {
+      //   label: "Htpasswd Generator",
+      //   // slug: "convert-case",
+      //   href: "/dev/htpasswd-generator",
+      //   icon: null,
+      //   breadcrumbUseLabel: true,
+      // },
       {
         label: "Calldata Decoder",
         href: "/dev/ethereum-input-data-decoder",

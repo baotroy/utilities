@@ -1,19 +1,12 @@
 import { Metadata } from "next";
 import Head from "next/head";
-import NumberConversionComponent from "./number/components/number-conversion";
+import UniversalCallDataDecoderComponent from "./dev/universal-calldata-decoder/components/universal-call-data-decoder";
 export const metadata: Metadata = {
   title: "Holaa - Utilities for developers and more.",
   description: "Utilities for developers and more.",
-  // icons: {
-  //   icon: "/favicon.jpg",
-  //   // shortcut: "/shortcut-icon.png",
-  //   // apple: "/apple-icon.png",
-  //   // other: {
-  //   //   rel: "apple-touch-icon-precomposed",
-  //   //   url: "/apple-touch-icon-precomposed.png",
-  //   // },
-  // },
-  // other metadata
+  manifest: "/manifest.json",
+  icons: "/favicon.ico",
+
 };
 
 export default function Home() {
@@ -23,7 +16,8 @@ export default function Home() {
         <title></title>
       </Head>
       <h1 className="text-2xl font-bold">Latest Function</h1>
-      <NumberConversionComponent />
+      <h2 className="text-lg font-bold">Universal Calldata Decoder <i>(beta)</i></h2>
+      <UniversalCallDataDecoderComponent />
     </>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
 import "./globals.css";
 import "./custom.css";
-import { useState, useEffect } from "react";
-// import Loader from "@/components/common/Loader";
+import { useState } from "react";
 
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import ToasterContext from "@/context/ToasterContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
+
 
 export default function RootLayout({
   children,
@@ -37,7 +37,7 @@ export default function RootLayout({
               <Sidebar
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
-              />
+            />
               {/* <!-- ===== Sidebar End ===== --> */}
 
               {/* <!-- ===== Content Area Start ===== --> */}
@@ -60,6 +60,9 @@ export default function RootLayout({
               {/* <!-- ===== Content Area End ===== --> */}
             </div>
           )}
+        </div>
+        <div className=" text-gray-400 text-xs text-right m-2">
+          <a href="mailto:baotroy@gmail.com"><i>baotroy@gmail.com</i></a>
         </div>
       </body>
     </html>

@@ -22,8 +22,9 @@ const UniversalCallDataDecoderComponent: FC<
       const initFunc = await decodeFunctionDataNoABI(calldata, true);
 
       setFunc(initFunc);
+      toast.success("Successfully decoded the input data");
     } catch (error) {
-      toast.error("Unable to decode the input data");
+      toast.error("Unable to decode the calldata");
     } finally {
       setIsLoading(false);
     }
@@ -33,6 +34,12 @@ const UniversalCallDataDecoderComponent: FC<
     if (inputData !== e.clipboardData.getData("text/plain")) {
       setInputData(e.clipboardData.getData("text/plain"));
       doDecode(e.clipboardData.getData("text/plain"));
+    }
+  }
+
+  const handleInputChange = (e: any) => {
+    if (e.nativeEvent.inputType !== "insertFromPaste") {
+      setInputData(e.target.value);
     }
   }
   return (
@@ -46,7 +53,7 @@ const UniversalCallDataDecoderComponent: FC<
           <TextArea
             rows={5}
             additionalClass="w-full text-sm leading-4"
-            onChange={(e) => setInputData(e.target.value)}
+            onChange={(e) => handleInputChange(e)}
             onPaste={(e) => handleOnPaste(e)}
             value={inputData}
           />

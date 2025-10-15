@@ -6,7 +6,7 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 import LinkItem from "./LinkItem";
 import ChildrenLinkItems from "./ChildrenListItems";
 import menus from "@/common/menu";
-import { MdOutlineEmail } from "react-icons/md";
+// import { MdOutlineEmail } from "react-icons/md";
 
 interface SidebarProps {
   sidebarOpen: boolean;

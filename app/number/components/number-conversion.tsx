@@ -5,7 +5,7 @@ import BN from "bignumber.js";
 import SelectBox from "@/components/Input/SelectBox";
 import TextBox from "@/components/Input/TextBox";
 import Button from "@/components/Input/Button";
-import { MdOutlineClear, MdOutlineSwapHoriz, MdOutlineSwapVert } from "react-icons/md";
+import { MdOutlineClear, MdOutlineSwapHoriz } from "react-icons/md";
 import { LiaEqualsSolid } from "react-icons/lia";
 import Copy from "@/components/common/copy";
 import { copyToClipboard } from "@/common/utils";

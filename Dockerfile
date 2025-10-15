@@ -7,7 +7,7 @@ FROM ${NODE} AS deps
 RUN apk add --no-cache libc6-compat g++ make py3-pip
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 COPY package.json yarn.lock* ./
 RUN yarn --frozen-lockfile
@@ -18,13 +18,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
 # Stage 3: Run the production
 FROM ${NODE} AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -36,7 +36,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-ENV PORT 3000
+ENV PORT=3000
 
 # Serve the app
 CMD ["node", "./server.js"]

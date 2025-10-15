@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading] = useState<boolean>(false);
 
   // useEffect(() => {
   //   setTimeout(() => setLoading(false), 1000);

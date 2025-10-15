@@ -2,7 +2,7 @@ import BigNumber from "bignumber.js";
 import { Wallet } from "ethers";
 
 export const TOTAL_KEYS = BigNumber(16).pow(64);
-export const PAGE_SIZE = 50;
+export const PAGE_SIZE = 200;
 export const TOTAL_PAGES = TOTAL_KEYS.dividedBy(PAGE_SIZE);
 
 export const getAddressFromPrivateKey = (privateKey: string): string => {

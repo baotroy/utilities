@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Head from "next/head";
-import UniversalCallDataDecoderComponent from "./dev/universal-calldata-decoder/components/universal-call-data-decoder";
+import ConvertComponent from "./string/components/convert-case";
 export const metadata: Metadata = {
   title: "Holaa - Utilities for developers and more.",
   description: "Utilities for developers and more.",
@@ -16,8 +16,7 @@ export default function Home() {
         <title></title>
       </Head>
       <h1 className="text-2xl font-bold">Latest Function</h1>
-      <h2 className="text-lg font-bold">Universal Calldata Decoder <i>(beta)</i></h2>
-      <UniversalCallDataDecoderComponent />
+      <ConvertComponent />
     </>
   );
 }

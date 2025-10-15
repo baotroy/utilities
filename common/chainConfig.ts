@@ -1,6 +1,6 @@
 const configs: Record<number, any> = {
   1: {
-    rpcs: ["https://1rpc.io/eth"],
+    rpcs: ["https://eth.llamarpc.com"],
     chainName: "mainnet",
     balanceContract: "0xaa31dc9c878a4D6Ec59146c6f53e5b02Cee30296",
     multicallAddress: "0xcA11bde05977b3631167028862bE2a173976CA11",

@@ -145,7 +145,7 @@ const multicall = async (
 };
 
 export const parseBalance = (balance: string): string => {
-  if (balance?.length === 0) return "";
+  if (balance?.length === 0 || balance === "NaN") return "";
   const result = formatUnits(balance || 0);
   return result === "0.0" ? "0" : result;
 };

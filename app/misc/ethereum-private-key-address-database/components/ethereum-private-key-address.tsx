@@ -44,6 +44,7 @@ const EthereumPrivateKeyAddressComponent = () => {
   const [addresses, setAddresses] = useState<string[]>([]);
   const [balances, setBalances] = useState<string[]>([]);
   const [customRpc, setCustomRpc] = useState<string>(rpc || "");
+  const [totalBalances, setTotalBalances] = useState<string>("0");
 
   useEffect(() => {
     setKeys(getKeysListFromPage(page));
@@ -68,7 +69,15 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   useEffect(() => {
     getBalances(addresses, 1, customRpc.trim()).then((bals) => {
-      if (bals) setBalances(bals.map((b) => parseBalance(b)));
+      if (bals) {
+        console.log("bals", bals)
+        setBalances(bals.map((b) => parseBalance(b)));
+        setTotalBalances(
+          bals.reduce((acc, cur) => {
+            return BigNumber(acc).plus(cur ?? 0).toString(10);
+          }, "0")
+        );
+      }
     });
   }, [addresses]);
 
@@ -127,6 +136,10 @@ const EthereumPrivateKeyAddressComponent = () => {
             randomPage={randomPage}
           />
         </div>
+        <div className="clear-both"></div>
+        <div className="float-right mb-5 flex">
+          Total balance: {parseBalance(totalBalances)} ETH
+        </div>
         <div>
           <table className="w-full">
             <thead>
@@ -158,6 +171,10 @@ const EthereumPrivateKeyAddressComponent = () => {
           </table>
         </div>
 
+        <div className="float-right mt-5 flex">
+          Total balance: {parseBalance(totalBalances)} ETH
+        </div>
+        <div className="clear-both"></div>
         <div className="mt-5 float-right flex">
           <PaginatorBox
             page={page}

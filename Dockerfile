@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 # Stage 3: Run the production
 FROM ${NODE} AS runner

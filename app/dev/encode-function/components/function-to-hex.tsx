@@ -28,9 +28,9 @@ const FunctionToHexComponent: FC<
   const doEncode = () => {
     try {
       const jsonAbi = JSON.parse(abi);
-      const functions = jsonAbi.filter((item: any) => item.type === "function" && item.stateMutability === "nonpayable");
+      const functions = jsonAbi.filter((item: any) => item.type === "function");
       setFunctions(functions);
-      const web3 = new Web3()
+      const web3 = new Web3();
       const hexs = functions.map((item: any) => web3.eth.abi.encodeFunctionSignature(item));
       setViews(hexs);
 

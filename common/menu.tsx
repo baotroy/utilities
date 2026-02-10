@@ -160,6 +160,11 @@ const menus: menuProps[] = [
         href: "/file/file-to-base64",
         icon: null,
       },
+      {
+        label: "Chmod Calculator",
+        href: "/file/chmod-calculator",
+        icon: null,
+      },
     ],
   },
   {

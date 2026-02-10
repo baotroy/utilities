@@ -17,6 +17,7 @@ BigNumber.config({ ROUNDING_MODE: 2 }); // ROUND CEIL
 import { getBalances, parseBalance } from "@/common/utils";
 import clsx from "clsx";
 import PaginatorBox from "./paginatorBox";
+import { set } from "lodash";
 
 const EthereumPrivateKeyAddressComponent = () => {
   const getValidPage = (page: BigNumber | number | string): BigNumber => {
@@ -45,8 +46,10 @@ const EthereumPrivateKeyAddressComponent = () => {
   const [balances, setBalances] = useState<string[]>([]);
   const [customRpc, setCustomRpc] = useState<string>(rpc || "");
   const [totalBalances, setTotalBalances] = useState<string>("0");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    setIsLoading(true);
     setKeys(getKeysListFromPage(page));
     setBalances([]);
     setAddresses(
@@ -78,6 +81,7 @@ const EthereumPrivateKeyAddressComponent = () => {
           }, "0")
         );
       }
+      setIsLoading(false);
     });
   }, [addresses]);
 
@@ -138,7 +142,7 @@ const EthereumPrivateKeyAddressComponent = () => {
         </div>
         <div className="clear-both"></div>
         <div className="float-right mb-5 flex">
-          Total balance: {parseBalance(totalBalances)} ETH
+          Total balance: {!isLoading ? parseBalance(totalBalances) : "-"} ETH
         </div>
         <div>
           <table className="w-full">
@@ -172,7 +176,7 @@ const EthereumPrivateKeyAddressComponent = () => {
         </div>
 
         <div className="float-right mt-5 flex">
-          Total balance: {parseBalance(totalBalances)} ETH
+          Total balance: {!isLoading ? parseBalance(totalBalances) : "-"} ETH
         </div>
         <div className="clear-both"></div>
         <div className="mt-5 float-right flex">

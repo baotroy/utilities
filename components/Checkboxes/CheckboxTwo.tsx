@@ -4,6 +4,7 @@ import clsx from "clsx";
 
 interface CheckboxTwoProps {
   label: string;
+  id?: string;
   labelClass?: string;
   isChecked: boolean;
   onChange: (isChecked: boolean) => void;
@@ -11,14 +12,16 @@ interface CheckboxTwoProps {
 
 const CheckboxTwo: React.FC<CheckboxTwoProps> = ({
   label,
+  id,
   labelClass,
   isChecked = false,
   onChange,
 }) => {
+  const inputId = id || `checkboxLabelTwo${label}`;
   return (
     <div className="flex">
       <label
-        htmlFor={`checkboxLabelTwo${label}`}
+        htmlFor={inputId}
         className={clsx(
           "flex cursor-pointer select-none items-center",
           labelClass
@@ -27,7 +30,7 @@ const CheckboxTwo: React.FC<CheckboxTwoProps> = ({
         <div className="relative">
           <input
             type="checkbox"
-            id={`checkboxLabelTwo${label}`}
+            id={inputId}
             className="sr-only"
             checked={isChecked}
             onChange={() => {
@@ -35,9 +38,8 @@ const CheckboxTwo: React.FC<CheckboxTwoProps> = ({
             }}
           />
           <div
-            className={`mr-2 flex h-5 w-5 items-center justify-center rounded border ${
-              isChecked && "border-primary bg-gray dark:bg-transparent"
-            }`}
+            className={`mr-2 flex h-5 w-5 items-center justify-center rounded border ${isChecked && "border-primary bg-gray dark:bg-transparent"
+              }`}
           >
             <span className={`opacity-0 ${isChecked && "!opacity-100"}`}>
               <svg

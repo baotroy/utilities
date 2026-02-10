@@ -5,6 +5,10 @@ import TextArea from "@/components/Input/TextArea";
 import { Web3 } from "web3";
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  getFunctionSignature,
+  keccak256,
+} from "viem";
 
 interface FunctionToHexComponentProps { }
 
@@ -17,6 +21,9 @@ const FunctionToHexComponent: FC<
 
   const [events, setEvents] = useState([]);
   const [hexEvents, setHexEvents] = useState<string[]>([]);
+
+  const [errors, setErrors] = useState([]);
+  const [hexErrors, setHexErrors] = useState<string[]>([]);
 
   const doEncode = () => {
     try {
@@ -31,6 +38,15 @@ const FunctionToHexComponent: FC<
       setEvents(events);
       const hexEvents = events.map((item: any) => web3.eth.abi.encodeEventSignature(item));
       setHexEvents(hexEvents);
+
+      const errs = jsonAbi.filter((item: any) => item.type === "error");
+      setErrors(errs);
+      const hexErrs = errs.map((err: any) => {
+        const signature = getFunctionSignature(err);
+        const hash = keccak256(signature.split("error ")[1] as `0x${string}`);
+        return hash
+      });
+      setHexErrors(hexErrs);
     } catch (e) {
       toast.error("Invalid ABI");
       setFunctions([]);
@@ -54,6 +70,9 @@ const FunctionToHexComponent: FC<
             value={abi}
           />
         </div>
+        <div className="text-right mt-2">
+          <Button label="Encode" handleOnClick={doEncode} />
+        </div>
         {functions.length > 0 && (
           <div className="w-full mt-2">
             <div>Functions</div>
@@ -73,7 +92,7 @@ const FunctionToHexComponent: FC<
                 }
               </table>
             </div>
-            <div>Events</div>
+            <div className="mt-2">Events</div>
             <div>
               <table className="table-code">
                 {
@@ -90,11 +109,25 @@ const FunctionToHexComponent: FC<
                 }
               </table>
             </div>
+            <div className="mt-2">Errors</div>
+            <div>
+              <table className="table-code">
+                {
+                  errors.map((item: any, index) => {
+                    const inputs = item.inputs.map((input: any) => input.type).join(",");
+                    const f = `${item.name}(${inputs})`;
+                    return (
+                      <tr className="code" key={index}>
+                        <td>{f}</td>
+                        <td>{hexErrors[index]}</td>
+                      </tr>
+                    )
+                  })
+                }
+              </table>
+            </div>
           </div>
         )}
-      </div>
-      <div className="text-right mt-2">
-        <Button label="Encode" handleOnClick={doEncode} />
       </div>
     </>
   );

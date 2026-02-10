@@ -149,6 +149,11 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
+      {
+        label: "Cron Expression Editor",
+        href: "/dev/cron-editor",
+        icon: null,
+      },
     ],
   },
   {

@@ -1,6 +1,6 @@
 # Dockerfile
 
-ARG NODE=node:22-alpine
+ARG NODE=node:25-alpine
 
 # Stage 1: Install dependencies
 FROM ${NODE} AS deps

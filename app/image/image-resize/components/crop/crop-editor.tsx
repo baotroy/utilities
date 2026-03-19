@@ -10,8 +10,8 @@ interface CropEditorProps {
   aspect: number;
   handleChangeCropArea: (x: number, y: number, w: number, h: number) => void;
   initialCrop: Crop;
-  imgRef: RefObject<HTMLImageElement>;
-  previewCanvasRef: RefObject<HTMLCanvasElement>;
+  imgRef: RefObject<HTMLImageElement | null>;
+  previewCanvasRef: RefObject<HTMLCanvasElement | null>;
   setCompletedCrop: (a: PixelCrop) => void;
   completedCrop?: PixelCrop;
 }

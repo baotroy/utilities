@@ -55,13 +55,13 @@ function apr1Md5(password: string): string {
 
   // Add alternate hash bytes
   for (let pl = password.length; pl > 0; pl -= 16) {
-    ctx.update(final.subarray(0, pl > 16 ? 16 : pl));
+    ctx.update(new Uint8Array(final.buffer, final.byteOffset, pl > 16 ? 16 : pl));
   }
 
   // Add password bits
   for (let i = password.length; i !== 0; i >>= 1) {
     if (i & 1) {
-      ctx.update(Buffer.from([0]));
+      ctx.update(new Uint8Array([0]));
     } else {
       ctx.update(password.charAt(0));
     }
@@ -75,7 +75,7 @@ function apr1Md5(password: string): string {
     if (i & 1) {
       ctx1.update(password);
     } else {
-      ctx1.update(final);
+      ctx1.update(new Uint8Array(final.buffer, final.byteOffset, final.length));
     }
     if (i % 3) {
       ctx1.update(salt);
@@ -84,7 +84,7 @@ function apr1Md5(password: string): string {
       ctx1.update(password);
     }
     if (i & 1) {
-      ctx1.update(final);
+      ctx1.update(new Uint8Array(final.buffer, final.byteOffset, final.length));
     } else {
       ctx1.update(password);
     }

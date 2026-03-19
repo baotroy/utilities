@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import EthereumPrivateKeyAddressComponent from "./components/ethereum-private-key-address";
 
 export const metadata: Metadata = {
@@ -7,7 +8,11 @@ export const metadata: Metadata = {
 };
 
 const EthereumPrivateKeyAddress = () => {
-  return <EthereumPrivateKeyAddressComponent />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EthereumPrivateKeyAddressComponent />
+    </Suspense>
+  );
 };
 
 export default EthereumPrivateKeyAddress;

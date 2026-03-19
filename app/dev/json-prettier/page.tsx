@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     "Online JSON Formatter / Beautifier and JSON Validator will format JSON data, and helps to validate",
 };
 
+// Force dynamic rendering due to react-ace dependency
+export const dynamic = "force-dynamic";
+
 const JsonPrettier = () => {
   return <JsonPrettierComponent />;
 };

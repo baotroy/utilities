@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import {
   base64UrlDecode,
@@ -31,6 +31,7 @@ export default function JwtDecoderComponent() {
   const defaultPayload = `{"name":"Foo Bar","iat":1704067200}`;
 
   const [tabSize] = useState(2);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [algorithm, setAlgorithm] = useState<TypeAlgorithm>(defaultAlgorithm);
   const [header, setHeader] = useState(defaultHeader);
@@ -39,23 +40,36 @@ export default function JwtDecoderComponent() {
 
   const defaultSecret = "secret";
   const [secret, setSecret] = useState(defaultSecret);
-  const defaultToken = createJwt(
-    JSON.parse(defaultPayload),
-    defaultAlgorithm,
-    defaultSecret
-  );
-  const tokens = defaultToken.split(".");
-  const [headerHash, setHeaderHash] = useState(tokens[0]);
-  const [payloadHash, setPayloadHash] = useState(tokens[1]);
-  const [secretHash, setSecretHash] = useState(tokens[2]);
-  const [verifiedSecretHash, setVerifiedSecretHash] = useState(tokens[2]);
 
-  const [token, setToken] = useState(defaultToken);
+  const [headerHash, setHeaderHash] = useState("");
+  const [payloadHash, setPayloadHash] = useState("");
+  const [secretHash, setSecretHash] = useState("");
+  const [verifiedSecretHash, setVerifiedSecretHash] = useState("");
+
+  const [token, setToken] = useState("");
   const [verified, setVerified] = useState(true);
   // States error
   const [errorHeader, setErrorHeader] = useState(false);
   const [errorPayload, setErrorPayload] = useState(false);
-  // const [errorToken, setErrorToken] = useState(false);
+
+  // Initialize the component with async JWT creation
+  useEffect(() => {
+    const initializeJwt = async () => {
+      const defaultToken = await createJwt(
+        JSON.parse(defaultPayload),
+        defaultAlgorithm,
+        defaultSecret
+      );
+      const tokens = defaultToken.split(".");
+      setHeaderHash(tokens[0]);
+      setPayloadHash(tokens[1]);
+      setSecretHash(tokens[2]);
+      setVerifiedSecretHash(tokens[2]);
+      setToken(defaultToken);
+      setIsLoading(false);
+    };
+    initializeJwt();
+  }, []);
 
   // User changes token
   const handleChangeToken = (newToken: string) => {
@@ -96,15 +110,29 @@ export default function JwtDecoderComponent() {
     setToken(newToken);
   };
 
-  useEffect(() => {
-    const nHeader = `{"alg":"${algorithm}","typ":"JWT"}`;
-    setHeader(nHeader);
-    setHeaderHash(base64UrlEncode(nHeader));
+  const updateToken = useCallback((token: string) => {
+    const hashes = token.split(".");
+    setHeaderHash(hashes[0]);
+    setHeader(base64UrlDecode(hashes[0]));
+    setPayloadHash(hashes[1]);
+    setValidPayload(base64UrlDecode(hashes[1]));
+    setToken(token);
+  }, []);
 
-    const token = createJwt(JSON.parse(validPayload), algorithm, secret);
-    updateToken(token);
-    setVerifiedSecretHash(token.split(".")[2]);
-  }, [algorithm]);
+  useEffect(() => {
+    if (isLoading) return;
+
+    const updateAlgorithm = async () => {
+      const nHeader = `{"alg":"${algorithm}","typ":"JWT"}`;
+      setHeader(nHeader);
+      setHeaderHash(base64UrlEncode(nHeader));
+
+      const newToken = await createJwt(JSON.parse(validPayload), algorithm, secret);
+      updateToken(newToken);
+      setVerifiedSecretHash(newToken.split(".")[2]);
+    };
+    updateAlgorithm();
+  }, [algorithm, isLoading, secret, validPayload, updateToken]);
 
   const handleInputHeaderChange = (value: string) => {
     setHeader(value);
@@ -117,7 +145,6 @@ export default function JwtDecoderComponent() {
         return;
       }
       setErrorHeader(false);
-      // setValidHeader(value);
       setHeaderHash(base64UrlEncode(value));
       setToken(`${base64UrlEncode(value)}.${payloadHash}.${secretHash}`);
     } else {
@@ -139,33 +166,14 @@ export default function JwtDecoderComponent() {
     }
   };
 
-  const handleUpdateSecret = (value: string) => {
+  const handleUpdateSecret = async (value: string) => {
     value = value || defaultSecret;
     setSecret(value);
-    const token = createJwt(JSON.parse(validPayload), algorithm, value);
-    const hashes = token.split(".");
-    setSecret(value);
+    const newToken = await createJwt(JSON.parse(validPayload), algorithm, value);
+    const hashes = newToken.split(".");
     setSecretHash(hashes[2]);
     setVerifiedSecretHash(hashes[2]);
-    updateToken(token);
-  };
-
-  const updateToken = (token: string) => {
-    const hashes = token.split(".");
-    setHeaderHash(hashes[0]);
-    setHeader(base64UrlDecode(hashes[0]));
-    setPayloadHash(hashes[1]);
-    setValidPayload(base64UrlDecode(hashes[1]));
-
-    // setSecretHash(hashes[2]);
-    // setVerifiedSecretHash(hashes[2]);
-    setToken(token);
-
-    // decode data
-    // const decodeHeader = base64UrlDecode(hashes[0]);
-    // const decodePayload = base64UrlDecode(hashes[1]);
-    // handleInputHeaderChange(decodeHeader);
-    // handleInputPayloadChange(decodePayload);
+    updateToken(newToken);
   };
 
   useEffect(() => {
@@ -180,6 +188,15 @@ export default function JwtDecoderComponent() {
       return s;
     }
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <Breadcrumb />
+        <div className="w-full mb-4">Loading...</div>
+      </>
+    );
+  }
 
   return (
     <>

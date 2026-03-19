@@ -1,17 +1,29 @@
 "use client";
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/theme-eclipse";
-import "ace-builds/src-noconflict/mode-json";
-
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { prettyJson } from "../utils";
 import { copyToClipboard, download } from "@/common/utils";
 
+const AceEditor = dynamic(
+  async () => {
+    const ace = await import("react-ace");
+    await import("ace-builds/src-noconflict/theme-eclipse");
+    await import("ace-builds/src-noconflict/mode-json");
+    return ace;
+  },
+  { ssr: false }
+);
+
 export default function JsonPrettierComponent() {
+  const [mounted, setMounted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [parseValue, setParseValue] = useState("");
   const [tabSize, setTabSize] = useState(2);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleTabSizeChange = (tab: number) => {
     setTabSize(tab);
@@ -32,6 +44,16 @@ export default function JsonPrettierComponent() {
   const handleCopy = () => {
     copyToClipboard(parseValue);
   };
+
+  if (!mounted) {
+    return (
+      <>
+        <Breadcrumb />
+        <div className="flex w-full">Loading editor...</div>
+      </>
+    );
+  }
+
   return (
     <>
       <Breadcrumb />

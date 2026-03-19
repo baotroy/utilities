@@ -1,6 +1,7 @@
 import { parse } from "@prantlf/jsonlint";
-import jwt, { Secret } from "jsonwebtoken";
+import type { Secret } from "jsonwebtoken";
 import { TypeAlgorithm } from "./type";
+
 // JSON
 export function prettyJson(str: string, indent = 2): string {
   try {
@@ -32,6 +33,11 @@ export function validJSON(str: string): boolean {
 
 export const base64UrlEncode = (input: string): string => {
   if (!input) return "";
+  // Use browser-compatible btoa instead of Buffer for client-side
+  if (typeof window !== "undefined") {
+    const base64 = btoa(unescape(encodeURIComponent(input)));
+    return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
   const base64 = Buffer.from(input).toString("base64");
   const base64Url = base64
     .replace(/\+/g, "-")
@@ -44,16 +50,37 @@ export const base64UrlDecode = (input: string): string => {
   if (!input) return "";
   const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  // Use browser-compatible atob instead of Buffer for client-side
+  if (typeof window !== "undefined") {
+    return decodeURIComponent(escape(atob(base64 + padding)));
+  }
   const decoded = Buffer.from(base64 + padding, "base64").toString("utf-8");
   return decoded;
 };
 
-export const createJwt = (
+// Dynamically import jsonwebtoken only when needed (avoids SSR issues)
+export const createJwt = async (
+  payload: string | object | Buffer,
+  algorithm: TypeAlgorithm,
+  secret: Secret
+): Promise<string> => {
+  const jwt = (await import("jsonwebtoken")).default;
+  return jwt.sign(payload, secret, { algorithm });
+};
+
+// Synchronous version for client-side only (use with caution)
+let jwtModule: typeof import("jsonwebtoken") | null = null;
+
+export const createJwtSync = (
   payload: string | object | Buffer,
   algorithm: TypeAlgorithm,
   secret: Secret
 ): string => {
-  return jwt.sign(payload, secret, { algorithm });
+  if (!jwtModule) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    jwtModule = require("jsonwebtoken");
+  }
+  return jwtModule!.sign(payload, secret, { algorithm });
 };
 
 // export const jwtDecode = (token: string) => {

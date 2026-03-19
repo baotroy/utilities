@@ -153,6 +153,12 @@ const menus: menuProps[] = [
         href: "/dev/cron-editor",
         icon: null,
       },
+      {
+        label: "Object Serializer",
+        href: "/dev/object-serializer",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {

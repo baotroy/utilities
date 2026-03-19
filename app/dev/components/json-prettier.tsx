@@ -10,6 +10,8 @@ const AceEditor = dynamic(
     const ace = await import("react-ace");
     await import("ace-builds/src-noconflict/theme-eclipse");
     await import("ace-builds/src-noconflict/mode-json");
+    const aceBuilds = await import("ace-builds");
+    (aceBuilds.config as any).set("useWorker", false);
     return ace;
   },
   { ssr: false }

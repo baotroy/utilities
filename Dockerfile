@@ -9,8 +9,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY package.json yarn.lock* ./
-RUN yarn --frozen-lockfile
+COPY package.json package-lock.json* ./
+RUN npm install --legacy-peer-deps
 
 # Stage 2: Build the app
 FROM ${NODE} AS builder
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
 # Stage 3: Run the production
 FROM ${NODE} AS runner

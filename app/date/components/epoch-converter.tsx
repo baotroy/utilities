@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function EpochConverterComponent() {
   const [tickingUnixTimestamp, setTickingUnixTimestamp] =
     useState(getCurrent());
-  const [intervalId, setIntervalId] = useState<NodeJS.Timer | number>(0);
+  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
   const [locale, setLocale] = useState("GMT");
   const [convertTimestampVal, setConvertTimestampVal] = useState("");
   const [inputCurrentTimestamp, setInputCurrentTimestamp] = useState("");
@@ -50,7 +50,7 @@ export default function EpochConverterComponent() {
     return () => clearInterval(id);
   }, []);
   const handleMouseEnter = () => {
-    clearInterval(intervalId as NodeJS.Timer);
+    if (intervalId) clearInterval(intervalId);
   };
 
   const handleMouseLeave = () => {

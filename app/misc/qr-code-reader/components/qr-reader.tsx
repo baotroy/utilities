@@ -1,18 +1,29 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
+import QRCode from "qrcode";
 import { copyToClipboard } from "@/common/utils";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { MdContentCopy, MdRefresh } from "react-icons/md";
+import { MdContentCopy, MdRefresh, MdDownload } from "react-icons/md";
 import toast from "react-hot-toast";
 
 const QRCodeReaderComponent = () => {
+  // Reader states
   const [qrContent, setQrContent] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+
+  // Generator states
+  const [generatorInput, setGeneratorInput] = useState("");
+  const [generatedQR, setGeneratedQR] = useState<string | null>(null);
+
+  // Active tab
+  const [activeTab, setActiveTab] = useState<"reader" | "generator">("reader");
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const generatorCanvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   // Handle image upload
@@ -154,6 +165,73 @@ const QRCodeReaderComponent = () => {
     };
   }, []);
 
+  // Generate QR Code
+  const generateQRCode = async (value: string) => {
+    try {
+      if (!value.trim()) {
+        toast.error("Please enter some text or a URL");
+        return;
+      }
+
+      if (generatorCanvasRef.current) {
+        await QRCode.toCanvas(generatorCanvasRef.current, value, {
+          width: 256,
+          margin: 2,
+          color: {
+            dark: "#000000",
+            light: "#FFFFFF",
+          },
+        });
+        setGeneratedQR(value);
+        toast.success("QR code generated successfully!");
+      }
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      toast.error("Error generating QR code");
+    }
+  };
+
+  // Handle generator input change
+  const handleGeneratorInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setGeneratorInput(e.target.value);
+  };
+
+  // Handle generate button click
+  const handleGenerateClick = () => {
+    generateQRCode(generatorInput);
+  };
+
+  // Download QR Code
+  const downloadQRCode = () => {
+    const canvas = generatorCanvasRef.current;
+    if (canvas) {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `qr-code-${Date.now()}.png`;
+      link.click();
+      toast.success("QR code downloaded!");
+    }
+  };
+
+  // Clear generator
+  const clearGenerator = () => {
+    setGeneratorInput("");
+    setGeneratedQR(null);
+    if (generatorCanvasRef.current) {
+      const ctx = generatorCanvasRef.current.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(
+          0,
+          0,
+          generatorCanvasRef.current.width,
+          generatorCanvasRef.current.height
+        );
+      }
+    }
+  };
+
   return (
     <>
       <Breadcrumb pageName="QR Code Reader" />
@@ -161,156 +239,276 @@ const QRCodeReaderComponent = () => {
       <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="mb-6">
           <h2 className="mb-4 text-title-md2 font-bold text-black dark:text-white">
-            QR Code Reader
+            QR Code Reader & Generator
           </h2>
           <p className="text-sm text-bodydark2">
-            Upload an image of a QR code or use your camera to scan it
+            Read QR codes from images or camera, or generate QR codes from text
           </p>
         </div>
 
-        {/* Tabs */}
+        {/* Tab Navigation */}
         <div className="mb-6 flex gap-4 border-b border-stroke dark:border-strokedark">
           <button
             onClick={() => {
+              setActiveTab("reader");
               stopCamera();
               handleReset();
             }}
-            className={`pb-4 px-4 font-medium transition-colors ${!cameraActive
-              ? "border-b-2 border-primary text-primary"
-              : "text-bodydark2"
+            className={`pb-4 px-4 font-medium transition-colors ${activeTab === "reader"
+                ? "border-b-2 border-primary text-primary"
+                : "text-bodydark2"
               }`}
           >
-            Upload Image
+            Reader
           </button>
           <button
             onClick={() => {
-              if (!cameraActive) {
-                handleReset();
-              }
+              setActiveTab("generator");
+              stopCamera();
+              handleReset();
             }}
-            className={`pb-4 px-4 font-medium transition-colors ${cameraActive
-              ? "border-b-2 border-primary text-primary"
-              : "text-bodydark2"
+            className={`pb-4 px-4 font-medium transition-colors ${activeTab === "generator"
+                ? "border-b-2 border-primary text-primary"
+                : "text-bodydark2"
               }`}
           >
-            Camera Scan
+            Generator
           </button>
         </div>
 
-        {/* Upload Section */}
-        {!cameraActive && (
-          <div className="mb-6">
-            <div className="mb-4.5 flex items-center justify-center rounded-lg border-2 border-dashed border-stroke bg-gray-1 p-6 dark:border-strokedark dark:bg-meta-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                ref={fileInputRef}
-                className="hidden"
-                id="qr-upload"
-              />
-              <label
-                htmlFor="qr-upload"
-                className="flex cursor-pointer flex-col items-center justify-center"
-              >
-                <svg
-                  className="mb-2 h-10 w-10 text-bodydark2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                <p className="text-sm font-medium text-bodydark">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-bodydark2">
-                  PNG, JPG, GIF up to 10MB
-                </p>
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* Camera Section */}
-        {!qrContent && (
-          <div className="mb-6">
-            <button
-              onClick={cameraActive ? stopCamera : startCamera}
-              className="w-full rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
-            >
-              {cameraActive ? "Stop Camera" : "Start Camera Scan"}
-            </button>
-          </div>
-        )}
-
-        {/* Video Element */}
-        {cameraActive && (
-          <div className="mb-6">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full rounded-lg border border-stroke dark:border-strokedark"
-              style={{ maxHeight: "400px", objectFit: "cover" }}
-            />
-            <canvas
-              ref={canvasRef}
-              className="hidden"
-              width={640}
-              height={480}
-            />
-          </div>
-        )}
-
-        {/* Result Section */}
-        {qrContent && (
-          <div className="rounded-lg bg-green-50 p-6 dark:bg-meta-9">
-            <div className="mb-4">
-              <h3 className="mb-2 font-medium text-black dark:text-white">
-                QR Code Content:
-              </h3>
-              <div className="break-all rounded-lg bg-white p-4 font-mono text-sm text-bodydark dark:bg-boxdark dark:text-bodydark2">
-                {qrContent}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
+        {/* Reader Section */}
+        {activeTab === "reader" && (
+          <>
+            {/* Tabs */}
+            <div className="mb-6 flex gap-4 border-b border-stroke dark:border-strokedark">
               <button
-                onClick={handleCopy}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+                onClick={() => {
+                  stopCamera();
+                  handleReset();
+                }}
+                className={`pb-4 px-4 font-medium transition-colors ${!cameraActive
+                    ? "border-b-2 border-primary text-primary"
+                    : "text-bodydark2"
+                  }`}
               >
-                <MdContentCopy className="h-5 w-5" />
-                Copy
+                Upload Image
               </button>
               <button
-                onClick={handleReset}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
+                onClick={() => {
+                  if (!cameraActive) {
+                    handleReset();
+                  }
+                }}
+                className={`pb-4 px-4 font-medium transition-colors ${cameraActive
+                    ? "border-b-2 border-primary text-primary"
+                    : "text-bodydark2"
+                  }`}
               >
-                <MdRefresh className="h-5 w-5" />
+                Camera Scan
+              </button>
+            </div>
+
+            {/* Upload Section */}
+            {!cameraActive && (
+              <div className="mb-6">
+                <div className="mb-4.5 flex items-center justify-center rounded-lg border-2 border-dashed border-stroke bg-gray-1 p-6 dark:border-strokedark dark:bg-meta-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    ref={fileInputRef}
+                    className="hidden"
+                    id="qr-upload"
+                  />
+                  <label
+                    htmlFor="qr-upload"
+                    className="flex cursor-pointer flex-col items-center justify-center"
+                  >
+                    <svg
+                      className="mb-2 h-10 w-10 text-bodydark2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    <p className="text-sm font-medium text-bodydark">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-bodydark2">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Camera Section */}
+            {!qrContent && (
+              <div className="mb-6">
+                <button
+                  onClick={cameraActive ? stopCamera : startCamera}
+                  className="w-full rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+                >
+                  {cameraActive ? "Stop Camera" : "Start Camera Scan"}
+                </button>
+              </div>
+            )}
+
+            {/* Video Element */}
+            {cameraActive && (
+              <div className="mb-6">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full rounded-lg border border-stroke dark:border-strokedark"
+                  style={{ maxHeight: "400px", objectFit: "cover" }}
+                />
+                <canvas
+                  ref={canvasRef}
+                  className="hidden"
+                  width={640}
+                  height={480}
+                />
+              </div>
+            )}
+
+            {/* Result Section */}
+            {qrContent && (
+              <div className="rounded-lg bg-green-50 p-6 dark:bg-meta-9">
+                <div className="mb-4">
+                  <h3 className="mb-2 font-medium text-black dark:text-white">
+                    QR Code Content:
+                  </h3>
+                  <div className="break-all rounded-lg bg-white p-4 font-mono text-sm text-bodydark dark:bg-boxdark dark:text-bodydark2">
+                    {qrContent}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    onClick={handleCopy}
+                    className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+                  >
+                    <MdContentCopy className="h-5 w-5" />
+                    Copy
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
+                  >
+                    <MdRefresh className="h-5 w-5" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Info Box */}
+            {qrContent === null && !cameraActive && (
+              <div className="rounded-lg bg-blue-50 p-4 text-sm text-bodydark dark:bg-meta-4 dark:text-bodydark2">
+                <p className="font-medium">How to use:</p>
+                <ul className="mt-2 list-inside list-disc space-y-1">
+                  <li>Upload an image containing a QR code, or</li>
+                  <li>
+                    Click "Start Camera Scan" to scan a QR code using your camera
+                  </li>
+                  <li>The decoded content will be displayed automatically</li>
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Generator Section */}
+        {activeTab === "generator" && (
+          <>
+            <div className="mb-6">
+              <label className="mb-2.5 block font-medium text-black dark:text-white">
+                Enter Text or URL
+              </label>
+              <input
+                type="text"
+                placeholder="Enter text or URL to generate QR code"
+                value={generatorInput}
+                onChange={handleGeneratorInputChange}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleGenerateClick();
+                  }
+                }}
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition placeholder:text-bodydark2 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              />
+            </div>
+
+            <div className="mb-6 flex gap-3">
+              <button
+                onClick={handleGenerateClick}
+                className="flex-1 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+              >
+                Generate QR Code
+              </button>
+              <button
+                onClick={clearGenerator}
+                className="rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
+              >
                 Clear
               </button>
             </div>
-          </div>
-        )}
 
-        {/* Info Box */}
-        {qrContent === null && !cameraActive && (
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-bodydark dark:bg-meta-4 dark:text-bodydark2">
-            <p className="font-medium">How to use:</p>
-            <ul className="mt-2 list-inside list-disc space-y-1">
-              <li>Upload an image containing a QR code, or</li>
-              <li>
-                Click "Start Camera Scan" to scan a QR code using your camera
-              </li>
-              <li>The decoded content will be displayed automatically</li>
-            </ul>
-          </div>
+            {/* Generated QR Code */}
+            {generatedQR && (
+              <div className="mb-6 rounded-lg bg-blue-50 p-6 dark:bg-meta-4">
+                <h3 className="mb-4 font-medium text-black dark:text-white">
+                  Generated QR Code
+                </h3>
+                <div className="mb-4 flex justify-center">
+                  <canvas
+                    ref={generatorCanvasRef}
+                    className="rounded-lg border border-stroke dark:border-strokedark"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={downloadQRCode}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+                  >
+                    <MdDownload className="h-5 w-5" />
+                    Download
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (generatedQR) {
+                        copyToClipboard(generatedQR);
+                      }
+                    }}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
+                  >
+                    <MdContentCopy className="h-5 w-5" />
+                    Copy Text
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Info Box */}
+            {!generatedQR && (
+              <div className="rounded-lg bg-green-50 p-4 text-sm text-bodydark dark:bg-meta-9 dark:text-bodydark2">
+                <p className="font-medium">How to use:</p>
+                <ul className="mt-2 list-inside list-disc space-y-1">
+                  <li>Enter any text or URL in the input field</li>
+                  <li>Click "Generate QR Code" to create the QR code</li>
+                  <li>Download the QR code as an image or copy the text</li>
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

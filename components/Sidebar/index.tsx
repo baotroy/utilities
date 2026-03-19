@@ -149,9 +149,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       );
                     } else {
                       return (
-                        <>
+                        <React.Fragment key={index}>
                           <LinkItem
-                            key={index}
                             label={item.label}
                             href={item.href}
                             icon={item.icon}
@@ -160,7 +159,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             isBeta={item.beta}
                           />
 
-                        </>
+                        </React.Fragment>
                       );
                     }
                   })}
@@ -168,7 +167,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </div>
             );
           })}
-          
+
         </nav>
       </div>
     </aside>

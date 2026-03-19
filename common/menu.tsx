@@ -198,6 +198,11 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
+        label: "QR Code Reader",
+        href: "/misc/qr-code-reader",
+        icon: null,
+      },
+      {
         label: "Ethereum Private Key Address Database",
         href: "/misc/ethereum-private-key-address-database",
         icon: null,

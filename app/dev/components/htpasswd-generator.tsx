@@ -182,9 +182,9 @@ auth_basic_user_file /etc/nginx/.htpasswd;`);
 
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className="max-w-2xl">
-        <p className="mb-4 text-sm text-bodydark dark:text-bodydark2">
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
           Generate htpasswd entries for NGINX basic authentication. The encoding runs in your browser - no credentials are sent to any server.
         </p>
 

@@ -149,7 +149,7 @@ export default function ChmodCalculatorComponent() {
     <>
       <Breadcrumb />
       <div className="max-w-4xl">
-        <p className="mb-6 text-sm text-bodydark dark:text-bodydark2">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
           Convert Linux file permissions between octal (numeric) and symbolic formats.
           Click checkboxes or enter values directly.
         </p>

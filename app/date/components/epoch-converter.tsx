@@ -44,7 +44,7 @@ export default function EpochConverterComponent() {
       setTickingUnixTimestamp(getCurrent());
     }, 1000);
 
-    
+
     setIntervalId(id);
 
     return () => clearInterval(id);
@@ -57,8 +57,8 @@ export default function EpochConverterComponent() {
     const id = setInterval(() => {
       setTickingUnixTimestamp(getCurrent());
     }, 1000);
-    
-    
+
+
     setIntervalId(id);
   };
 
@@ -109,7 +109,10 @@ export default function EpochConverterComponent() {
   return (
     <>
       <Breadcrumb />
-      <div>
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert Unix timestamps to human-readable dates and vice versa. Supports seconds, milliseconds, microseconds and nanoseconds.
+        </p>
         {/* The current Unix Timestamp is: */}
         <span
           onMouseEnter={handleMouseEnter}

@@ -72,12 +72,12 @@ export default function RandomPasswordGeneratorComponent() {
 
   return (
     <>
-      <Breadcrumb pageName="" />
-      <h3>
-        Create strong and secure passwords to keep your account safe online.
-      </h3>
-      <div>
-        <div className="flex mt-6">
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Create strong and secure passwords to keep your account safe online. Customize length and character types.
+        </p>
+        <div className="flex">
           <input
             type="text"
             readOnly

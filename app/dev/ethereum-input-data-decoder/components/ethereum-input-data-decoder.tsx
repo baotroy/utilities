@@ -4,7 +4,7 @@ import Button from "@/components/Input/Button";
 import TextArea from "@/components/Input/TextArea";
 import InputDataDecoder from "ethereum-input-data-decoder";
 import { FC, useState } from "react";
-interface EthereumInputDataDecoderProps {}
+interface EthereumInputDataDecoderProps { }
 const EthereumInputDataDecoderComponent: FC<
   EthereumInputDataDecoderProps
 > = () => {
@@ -28,43 +28,48 @@ const EthereumInputDataDecoderComponent: FC<
   };
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className="flex w-full">
-        <div className="w-1/3 mr-3">
-          <label htmlFor="" className="text-sm">
-            ABI
-          </label>
-          <TextArea
-            rows={35}
-            additionalClass="w-full text-sm leading-4"
-            onChange={(e) => setAbi(e.target.value)}
-            value={abi}
-          />
+      <Breadcrumb />
+      <div className="w-full">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Decode Ethereum transaction input data using an ABI. Paste the contract ABI and calldata to see the decoded function parameters.
+        </p>
+        <div className="flex w-full">
+          <div className="w-1/3 mr-3">
+            <label htmlFor="" className="text-sm">
+              ABI
+            </label>
+            <TextArea
+              rows={35}
+              additionalClass="w-full text-sm leading-4"
+              onChange={(e) => setAbi(e.target.value)}
+              value={abi}
+            />
+          </div>
+          <div className="w-1/3  mr-3">
+            <label htmlFor="" className="text-sm">
+              Calldata
+            </label>
+            <TextArea
+              rows={35}
+              additionalClass="w-full text-sm leading-4"
+              onChange={(e) => setInputData(e.target.value)}
+              value={inputData}
+            />
+          </div>
+          <div className="w-1/3">
+            <label htmlFor="" className="text-sm">
+              Output
+            </label>
+            <TextArea
+              rows={35}
+              additionalClass="w-full text-sm leading-4"
+              value={output}
+            />
+          </div>
         </div>
-        <div className="w-1/3  mr-3">
-          <label htmlFor="" className="text-sm">
-            Calldata
-          </label>
-          <TextArea
-            rows={35}
-            additionalClass="w-full text-sm leading-4"
-            onChange={(e) => setInputData(e.target.value)}
-            value={inputData}
-          />
+        <div className="text-right mt-2">
+          <Button label="Decode" handleOnClick={doDecode} />
         </div>
-        <div className="w-1/3">
-          <label htmlFor="" className="text-sm">
-            Output
-          </label>
-          <TextArea
-            rows={35}
-            additionalClass="w-full text-sm leading-4"
-            value={output}
-          />
-        </div>
-      </div>
-      <div className="text-right mt-2">
-        <Button label="Decode" handleOnClick={doDecode} />
       </div>
     </>
   );

@@ -279,7 +279,7 @@ export default function CronEditorComponent() {
     <>
       <Breadcrumb />
       <div className="max-w-4xl">
-        <p className="mb-6 text-sm text-bodydark dark:text-bodydark2">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
           Build and validate cron schedule expressions. Edit individual fields or type the full expression directly.
         </p>
 

@@ -60,76 +60,81 @@ export default function RgbToHexComponent() {
 
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className="w-1/2 m-auto">
-        <div className="flex">
-          <div className="w-1/3">
-            <ColorCircle color="R" label="Red" bgColor="#ff0000" />
-          </div>
-          <div className="w-1/3">
-            <ColorCircle color="G" label="Green" bgColor="#00ff00" />
-          </div>
-          <div className="w-1/3">
-            <ColorCircle color="B" label="Blue" bgColor="#0000ff" />
-          </div>
-        </div>
-        <div className="flex">
-          <div className="w-1/3 mr-2">
-            <TextBox
-              onChange={(e) => onHandleRedChange(e.target.value)}
-              placeholder="0"
-              maxLength={3}
-              value={red}
-              additionalClass="w-full"
-            />
-          </div>
-          <div className="w-1/3 mr-2">
-            <TextBox
-              onChange={(e) => onHandleGreenChange(e.target.value)}
-              placeholder="0"
-              maxLength={3}
-              value={green}
-              additionalClass="w-full"
-            />
-          </div>
-          <div className="w-1/3 mr-2">
-            <TextBox
-              onChange={(e) => onHandleBlueChange(e.target.value)}
-              placeholder="0"
-              maxLength={3}
-              value={blue}
-              additionalClass="w-full"
-            />
-          </div>
-        </div>
-        {hex && (
-          <div className="mt-4">
-            <div className="text-center">
-              <ColorCircle color="R" bgColor="#ff0000" label={red} />
-              <ColorCircle color="G" bgColor="#00ff00" label={green} />
-              <ColorCircle color="B" bgColor="#0000ff" label={blue} />
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert RGB color values to hexadecimal format. Enter red, green, and blue values (0-255) to get the hex color code.
+        </p>
+        <div className="w-1/2 m-auto">
+          <div className="flex">
+            <div className="w-1/3">
+              <ColorCircle color="R" label="Red" bgColor="#ff0000" />
             </div>
-            <div className="mt-8 text-center">
-              <strong>{hex}</strong>{" "}
-              <Button
-                label="Copy"
-                handleOnClick={() => copyToClipboard(hex)}
-                additionalClass="primary"
-                icon={{
-                  icon: MdContentCopy,
-                  position: "left",
-                  size: 20,
-                }}
+            <div className="w-1/3">
+              <ColorCircle color="G" label="Green" bgColor="#00ff00" />
+            </div>
+            <div className="w-1/3">
+              <ColorCircle color="B" label="Blue" bgColor="#0000ff" />
+            </div>
+          </div>
+          <div className="flex">
+            <div className="w-1/3 mr-2">
+              <TextBox
+                onChange={(e) => onHandleRedChange(e.target.value)}
+                placeholder="0"
+                maxLength={3}
+                value={red}
+                additionalClass="w-full"
               />
             </div>
-            <div className="mt-4">
-              <div
-                className={"w-25 h-25 m-auto rounded-full"}
-                style={{ backgroundColor: hex }}
-              ></div>
+            <div className="w-1/3 mr-2">
+              <TextBox
+                onChange={(e) => onHandleGreenChange(e.target.value)}
+                placeholder="0"
+                maxLength={3}
+                value={green}
+                additionalClass="w-full"
+              />
+            </div>
+            <div className="w-1/3 mr-2">
+              <TextBox
+                onChange={(e) => onHandleBlueChange(e.target.value)}
+                placeholder="0"
+                maxLength={3}
+                value={blue}
+                additionalClass="w-full"
+              />
             </div>
           </div>
-        )}
+          {hex && (
+            <div className="mt-4">
+              <div className="text-center">
+                <ColorCircle color="R" bgColor="#ff0000" label={red} />
+                <ColorCircle color="G" bgColor="#00ff00" label={green} />
+                <ColorCircle color="B" bgColor="#0000ff" label={blue} />
+              </div>
+              <div className="mt-8 text-center">
+                <strong>{hex}</strong>{" "}
+                <Button
+                  label="Copy"
+                  handleOnClick={() => copyToClipboard(hex)}
+                  additionalClass="primary"
+                  icon={{
+                    icon: MdContentCopy,
+                    position: "left",
+                    size: 20,
+                  }}
+                />
+              </div>
+              <div className="mt-4">
+                <div
+                  className={"w-25 h-25 m-auto rounded-full"}
+                  style={{ backgroundColor: hex }}
+                ></div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

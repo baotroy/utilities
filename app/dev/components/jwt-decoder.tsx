@@ -193,7 +193,12 @@ export default function JwtDecoderComponent() {
     return (
       <>
         <Breadcrumb />
-        <div className="w-full mb-4">Loading...</div>
+        <div className="w-full">
+          <p className="mb-6 text-sm text-bodydark dark:text-bodydark2">
+            Decode, verify and generate JSON Web Tokens. Supports various algorithms including HS256, HS384, HS512.
+          </p>
+          <div>Loading...</div>
+        </div>
       </>
     );
   }
@@ -201,32 +206,36 @@ export default function JwtDecoderComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="w-full mb-4">
-        Algorithm
-        <select
-          value={algorithm}
-          onChange={(e) => setAlgorithm(e.target.value as TypeAlgorithm)}
-          className="rounded p-2 mx-3 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-[14px] dark:text-bodydark1"
-        >
-          {algorithms.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="flex w-full">
-        <div className="w-1/2">
-          <h3 className={h3Style}>Encoded</h3>
-          <div>
-            <textarea
-              rows={20}
-              placeholder=""
-              defaultValue={`${headerHash}.${payloadHash}.${secretHash}`}
-              value={token}
-              onChange={(e) => handleChangeToken(e.target.value)}
-              spellCheck={false}
-              className="
+      <div className="w-full">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Decode, verify and generate JSON Web Tokens. Supports various algorithms including HS256, HS384, HS512.
+        </p>
+        <div className="mb-4">
+          Algorithm
+          <select
+            value={algorithm}
+            onChange={(e) => setAlgorithm(e.target.value as TypeAlgorithm)}
+            className="rounded p-2 mx-3 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-[14px] dark:text-bodydark1"
+          >
+            {algorithms.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex w-full">
+          <div className="w-1/2">
+            <h3 className={h3Style}>Encoded</h3>
+            <div>
+              <textarea
+                rows={20}
+                placeholder=""
+                defaultValue={`${headerHash}.${payloadHash}.${secretHash}`}
+                value={token}
+                onChange={(e) => handleChangeToken(e.target.value)}
+                spellCheck={false}
+                className="
                 dark:text-graydark2
                 bg-white
                 dark:bg-graydark
@@ -238,74 +247,75 @@ export default function JwtDecoderComponent() {
                 py-3 px-5
                 outline-none
                 resize-none"
-            ></textarea>
+              ></textarea>
+            </div>
           </div>
-        </div>
 
-        <div className="w-1/2 ml-2   ">
-          <h3 className={h3Style}>Decoded</h3>
-          <div>
-            <p className="text-xs p-2  border-x-[1.5px] border-t-[1.5px] border-stroke">
-              HEADER
-            </p>
-            <textarea
-              rows={5}
-              placeholder=""
-              defaultValue={showJSON(header)}
-              value={showJSON(header)}
-              onChange={(e) => handleInputHeaderChange(e.target.value)}
-              spellCheck={false}
-              className={clsx(textareaStyle, errorHeader && errorStyle)}
-            ></textarea>
-          </div>
-          <div>
-            <p className="text-xs p-2 border-x-[1.5px] border-stroke">
-              PAYLOAD
-            </p>
-            <textarea
-              rows={6}
-              placeholder=""
-              defaultValue={showJSON(payload)}
-              value={showJSON(payload)}
-              onChange={(e) => handleInputPayloadChange(e.target.value)}
-              spellCheck={false}
-              className={clsx(textareaStyle, errorPayload && errorStyle)}
-            ></textarea>
-          </div>
-          <div>
-            <p className="text-xs p-2  border-x-[1.5px] border-stroke">
-              VERIFY SIGNATURE
-            </p>
-            <textarea
-              rows={5}
-              placeholder=""
-              defaultValue={secret}
-              value={secret}
-              spellCheck={false}
-              onChange={(e) => handleUpdateSecret(e.target.value)}
-              className={textareaStyle}
-            ></textarea>
+          <div className="w-1/2 ml-2   ">
+            <h3 className={h3Style}>Decoded</h3>
+            <div>
+              <p className="text-xs p-2  border-x-[1.5px] border-t-[1.5px] border-stroke">
+                HEADER
+              </p>
+              <textarea
+                rows={5}
+                placeholder=""
+                defaultValue={showJSON(header)}
+                value={showJSON(header)}
+                onChange={(e) => handleInputHeaderChange(e.target.value)}
+                spellCheck={false}
+                className={clsx(textareaStyle, errorHeader && errorStyle)}
+              ></textarea>
+            </div>
+            <div>
+              <p className="text-xs p-2 border-x-[1.5px] border-stroke">
+                PAYLOAD
+              </p>
+              <textarea
+                rows={6}
+                placeholder=""
+                defaultValue={showJSON(payload)}
+                value={showJSON(payload)}
+                onChange={(e) => handleInputPayloadChange(e.target.value)}
+                spellCheck={false}
+                className={clsx(textareaStyle, errorPayload && errorStyle)}
+              ></textarea>
+            </div>
+            <div>
+              <p className="text-xs p-2  border-x-[1.5px] border-stroke">
+                VERIFY SIGNATURE
+              </p>
+              <textarea
+                rows={5}
+                placeholder=""
+                defaultValue={secret}
+                value={secret}
+                spellCheck={false}
+                onChange={(e) => handleUpdateSecret(e.target.value)}
+                className={textareaStyle}
+              ></textarea>
+            </div>
           </div>
         </div>
+        <p
+          className={clsx(
+            "text-[20px]",
+            verified ? "text-success" : "text-danger"
+          )}
+        >
+          {verified ? (
+            <span className="flex">
+              <MdCheckCircleOutline />
+              &nbsp;Signature Verified
+            </span>
+          ) : (
+            <span className="flex">
+              <MdOutlineCancel />
+              &nbsp;Invalid Signature
+            </span>
+          )}
+        </p>
       </div>
-      <p
-        className={clsx(
-          "text-[20px]",
-          verified ? "text-success" : "text-danger"
-        )}
-      >
-        {verified ? (
-          <span className="flex">
-            <MdCheckCircleOutline />
-            &nbsp;Signature Verified
-          </span>
-        ) : (
-          <span className="flex">
-            <MdOutlineCancel />
-            &nbsp;Invalid Signature
-          </span>
-        )}
-      </p>
     </>
   );
 }

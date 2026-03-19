@@ -117,8 +117,11 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div>
+      <Breadcrumb />
+      <div className="w-full">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Browse Ethereum private keys and their corresponding addresses. Educational tool demonstrating the relationship between private keys and addresses.
+        </p>
         <div className="float-right mb-5">
           <i className="text-sm">Use your RPC</i>
           <TextBox

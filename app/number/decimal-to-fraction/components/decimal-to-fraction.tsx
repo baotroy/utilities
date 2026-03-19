@@ -74,7 +74,10 @@ export default function DecimalToFractionComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="m-auto">
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert decimal numbers to fractions and vice versa. Supports mixed numbers and proper/improper fractions.
+        </p>
         <div className="flex">
           <div className="flex w-1/2">From</div>
           <div className="flex w-[54px] !mx-[8px]">&nbsp;</div>

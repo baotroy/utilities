@@ -57,8 +57,11 @@ const FunctionToHexComponent: FC<
   };
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className=" w-full">
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Encode Solidity function signatures to their 4-byte hex selectors. Paste your ABI to extract function, event, and error selectors.
+        </p>
         <div className="w-full">
           <label htmlFor="" className="text-sm">
             ABI

@@ -16,14 +16,11 @@ export default function EtherUnitConverterComponent() {
   return (
     <>
       <Breadcrumb />
-      <div>
-        <p>
-          Ether or ETH is often used in different denominations of its currency,
-          such as Wei for interacting with smart contracts and Gwei for
-          calculating gas prices. Use our Unit Converter to easily convert
-          between them!
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert between Ethereum units including Wei, Gwei, and Ether. Useful for calculating gas prices and smart contract interactions.
         </p>
-        <div className="my-4">Enter any value</div>
+        <div className="mb-4">Enter any value</div>
         {Object.keys(ethUnitDecimals).map((unit, index) => {
           return (
             <EtherUnit

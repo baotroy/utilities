@@ -40,22 +40,22 @@ export default function File2Base64Component() {
   };
   const formatBase64 = () => {
     switch (selectedFormat) {
-    case "txt":
-      return base64.split("base64,")[1];
-    case "uri":
-      return base64;
-    case "html_hyperlink":
-      return `<a href="${base64}">File</a>`;
-    case "json":
-      return prettyJson(
-        JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
-      );
-    case "xml":
-      return formatXml(
-        `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
-      );
-    default:
-      return base64;
+      case "txt":
+        return base64.split("base64,")[1];
+      case "uri":
+        return base64;
+      case "html_hyperlink":
+        return `<a href="${base64}">File</a>`;
+      case "json":
+        return prettyJson(
+          JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
+        );
+      case "xml":
+        return formatXml(
+          `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
+        );
+      default:
+        return base64;
     }
   };
 
@@ -81,7 +81,10 @@ export default function File2Base64Component() {
   return (
     <>
       <Breadcrumb />
-      <div>
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert files to Base64 encoded strings. Supports various output formats including plain text, Data URI, HTML, JSON, and XML.
+        </p>
         <div className="mb-4">
           <h3 className={h3Style}>Local File</h3>
           <input

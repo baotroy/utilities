@@ -87,150 +87,135 @@ export default function MongoObjectTimeComponent() {
   };
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className="flex">
-        <div className="w-1/2 mr-4">
-          <h3 className={h3Style}>ObjectId</h3>
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert MongoDB ObjectId to timestamp and vice versa. Extract date and time information from ObjectId or generate ObjectId from a specific date.
+        </p>
+        <div className="flex">
+          <div className="w-1/2 mr-4">
+            <h3 className={h3Style}>ObjectId</h3>
 
-          <div className="flex mb-2">
-            <input
-              type="text"
-              value={objectId}
-              className={clsx(
-                "w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-bodydark dark:bg-graydark",
-                errorId && "border-[#ff0000]"
-              )}
-              onChange={(e) => handleInputObjectId(e.target.value)}
-            />
+            <div className="flex mb-2">
+              <input
+                type="text"
+                value={objectId}
+                className={clsx(
+                  "w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-bodydark dark:bg-graydark",
+                  errorId && "border-[#ff0000]"
+                )}
+                onChange={(e) => handleInputObjectId(e.target.value)}
+              />
+              <div className="flex">
+                <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
+                  <MdContentCopy size={20} onClick={() => handleCopy(false)} />
+                </span>
+              </div>
+            </div>
+
             <div className="flex">
-              <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
-                <MdContentCopy size={20} onClick={() => handleCopy(false)} />
-              </span>
+              <input
+                type="text"
+                readOnly
+                value={`ObjectId("${mObjectId}")`}
+                className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                onFocus={onFocus}
+              />
+              <div className="flex">
+                <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
+                  <MdContentCopy size={20} onClick={() => handleCopy(true)} />
+                </span>
+              </div>
             </div>
           </div>
-
-          <div className="flex">
-            <input
-              type="text"
-              readOnly
-              value={`ObjectId("${mObjectId}")`}
-              className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-              onFocus={onFocus}
-            />
-            <div className="flex">
-              <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
-                <MdContentCopy size={20} onClick={() => handleCopy(true)} />
-              </span>
+          <div className="w-1/2">
+            <h3 className={h3Style}>Time</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Year (YYYY)</label>
+                <input
+                  type="number"
+                  value={date.getFullYear()}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.y)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Month (1-12)</label>
+                <input
+                  type="number"
+                  value={date.getMonth() + 1}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.m)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Date (1-31)</label>
+                <input
+                  type="number"
+                  value={date.getDate()}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.d)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Hours</label>
+                <input
+                  type="number"
+                  value={date.getHours()}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.h)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Minutes</label>
+                <input
+                  type="number"
+                  value={date.getMinutes()}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.min)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Seconds</label>
+                <input
+                  type="number"
+                  value={date.getSeconds()}
+                  onChange={(e) =>
+                    handleInputTime(e.target.value, TypeDate.s)
+                  }
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">ISO Timestamp</label>
+                <input
+                  type="text"
+                  value={date.toISOString()}
+                  onFocus={onFocus}
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="font-medium">Unix Timestamp</label>
+                <input
+                  type="text"
+                  value={Math.round(date.getTime() / 1000)}
+                  onFocus={onFocus}
+                  className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+                />
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="w-1/2">
-          <h3 className={h3Style}>Time</h3>
-          <div>
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <td>Year (YYYY)</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getFullYear()}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.y)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Month (1-12)</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getMonth() + 1}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.m)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Date (1-31)</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getDate()}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.d)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Hours</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getHours()}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.h)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Minutes</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getMinutes()}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.min)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Seconds</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={date.getSeconds()}
-                      onChange={(e) =>
-                        handleInputTime(e.target.value, TypeDate.s)
-                      }
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>ISO Timestamp</td>
-                  <td>
-                    <input
-                      type="text"
-                      value={date.toISOString()}
-                      onFocus={onFocus}
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Unix Timestamp</td>
-                  <td>
-                    <input
-                      type="text"
-                      value={Math.round(date.getTime() / 1000)}
-                      onFocus={onFocus}
-                      className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

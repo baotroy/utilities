@@ -22,17 +22,13 @@ export default function BasicAuthHeaderComponent() {
 
   return (
     <>
-      <Breadcrumb pageName="" />
-      <h3>
-        The encoding script runs in your browser, and none of your credentials
-        are seen or stored by this site.
-      </h3>
-      <div>
-        <div className="mt-2">
-          <label
-            className="text-lg text-gray-500 dark:text-gray-400"
-            htmlFor="username"
-          >
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Generate HTTP Basic Authentication headers. The encoding runs in your browser - no credentials are sent to any server.
+        </p>
+        <div className="mb-4">
+          <label className="font-semibold text-sm mb-2 block" htmlFor="username">
             Username
           </label>
           <input
@@ -40,14 +36,11 @@ export default function BasicAuthHeaderComponent() {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+            className="w-full rounded p-2 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-sm dark:text-bodydark1"
           />
         </div>
-        <div className="mt-2">
-          <label
-            className="text-lg text-gray-500 dark:text-gray-400"
-            htmlFor="password"
-          >
+        <div className="mb-4">
+          <label className="font-semibold text-sm mb-2 block" htmlFor="password">
             Password
           </label>
           <input
@@ -55,29 +48,26 @@ export default function BasicAuthHeaderComponent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+            className="w-full rounded p-2 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-sm dark:text-bodydark1"
           />
         </div>
-        <div className="mt-6">
-          <label
-            className="text-lg text-gray-500 dark:text-gray-400"
-            htmlFor="password"
-          >
+        <div className="mb-4">
+          <label className="font-semibold text-sm mb-2 block">
             Basic Authentication Header
           </label>
-          <div className="flex">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               readOnly
-              disabled
               value={authHeader}
-              className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
+              className="flex-1 rounded p-2 border border-bodydark outline-bodydark dark:outline-boxdark dark:bg-body text-sm dark:text-bodydark1 font-mono"
             />
-            <div className="flex">
-              <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
-                <MdContentCopy size={20} onClick={() => handleCopy()} />
-              </span>
-            </div>
+            <button
+              onClick={() => handleCopy()}
+              className="px-4 py-2 text-sm underline decoration-dashed hover:no-underline"
+            >
+              copy
+            </button>
           </div>
         </div>
       </div>

@@ -48,8 +48,11 @@ export default function ImageResizeComponent() {
   return (
     <>
       <Breadcrumb />
-      <div>
-        <div className="mb-2">
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Resize, crop, flip, and rotate images. All processing is done in your browser - no files are uploaded to any server.
+        </p>
+        <div className="mb-4">
           <input
             type="file"
             onChange={handleFileChange}
@@ -66,9 +69,8 @@ export default function ImageResizeComponent() {
               <div className="xl:flex block">
                 <div className="xl:w-[350px] text-center w-full border-r border-b py-2 border-bodydark">
                   <button
-                    className={`px-4 py-1.5 rounded-[0.375rem] ${
-                      activeTab === "resize" ? "bg-meta-5 text-white" : ""
-                    }`}
+                    className={`px-4 py-1.5 rounded-[0.375rem] ${activeTab === "resize" ? "bg-meta-5 text-white" : ""
+                      }`}
                     onClick={() => handleTabClick("resize")}
                   >
                     <div className="flex items-center">
@@ -77,9 +79,8 @@ export default function ImageResizeComponent() {
                     </div>
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-[0.375rem] ${
-                      activeTab === "crop" ? "bg-meta-5 text-white" : ""
-                    }`}
+                    className={`px-4 py-2 rounded-[0.375rem] ${activeTab === "crop" ? "bg-meta-5 text-white" : ""
+                      }`}
                     onClick={() => handleTabClick("crop")}
                   >
                     <div className="flex items-center">
@@ -87,9 +88,8 @@ export default function ImageResizeComponent() {
                     </div>
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-[0.375rem] ${
-                      activeTab === "rotate" ? "bg-meta-5 text-white" : ""
-                    }`}
+                    className={`px-4 py-2 rounded-[0.375rem] ${activeTab === "rotate" ? "bg-meta-5 text-white" : ""
+                      }`}
                     onClick={() => handleTabClick("rotate")}
                   >
                     <div className="flex items-center">

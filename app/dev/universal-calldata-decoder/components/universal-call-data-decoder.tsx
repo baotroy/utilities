@@ -44,10 +44,13 @@ const UniversalCallDataDecoderComponent: FC<
   }
   return (
     <>
-      <Breadcrumb pageName="" />
-      <div className="w-full">
-        <div className="">
-          <label htmlFor="" className="text-sm">
+      <Breadcrumb />
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Decode Ethereum calldata without an ABI. Automatically fetches function signatures and recursively decodes nested calls.
+        </p>
+        <div className="mb-4">
+          <label className="font-semibold text-sm mb-2 block">
             Calldata
           </label>
           <TextArea
@@ -59,13 +62,13 @@ const UniversalCallDataDecoderComponent: FC<
           />
         </div>
 
+        <div className="text-right mb-4">
+          <Button label="Copy" additionalClass="mr-2" type="success"
+            handleOnClick={() => copyToClipboard(inputData)} />
+          <Button label="Decode" handleOnClick={() => doDecode(inputData)} isLoading={isLoading} />
+        </div>
+        {func && <FunctionComponent fragment={func} />}
       </div>
-      <div className="text-right mt-4 mb-4">
-        <Button label="Copy" additionalClass="mr-2" type="success"
-          handleOnClick={() => copyToClipboard(inputData)} />
-        <Button label="Decode" handleOnClick={() => doDecode(inputData)} isLoading={isLoading} />
-      </div>
-      {func && <FunctionComponent fragment={func} />}
     </>
   );
 };

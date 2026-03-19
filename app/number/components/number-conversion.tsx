@@ -62,8 +62,11 @@ export default function NumberConversionComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="w-full m-auto">
-        <div className="flex ">
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert numbers between binary, octal, decimal, and hexadecimal formats. Supports large numbers with arbitrary precision.
+        </p>
+        <div className="flex">
           <div className="w-1/2">From</div>
           <div className="flex w-[54px] !mx-[8px]">&nbsp;</div>
           <div className="w-1/2">To</div>

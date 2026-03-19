@@ -87,10 +87,13 @@ export default function ConvertCaseComponent() {
   return (
     <>
       <Breadcrumb />
-      <div>
+      <div className="max-w-4xl">
+        <p className="mb-6 text-sm text-body dark:text-bodydark2">
+          Convert text between different case formats including lowercase, UPPERCASE, Title Case, Sentence case, and more.
+        </p>
         <textarea
-          rows={20}
-          placeholder=""
+          rows={15}
+          placeholder="Paste or type your text here..."
           onChange={(e) => {
             setCharacterCount(e.target.value.length);
             setWordCount(e.target.value.replaceAll("\n", " ").split(" ").length);
@@ -100,35 +103,33 @@ export default function ConvertCaseComponent() {
           }}
           value={text}
           className="
-          dark:text-graydark2
-          bg-white
-          dark:bg-graydark
-          w-full 
-          rounded-lg
-          border-[1.5px] 
-          border-stroke  
-          dark:border-strokedark
-          py-3 px-5 outline-none
-          font-normal
+            dark:text-graydark2
+            bg-white
+            dark:bg-graydark
+            w-full 
+            rounded-lg
+            border-[1.5px] 
+            border-stroke  
+            dark:border-strokedark
+            py-3 px-5 outline-none
+            font-normal
           "
         ></textarea>
-      </div>
-      <div>
-        Character Count: {characterCount} | Word Count: {wordCount} | Sentence Count: {sentenceCount} |  Line Count: {lineCount}
-      </div>
-      <div>
-        {buttons.map((btn, index) => (
-          <button
-            type="button"
-            key={index}
-            className={
-              clsx("m-1 rounded bg-bodydark1 dark:bg-boxdark p-1 font-medium text-graydark hover:bg-bodydark2")
-            }
-            onClick={btn.handleClick}
-          >
-            {btn.label}
-          </button>
-        ))}
+        <div className="my-3 text-sm text-bodydark dark:text-bodydark2">
+          Character Count: {characterCount} | Word Count: {wordCount} | Sentence Count: {sentenceCount} | Line Count: {lineCount}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {buttons.map((btn, index) => (
+            <button
+              type="button"
+              key={index}
+              className="rounded bg-bodydark1 dark:bg-boxdark px-3 py-1.5 font-medium text-sm text-graydark hover:bg-bodydark2"
+              onClick={btn.handleClick}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
       </div>
     </>
   );

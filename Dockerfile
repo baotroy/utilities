@@ -1,43 +1,30 @@
-# Dockerfile
-
-ARG NODE=node:25-alpine
-
 # Stage 1: Install dependencies
-FROM ${NODE} AS deps
-RUN apk add --no-cache libc6-compat g++ make py3-pip
+FROM node:25-slim AS deps
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends g++ make python3 && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-
 COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
-# Stage 2: Build the app
-FROM ${NODE} AS builder
+# Stage 2: Build the application
+FROM node:25-slim AS builder
 WORKDIR /app
-
-ENV NODE_ENV=production
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
+ENV NODE_ENV=production
 RUN npm run build
 
-# Stage 3: Run the production
-FROM ${NODE} AS runner
+# Stage 3: Production runner
+FROM node:25-slim AS runner
 WORKDIR /app
-
 ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# copy assets and the generated standalone server
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
 USER nextjs
-
+EXPOSE 3000
 ENV PORT=3000
-
-# Serve the app
-CMD ["node", "./server.js"]
+CMD ["node", "server.js"]

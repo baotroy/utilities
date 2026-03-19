@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   output: "standalone",
   // Empty turbopack config to acknowledge we're using Turbopack
   turbopack: {},
@@ -8,4 +8,4 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["jsonwebtoken", "bcryptjs", "crypto"],
 };
 
-export default nextConfig;
+module.exports = nextConfig;

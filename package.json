@@ -34,6 +34,7 @@
     "ethers": "^6.11.1",
     "fraction.js": "^4.3.7",
     "jsonwebtoken": "^8.5.1",
+    "jsqr": "^1.4.0",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-ace": "^14.0.0",

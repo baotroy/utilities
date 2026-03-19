@@ -23,26 +23,44 @@ const QRCodeReaderComponent = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          if (!ctx) return;
 
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-        const code = jsQR(imageData.data, img.width, img.height);
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, img.width, img.height);
 
-        if (code) {
-          setQrContent(code.data);
-          toast.success("QR code decoded successfully!");
-        } else {
-          toast.error("No QR code found in the image");
+          // Ensure we have the correct data format for jsQR
+          const data = new Uint8ClampedArray(imageData.data);
+          const code = jsQR(data, img.width, img.height);
+
+          if (code) {
+            setQrContent(code.data);
+            toast.success("QR code decoded successfully!");
+          } else {
+            toast.error("No QR code found in the image. Make sure the QR code is clearly visible.");
+            setQrContent(null);
+          }
+        } catch (error) {
+          console.error("Error processing image:", error);
+          toast.error("Error processing image. Please try another image.");
           setQrContent(null);
         }
       };
+      img.onerror = () => {
+        toast.error("Failed to load image. Please try another file.");
+        setQrContent(null);
+      };
       img.src = event.target?.result as string;
+    };
+    reader.onerror = () => {
+      toast.error("Error reading file");
+      setQrContent(null);
     };
     reader.readAsDataURL(file);
   };
@@ -71,7 +89,7 @@ const QRCodeReaderComponent = () => {
     const canvas = canvasRef.current;
 
     if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
 
       canvas.width = video.videoWidth;
@@ -85,7 +103,8 @@ const QRCodeReaderComponent = () => {
           canvas.width,
           canvas.height
         );
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
+        const data = new Uint8ClampedArray(imageData.data);
+        const code = jsQR(data, canvas.width, canvas.height);
 
         if (code) {
           setQrContent(code.data);

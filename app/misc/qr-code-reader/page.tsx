@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import QRCodeReaderComponent from "./components/qr-reader";
 
 export const metadata: Metadata = {
-  title: "QR Code Reader",
+  title: "QR Code Reader & Generator",
   description:
-    "Read QR codes from images or camera. Upload an image with a QR code or scan QR codes in real-time using your device camera. Instantly decode and display QR code content.",
+    "Read and generate QR codes. Upload an image or scan with your camera to read QR codes. Generate QR codes from text or URLs and download them as images.",
 };
 
 export default function QRCodeReaderPage() {

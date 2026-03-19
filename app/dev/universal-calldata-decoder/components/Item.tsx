@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import {  IFunctionFragement } from "./type";
+import { IFunctionFragement } from "./type";
 import { MdContentCopy } from "react-icons/md";
 import { copyToClipboard } from "@/common/utils";
 import clsx from "clsx";
@@ -9,6 +9,59 @@ import { convertNumberBetweenEtherUnit, ethUnitDecimals } from "@/app/number/uti
 enum Uint {
   ether = "ETH",
   wei = "WEI",
+}
+
+enum BytesFormat {
+  hex = "Hex",
+  decimal = "Decimal",
+  binary = "Binary",
+  text = "Text",
+}
+
+// Convert hex string to decimal string
+function hexToDecimal(hex: string): string {
+  try {
+    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+    if (!cleanHex) return "0";
+    return BigInt("0x" + cleanHex).toString(10);
+  } catch {
+    return "Invalid hex";
+  }
+}
+
+// Convert hex string to binary string
+function hexToBinary(hex: string): string {
+  try {
+    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+    if (!cleanHex) return "0";
+    return BigInt("0x" + cleanHex).toString(2);
+  } catch {
+    return "Invalid hex";
+  }
+}
+
+// Convert hex string to text (UTF-8)
+function hexToText(hex: string): string {
+  try {
+    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+    if (!cleanHex) return "";
+    // Remove trailing zeros (null bytes)
+    const trimmedHex = cleanHex.replace(/0+$/, "");
+    if (trimmedHex.length % 2 !== 0) return "Invalid hex length";
+
+    const bytes = [];
+    for (let i = 0; i < trimmedHex.length; i += 2) {
+      bytes.push(parseInt(trimmedHex.substring(i, i + 2), 16));
+    }
+    return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
+  } catch {
+    return "Invalid text";
+  }
+}
+
+// Check if type is a fixed-size bytes type (bytes1 to bytes32)
+function isFixedBytesType(type: string): boolean {
+  return /^bytes([1-9]|[12][0-9]|3[0-2])$/.test(type);
 }
 
 interface ItemProps {
@@ -37,14 +90,38 @@ const Item: FC<ItemProps> = ({
   depth++;
 
   const [sltUint, setSltUint] = useState("wei");
+  const [sltBytesFormat, setSltBytesFormat] = useState<keyof typeof BytesFormat>("hex");
   const [values, setValue] = useState(value);
+
   const handleCopy = (v: string) => {
     copyToClipboard(v);
   };
+
   const handleUnitChange = (newUnit: string) => {
     convertData(sltUint, newUnit);
     setSltUint(newUnit as Uint);
+  }
 
+  const handleBytesFormatChange = (newFormat: keyof typeof BytesFormat) => {
+    setSltBytesFormat(newFormat);
+    const hexValue = value.toString();
+
+    switch (newFormat) {
+      case "hex":
+        setValue(hexValue);
+        break;
+      case "decimal":
+        setValue(hexToDecimal(hexValue));
+        break;
+      case "binary":
+        setValue(hexToBinary(hexValue));
+        break;
+      case "text":
+        setValue(hexToText(hexValue));
+        break;
+      default:
+        setValue(hexValue);
+    }
   }
 
   const convertData = (fromUnit: string, toUnit: string) => {
@@ -95,7 +172,7 @@ const Item: FC<ItemProps> = ({
               </div>
               <div className="flex">
                 <span className="bg-gray-2  dark:bg-graydark border border-bodydark  block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
-                  <MdContentCopy size={20} onClick={() => handleCopy(value.toString())} />
+                  <MdContentCopy size={20} onClick={() => handleCopy(values.toString())} />
                 </span>
               </div>
             </>
@@ -107,7 +184,24 @@ const Item: FC<ItemProps> = ({
                 <select value={sltUint} className="p-1.5 rounded-lg border-bodydark border" onChange={(e) => handleUnitChange(e.target.value)}>
                   {
                     Object.keys(Uint).map((unit, index) => {
-                      return <option key={index}  value={unit}>{Uint[unit as keyof typeof Uint]}</option>
+                      return <option key={index} value={unit}>{Uint[unit as keyof typeof Uint]}</option>
+                    })
+                  }
+                </select>
+              </div>
+            ) : null
+          }
+          {
+            isFixedBytesType(type) ? (
+              <div className="ml-2">
+                <select
+                  value={sltBytesFormat}
+                  className="p-1.5 rounded-lg border-bodydark border"
+                  onChange={(e) => handleBytesFormatChange(e.target.value as keyof typeof BytesFormat)}
+                >
+                  {
+                    Object.keys(BytesFormat).map((format, index) => {
+                      return <option key={index} value={format}>{BytesFormat[format as keyof typeof BytesFormat]}</option>
                     })
                   }
                 </select>

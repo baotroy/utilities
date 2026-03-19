@@ -1,11 +1,208 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Colors */
+  --color-current: currentColor;
+  --color-transparent: transparent;
+  --color-white: #FFFFFF;
+  --color-black: #1C2434;
+  --color-black-2: #010101;
+  --color-body: #64748B;
+  --color-bodydark: #AEB7C0;
+  --color-bodydark1: #DEE4EE;
+  --color-bodydark2: #8A99AF;
+  --color-primary: #0071e3;
+  --color-secondary: #80CAEE;
+  --color-stroke: #E2E8F0;
+  --color-gray: #EFF4FB;
+  --color-graydark: #333A48;
+  --color-gray-2: #F7F9FC;
+  --color-gray-3: #FAFAFA;
+  --color-whiten: #F1F5F9;
+  --color-whiter: #F5F7FD;
+  --color-boxdark: #24303F;
+  --color-boxdark-2: #1A222C;
+  --color-strokedark: #2E3A47;
+  --color-form-strokedark: #3d4d60;
+  --color-form-input: #1d2a39;
+  --color-meta-1: #DC3545;
+  --color-meta-2: #EFF2F7;
+  --color-meta-3: #10B981;
+  --color-meta-4: #313D4A;
+  --color-meta-5: #259AE6;
+  --color-meta-6: #FFBA00;
+  --color-meta-7: #FF6766;
+  --color-meta-8: #F0950C;
+  --color-meta-9: #E5E7EB;
+  --color-success: #219653;
+  --color-danger: #D34053;
+  --color-warning: #FFA70B;
+  --color-red-600: #DC2626;
+  --color-amber-600: #D97706;
+  --color-amber-200: #FDE68A;
+  --color-lime-200: #D9F99D;
+  --color-green-500: #22C55E;
+  --color-error: #ff5e84;
+  --color-reset: #DEE4EF;
+  --color-gray-50: #e5e7eb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+
+  /* Custom Breakpoints */
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-3xl: 2000px;
+
+  /* Font Sizes */
+  --font-size-title-xxl: 44px;
+  --line-height-title-xxl: 55px;
+  --font-size-title-xl: 36px;
+  --line-height-title-xl: 45px;
+  --font-size-title-xl2: 33px;
+  --line-height-title-xl2: 45px;
+  --font-size-title-lg: 28px;
+  --line-height-title-lg: 35px;
+  --font-size-title-md: 24px;
+  --line-height-title-md: 30px;
+  --font-size-title-md2: 26px;
+  --line-height-title-md2: 30px;
+  --font-size-title-sm: 20px;
+  --line-height-title-sm: 26px;
+  --font-size-title-xsm: 18px;
+  --line-height-title-xsm: 24px;
+
+  /* Custom Spacing */
+  --spacing-4_5: 1.125rem;
+  --spacing-5_5: 1.375rem;
+  --spacing-6_5: 1.625rem;
+  --spacing-7_5: 1.875rem;
+  --spacing-8_5: 2.125rem;
+  --spacing-9_5: 2.375rem;
+  --spacing-10_5: 2.625rem;
+  --spacing-11_5: 2.875rem;
+  --spacing-12_5: 3.125rem;
+  --spacing-13: 3.25rem;
+  --spacing-13_5: 3.375rem;
+  --spacing-14_5: 3.625rem;
+  --spacing-15: 3.75rem;
+  --spacing-15_5: 3.875rem;
+  --spacing-16_5: 4.125rem;
+  --spacing-17: 4.25rem;
+  --spacing-17_5: 4.375rem;
+  --spacing-18: 4.5rem;
+  --spacing-18_5: 4.625rem;
+  --spacing-19: 4.75rem;
+  --spacing-19_5: 4.875rem;
+  --spacing-21: 5.25rem;
+  --spacing-21_5: 5.375rem;
+  --spacing-22: 5.5rem;
+  --spacing-22_5: 5.625rem;
+  --spacing-24_5: 6.125rem;
+  --spacing-25: 6.25rem;
+  --spacing-25_5: 6.375rem;
+  --spacing-26: 6.5rem;
+  --spacing-27: 6.75rem;
+  --spacing-27_5: 6.875rem;
+  --spacing-29: 7.25rem;
+  --spacing-29_5: 7.375rem;
+  --spacing-30: 7.5rem;
+  --spacing-31: 7.75rem;
+  --spacing-32_5: 8.125rem;
+  --spacing-34: 8.5rem;
+  --spacing-34_5: 8.625rem;
+  --spacing-35: 8.75rem;
+  --spacing-36_5: 9.125rem;
+  --spacing-37_5: 9.375rem;
+  --spacing-39: 9.75rem;
+  --spacing-39_5: 9.875rem;
+  --spacing-42_5: 10.625rem;
+  --spacing-45: 11.25rem;
+  --spacing-46: 11.5rem;
+  --spacing-47_5: 11.875rem;
+  --spacing-49: 12.25rem;
+  --spacing-50: 12.5rem;
+  --spacing-52_5: 13.125rem;
+  --spacing-54: 13.5rem;
+  --spacing-54_5: 13.625rem;
+  --spacing-55: 13.75rem;
+  --spacing-55_5: 13.875rem;
+  --spacing-59: 14.75rem;
+  --spacing-60: 15rem;
+  --spacing-62_5: 15.625rem;
+  --spacing-65: 16.25rem;
+  --spacing-67: 16.75rem;
+  --spacing-67_5: 16.875rem;
+  --spacing-70: 17.5rem;
+  --spacing-72_5: 18.125rem;
+  --spacing-73: 18.25rem;
+  --spacing-75: 18.75rem;
+  --spacing-90: 22.5rem;
+  --spacing-94: 23.5rem;
+  --spacing-95: 23.75rem;
+  --spacing-100: 25rem;
+  --spacing-115: 28.75rem;
+  --spacing-125: 31.25rem;
+  --spacing-132_5: 33.125rem;
+  --spacing-150: 37.5rem;
+  --spacing-171_5: 42.875rem;
+  --spacing-180: 45rem;
+  --spacing-187_5: 46.875rem;
+  --spacing-203: 50.75rem;
+  --spacing-230: 57.5rem;
+  --spacing-242_5: 60.625rem;
+
+  /* Z-Index */
+  --z-1: 1;
+  --z-9: 9;
+  --z-99: 99;
+  --z-999: 999;
+  --z-9999: 9999;
+  --z-99999: 99999;
+  --z-999999: 999999;
+
+  /* Box Shadows */
+  --shadow-default: 0px 8px 13px -3px rgba(0, 0, 0, 0.07);
+  --shadow-card: 0px 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-card-2: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-switcher: 0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1);
+  --shadow-switch-1: 0px 0px 5px rgba(0, 0, 0, 0.15);
+  --shadow-1: 0px 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0px 1px 4px rgba(0, 0, 0, 0.12);
+  --shadow-3: 0px 1px 5px rgba(0, 0, 0, 0.14);
+  --shadow-4: 0px 4px 10px rgba(0, 0, 0, 0.12);
+  --shadow-5: 0px 1px 1px rgba(0, 0, 0, 0.15);
+  --shadow-6: 0px 3px 15px rgba(0, 0, 0, 0.1);
+  --shadow-7: -5px 0 0 #313D4A, 5px 0 0 #313D4A;
+  --shadow-8: 1px 0 0 #313D4A, -1px 0 0 #313D4A, 0 1px 0 #313D4A, 0 -1px 0 #313D4A, 0 3px 13px rgb(0 0 0 / 8%);
+
+  /* Drop Shadows */
+  --drop-shadow-1: 0px 1px 0px #E2E8F0;
+  --drop-shadow-2: 0px 1px 4px rgba(0, 0, 0, 0.12);
+
+  /* Animations */
+  --animate-ping-once: ping 5s cubic-bezier(0, 0, 0.2, 1);
+  --animate-rotating: rotating 30s linear infinite;
+  --animate-spin-1_5: spin 1.5s linear infinite;
+  --animate-spin-2: spin 2s linear infinite;
+  --animate-spin-3: spin 3s linear infinite;
+}
+
+@keyframes rotating {
+  0%, 100% { transform: rotate(360deg); }
+  50% { transform: rotate(0deg); }
+}
+
+/* Dark mode support */
+@variant dark (&:where(.dark, .dark *));
 
 @layer base {
- body {
- @apply font-normal text-base text-black relative z-1;
- }
+  body {
+    @apply font-normal text-base text-black relative z-1;
+  }
 }
 
 @layer utilities {

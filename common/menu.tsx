@@ -201,7 +201,7 @@ const menus: menuProps[] = [
         label: "QR Code Reader",
         href: "/misc/qr-code-reader",
         icon: null,
-        breadcrumbUseLabel: true,
+        // breadcrumbUseLabel: true,
       },
       {
         label: "Ethereum Private Key Address Database",

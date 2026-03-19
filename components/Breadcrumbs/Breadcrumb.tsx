@@ -30,7 +30,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
     }
   }, [pathname]);
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-6 flex flex-row items-center justify-between gap-3">
       <h2 className="text-title-md2 font-semibold text-graydark dark:text-bodydark2">
         {convertCase(pageTitle, CaseType.Title)}{isBeta && <i> (beta)</i>}
       </h2>

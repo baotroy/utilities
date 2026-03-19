@@ -50,14 +50,13 @@ export default function EpochConverterComponent() {
     return () => clearInterval(id);
   }, []);
   const handleMouseEnter = () => {
-    clearInterval(0); // eslint-disable-line no-use-before-define
+    clearInterval(intervalId as NodeJS.Timer);
   };
 
   const handleMouseLeave = () => {
     const id = setInterval(() => {
       setTickingUnixTimestamp(getCurrent());
     }, 1000);
-
 
     setIntervalId(id);
   };

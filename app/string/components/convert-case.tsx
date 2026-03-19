@@ -61,6 +61,36 @@ export default function ConvertCaseComponent() {
       },
     },
     {
+      label: "slug-case",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Slug));
+      },
+    },
+    {
+      label: "kebab-case",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Kebab));
+      },
+    },
+    {
+      label: "snake_case",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Snake));
+      },
+    },
+    {
+      label: "camelCase",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Camel));
+      },
+    },
+    {
+      label: "PascalCase",
+      handleClick: () => {
+        setText(convertCase(text, CaseType.Pascal));
+      },
+    },
+    {
       label: "Download Text",
       handleClick: () => {
         const element = document.createElement("a");
@@ -87,7 +117,7 @@ export default function ConvertCaseComponent() {
   return (
     <>
       <Breadcrumb />
-      <div className="max-w-4xl">
+      <div className="max-w-6xl">
         <p className="mb-6 text-sm text-body dark:text-bodydark2">
           Convert text between different case formats including lowercase, UPPERCASE, Title Case, Sentence case, and more.
         </p>

@@ -9,6 +9,11 @@ export enum CaseType {
   Title = "title",
   Inverse = "inverse",
   Rotate = "rotate",
+  Slug = "slug",
+  Kebab = "kebab",
+  Snake = "snake",
+  Camel = "camel",
+  Pascal = "pascal",
 }
 
 export default function convertCase(str: string, type: CaseType): string {
@@ -24,6 +29,11 @@ export default function convertCase(str: string, type: CaseType): string {
   if (type === CaseType.Title) return convert(str, CaseType.Title);
   if (type === CaseType.Inverse) return convert(str, CaseType.Inverse);
   if (type === CaseType.Rotate) return convert(str, CaseType.Rotate);
+  if (type === CaseType.Slug) return _slug(str);
+  if (type === CaseType.Kebab) return _kebab(str);
+  if (type === CaseType.Snake) return _snake(str);
+  if (type === CaseType.Camel) return _camel(str);
+  if (type === CaseType.Pascal) return _pascal(str);
   return str.toLowerCase();
 }
 
@@ -32,14 +42,14 @@ function convert(str: string, type: CaseType): string {
   // Loop each line in the array
   for (let i = 0; i < a.length; i++) {
     const original = a[i];
-   
+
     if (type === CaseType.Lowercase) {
       const line = original.toLowerCase().trim();
       if (line.trim() === "") {
         continue;
       }
       const after = _sentense(line);
-      
+
       // Replace the original line with the new one
       a[i] = original.replace(line, after);
     } else if (type === CaseType.Alternating) {
@@ -116,7 +126,7 @@ function _title(str: string): string {
       /* Ignore intentional capitalization */
       /**
        * test failed Ddsf  sdf asdf. bdfdsf.sdfsdf.   cdfsd.     ddfs. edf
-       * bdfdsf.sdfsdf NOT UPPER CASE b 
+       * bdfdsf.sdfsdf NOT UPPER CASE b
        */
       // if (current.substring(1).search(/[A-Z]|\../) > -1) {
       //   return current;
@@ -143,18 +153,60 @@ function _inverse(str: string): string {
 
     if (char === char.toLowerCase()) {
       convertedString += char.toUpperCase();
-    }
-    else if (char === char.toUpperCase()) {
+    } else if (char === char.toUpperCase()) {
       convertedString += char.toLowerCase();
-    }
-    else {
+    } else {
       convertedString += char;
     }
   }
   return convertedString;
 }
 
-function _rotate(str: string): string{
+function _rotate(str: string): string {
   return str.split("").reverse().join("");
 }
 
+function _toWords(str: string): string[] {
+  return str
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_\-]+/g, " ")
+    .replace(/[^\w\s]/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function _slug(str: string): string {
+  return _toWords(str)
+    .map((w) => w.toLowerCase())
+    .join("-");
+}
+
+function _kebab(str: string): string {
+  return _toWords(str)
+    .map((w) => w.toLowerCase())
+    .join("-");
+}
+
+function _snake(str: string): string {
+  return _toWords(str)
+    .map((w) => w.toLowerCase())
+    .join("_");
+}
+
+function _camel(str: string): string {
+  const words = _toWords(str);
+  return words
+    .map((w, i) =>
+      i === 0
+        ? w.toLowerCase()
+        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join("");
+}
+
+function _pascal(str: string): string {
+  return _toWords(str)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join("");
+}

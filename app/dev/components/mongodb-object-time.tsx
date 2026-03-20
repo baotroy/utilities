@@ -203,6 +203,7 @@ export default function MongoObjectTimeComponent() {
                   type="text"
                   value={date.toISOString()}
                   onFocus={onFocus}
+                  readOnly
                   className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                 />
               </div>
@@ -212,6 +213,7 @@ export default function MongoObjectTimeComponent() {
                   type="text"
                   value={Math.round(date.getTime() / 1000)}
                   onFocus={onFocus}
+                  readOnly
                   className="w-1/2 p-1.5 outline-none border rounded-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
                 />
               </div>

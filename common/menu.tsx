@@ -191,6 +191,11 @@ const menus: menuProps[] = [
         href: "/dev/diff-viewer",
         icon: null,
       },
+      {
+        label: "Base64 Encode/Decode",
+        href: "/dev/base64-encoder",
+        icon: null,
+      },
     ],
   },
   {

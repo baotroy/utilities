@@ -444,39 +444,37 @@ const QRCodeReaderComponent = () => {
           </div>
 
           {/* Generated QR Code */}
-          {generatedQR && (
-            <div className="mb-6 rounded-lg bg-blue-50 p-6 dark:bg-meta-4">
-              <h3 className="mb-4 font-medium text-black dark:text-white">
-                Generated QR Code
-              </h3>
-              <div className="mb-4 flex justify-center">
-                <canvas
-                  ref={generatorCanvasRef}
-                  className="rounded-lg border border-stroke dark:border-strokedark"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={downloadQRCode}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
-                >
-                  <MdDownload className="h-5 w-5" />
-                  Download
-                </button>
-                <button
-                  onClick={() => {
-                    if (generatedQR) {
-                      copyToClipboard(generatedQR);
-                    }
-                  }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
-                >
-                  <MdContentCopy className="h-5 w-5" />
-                  Copy Text
-                </button>
-              </div>
+          <div className={`mb-6 rounded-lg bg-blue-50 p-6 dark:bg-meta-4 ${generatedQR ? "" : "hidden"}`}>
+            <h3 className="mb-4 font-medium text-black dark:text-white">
+              Generated QR Code
+            </h3>
+            <div className="mb-4 flex justify-center">
+              <canvas
+                ref={generatorCanvasRef}
+                className="rounded-lg border border-stroke dark:border-strokedark"
+              />
             </div>
-          )}
+            <div className="flex gap-3">
+              <button
+                onClick={downloadQRCode}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-90"
+              >
+                <MdDownload className="h-5 w-5" />
+                Download
+              </button>
+              <button
+                onClick={() => {
+                  if (generatedQR) {
+                    copyToClipboard(generatedQR);
+                  }
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-primary px-4 py-2.5 text-center font-medium text-primary hover:bg-opacity-90"
+              >
+                <MdContentCopy className="h-5 w-5" />
+                Copy Text
+              </button>
+            </div>
+          </div>
 
           {/* Info Box */}
           {!generatedQR && (

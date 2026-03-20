@@ -101,6 +101,11 @@ const menus: menuProps[] = [
     groupName: "DEV",
     items: [
       {
+        label: "UUID Generator",
+        href: "/dev/uuid-generator",
+        icon: null,
+      },
+      {
         label: "JSON Prettier",
         // slug: "convert-case",
         href: "/dev/json-prettier",

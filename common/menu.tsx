@@ -88,12 +88,16 @@ const menus: menuProps[] = [
         href: "/date/epoch-converter",
         icon: null,
       },
-      // {
-      //   label: "Date Difference",
-      //   // slug: "date-difference",
-      //   href: "/date/date-difference",
-      //   icon: null,
-      // },
+      {
+        label: "Date Difference",
+        href: "/date/date-difference",
+        icon: null,
+      },
+      {
+        label: "Timezone Converter",
+        href: "/date/timezone-converter",
+        icon: null,
+      },
     ],
   },
   {

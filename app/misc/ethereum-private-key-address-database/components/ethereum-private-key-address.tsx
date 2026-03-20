@@ -14,10 +14,9 @@ import { useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
 BigNumber.config({ ROUNDING_MODE: 2 }); // ROUND CEIL
 
-import { getBalances, parseBalance } from "@/common/utils";
+import { getBalances, parseBalance } from "@/common/ethUtils";
 import clsx from "clsx";
 import PaginatorBox from "./paginatorBox";
-import { set } from "lodash";
 
 const EthereumPrivateKeyAddressComponent = () => {
   const getValidPage = (page: BigNumber | number | string): BigNumber => {

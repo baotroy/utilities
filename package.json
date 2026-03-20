@@ -5,6 +5,12 @@
   "engines": {
     "node": ">=25.0.0"
   },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,11 +24,8 @@
   "dependencies": {
     "@next/third-parties": "^16.0.0",
     "@prantlf/jsonlint": "^12.0.0",
-    "@react-jvectormap/core": "^1.0.4",
-    "@react-jvectormap/unitedstates": "^1.0.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/react": "^19.0.0",
-    "apexcharts": "^3.41.1",
     "axios": "^1.7.7",
     "bcryptjs": "^3.0.3",
     "bignumber.js": "^9.1.2",
@@ -39,7 +42,6 @@
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-ace": "^14.0.0",
-    "react-apexcharts": "^1.4.1",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^4.12.0",
@@ -56,7 +58,6 @@
     "@babel/preset-typescript": "^7.24.1",
     "@types/bcryptjs": "^3.0.0",
     "@types/jest": "^29.5.12",
-    "@types/lodash": "^4.14.202",
     "@types/qrcode": "^1.5.6",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",

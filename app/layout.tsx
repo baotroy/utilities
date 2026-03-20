@@ -1,69 +1,35 @@
-"use client";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import "./custom.css";
-import { useState } from "react";
-
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import ToasterContext from "@/context/ToasterContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import ClientLayout from "@/components/ClientLayout";
 
+export const metadata: Metadata = {
+  title: {
+    default: "Utilities",
+    template: "%s | Utilities",
+  },
+  description: "A collection of useful developer utilities and tools",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [loading] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   setTimeout(() => setLoading(false), 1000);
-  // }, []);
-
   return (
     <html lang="en">
-      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GTAG!} />
+      <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body suppressHydrationWarning={true}>
-        <ToasterContext />
-        <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          {loading ? (
-            // <Loader />
-            <></>
-          ) : (
-            <div className="flex h-screen overflow-hidden">
-              {/* <!-- ===== Sidebar Start ===== --> */}
-              <Sidebar
-                sidebarOpen={sidebarOpen}
-                setSidebarOpen={setSidebarOpen}
-            />
-              {/* <!-- ===== Sidebar End ===== --> */}
-
-              {/* <!-- ===== Content Area Start ===== --> */}
-              <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-                {/* <!-- ===== Header Start ===== --> */}
-                <Header
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                {/* <!-- ===== Header End ===== --> */}
-
-                {/* <!-- ===== Main Content Start ===== --> */}
-                <main>
-                  <div className="mx-auto max-w-screen-2xl p-4 pt-1 md:p-6 2xl:p-10">
-                    {children}
-                  </div>
-                </main>
-                {/* <!-- ===== Main Content End ===== --> */}
-              </div>
-              {/* <!-- ===== Content Area End ===== --> */}
-            </div>
-          )}
-        </div>
-        <div className=" text-gray-400 text-xs text-right m-2">
-          <a href="mailto:baotroy@gmail.com"><i>baotroy@gmail.com</i></a>
-        </div>
+        <ClientLayout>{children}</ClientLayout>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GTAG!} />
       </body>
     </html>
   );

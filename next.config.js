@@ -10,6 +10,18 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["react-icons"],
   },
+  // Cache headers for static assets
+  headers: async () => [
+    {
+      source: "/:all*(svg|jpg|jpeg|png|gif|ico|webp|woff|woff2)",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
+  ],
 };
 
 module.exports = nextConfig;

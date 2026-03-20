@@ -55,12 +55,11 @@ const menus: menuProps[] = [
   {
     groupName: "NUMBER",
     items: [
-      // {
-      //   label: "Big Number Calculator",
-      //   // slug: "big-number-calculator",
-      //   href: "/number/convert-case",
-      //   icon: null,
-      // },
+      {
+        label: "Big Number Calculator",
+        href: "/number/big-number-calculator",
+        icon: null,
+      },
       {
         label: "Number Conversion",
         // slug: "ethereum-convert-units",

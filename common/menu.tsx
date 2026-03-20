@@ -186,6 +186,11 @@ const menus: menuProps[] = [
         href: "/dev/http-status-codes",
         icon: null,
       },
+      {
+        label: "Diff Viewer",
+        href: "/dev/diff-viewer",
+        icon: null,
+      },
     ],
   },
   {

@@ -220,6 +220,16 @@ const QRCodeReaderComponent = () => {
     };
   }, []);
 
+  // Re-draw QR code when switching back to generator tab
+  useEffect(() => {
+    if (activeTab === "generator" && generatedQR) {
+      const canvas = generatorCanvasRef.current;
+      if (canvas) {
+        QRCode.toCanvas(canvas, generatedQR, { width: 256, margin: 2 }).catch(console.error);
+      }
+    }
+  }, [activeTab, generatedQR]);
+
   return (
     <>
       <Breadcrumb />

@@ -299,19 +299,14 @@ const menus: menuProps[] = [
 ];
 
 // Sort items within each group alphabetically (except Home group)
-const sortedMenus = menus.map((group) => ({
+const sortedMenus: menuProps[] = menus.map((group) => ({
   ...group,
   items: group.groupName
     ? [...group.items].sort((a, b) => a.label.localeCompare(b.label))
     : group.items,
 }));
 
-export const menuItems = sortedMenus.reduce(
-  (acc: itemProps[], curr: menuProps): itemProps[] => {
-    return [...acc, ...curr.items];
-  },
-  []
-);
+export const menuItems: itemProps[] = sortedMenus.flatMap((group) => group.items);
 
 export default sortedMenus;
 

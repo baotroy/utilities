@@ -138,9 +138,9 @@ export default function BigNumberCalculatorComponent() {
                 <button
                   key={op}
                   onClick={() => setOperation(op)}
-                  className={`px-4 py-2 rounded border transition-colors min-w-[60px] ${operation === op
-                      ? "bg-primary text-white border-primary"
-                      : "bg-white dark:bg-boxdark border-stroke dark:border-strokedark hover:border-primary"
+                  className={`px-4 py-2 rounded border transition-colors min-w-15 ${operation === op
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white dark:bg-boxdark border-stroke dark:border-strokedark hover:border-primary"
                     }`}
                   title={operationLabels[op]}
                 >

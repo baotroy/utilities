@@ -67,9 +67,9 @@ export default function ImageResizeComponent() {
             </div>
             <div className="border border-bodydark ">
               <div className="xl:flex block">
-                <div className="xl:w-[350px] text-center w-full border-r border-b py-2 border-bodydark">
+                <div className="xl:w-87.5 text-center w-full border-r border-b py-2 border-bodydark">
                   <button
-                    className={`px-4 py-1.5 rounded-[0.375rem] ${activeTab === "resize" ? "bg-meta-5 text-white" : ""
+                    className={`px-4 py-1.5 rounded-md ${activeTab === "resize" ? "bg-meta-5 text-white" : ""
                       }`}
                     onClick={() => handleTabClick("resize")}
                   >
@@ -79,7 +79,7 @@ export default function ImageResizeComponent() {
                     </div>
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-[0.375rem] ${activeTab === "crop" ? "bg-meta-5 text-white" : ""
+                    className={`px-4 py-2 rounded-md ${activeTab === "crop" ? "bg-meta-5 text-white" : ""
                       }`}
                     onClick={() => handleTabClick("crop")}
                   >
@@ -88,7 +88,7 @@ export default function ImageResizeComponent() {
                     </div>
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-[0.375rem] ${activeTab === "rotate" ? "bg-meta-5 text-white" : ""
+                    className={`px-4 py-2 rounded-md ${activeTab === "rotate" ? "bg-meta-5 text-white" : ""
                       }`}
                     onClick={() => handleTabClick("rotate")}
                   >

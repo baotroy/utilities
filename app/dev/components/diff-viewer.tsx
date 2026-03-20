@@ -426,8 +426,8 @@ export default function DiffViewerComponent() {
                 <button
                   onClick={() => setViewMode("split")}
                   className={`px-3 py-1 text-sm ${viewMode === "split"
-                      ? "bg-primary text-white"
-                      : "bg-transparent text-body dark:text-bodydark2 hover:bg-gray-100 dark:hover:bg-meta-4"
+                    ? "bg-primary text-white"
+                    : "bg-transparent text-body dark:text-bodydark2 hover:bg-gray-100 dark:hover:bg-meta-4"
                     }`}
                 >
                   Split
@@ -435,8 +435,8 @@ export default function DiffViewerComponent() {
                 <button
                   onClick={() => setViewMode("unified")}
                   className={`px-3 py-1 text-sm border-l border-stroke dark:border-strokedark ${viewMode === "unified"
-                      ? "bg-primary text-white"
-                      : "bg-transparent text-body dark:text-bodydark2 hover:bg-gray-100 dark:hover:bg-meta-4"
+                    ? "bg-primary text-white"
+                    : "bg-transparent text-body dark:text-bodydark2 hover:bg-gray-100 dark:hover:bg-meta-4"
                     }`}
                 >
                   Unified
@@ -497,15 +497,15 @@ export default function DiffViewerComponent() {
                     {diff.map((line, idx) => (
                       <div
                         key={idx}
-                        className={`flex min-h-[24px] ${line.type === "removed" || line.type === "modified"
-                            ? "bg-red-100 dark:bg-red-900/30"
-                            : line.type === "added"
-                              ? "bg-gray-50 dark:bg-meta-4"
-                              : ""
+                        className={`flex min-h-6 ${line.type === "removed" || line.type === "modified"
+                          ? "bg-red-100 dark:bg-red-900/30"
+                          : line.type === "added"
+                            ? "bg-gray-50 dark:bg-meta-4"
+                            : ""
                           }`}
                       >
                         {showLineNumbers && (
-                          <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
+                          <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
                             {line.leftLine || ""}
                           </span>
                         )}
@@ -525,15 +525,15 @@ export default function DiffViewerComponent() {
                     {diff.map((line, idx) => (
                       <div
                         key={idx}
-                        className={`flex min-h-[24px] ${line.type === "added" || line.type === "modified"
-                            ? "bg-green-100 dark:bg-green-900/30"
-                            : line.type === "removed"
-                              ? "bg-gray-50 dark:bg-meta-4"
-                              : ""
+                        className={`flex min-h-6 ${line.type === "added" || line.type === "modified"
+                          ? "bg-green-100 dark:bg-green-900/30"
+                          : line.type === "removed"
+                            ? "bg-gray-50 dark:bg-meta-4"
+                            : ""
                           }`}
                       >
                         {showLineNumbers && (
-                          <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
+                          <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
                             {line.rightLine || ""}
                           </span>
                         )}
@@ -561,19 +561,19 @@ export default function DiffViewerComponent() {
                   {diff.map((line, idx) => (
                     <div
                       key={idx}
-                      className={`flex min-h-[24px] ${getLineClass(line.type)}`}
+                      className={`flex min-h-6 ${getLineClass(line.type)}`}
                     >
                       {showLineNumbers && (
                         <>
-                          <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
+                          <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
                             {line.leftLine || ""}
                           </span>
-                          <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
+                          <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark select-none">
                             {line.rightLine || ""}
                           </span>
                         </>
                       )}
-                      <span className="w-6 flex-shrink-0 px-1 py-1 text-center text-xs font-bold select-none">
+                      <span className="w-6 shrink-0 px-1 py-1 text-center text-xs font-bold select-none">
                         {line.type === "added" ? "+" : line.type === "removed" ? "-" : line.type === "modified" ? "~" : ""}
                       </span>
                       <pre className="flex-1 whitespace-pre px-2 py-1 text-black dark:text-white overflow-x-auto">

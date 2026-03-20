@@ -24,41 +24,35 @@ const FractionComponent: React.FC<FractionComponentProps> = ({
     <>
       <table id="tbl1">
         <tbody>
-          <tr>
-            {!!whole && !enableWhole && (
-              <td rowSpan={2}>
-                <TextBox
-                  value={whole || ""}
-                  type="number"
-                  additionalClass="text-center w-20 mr-1"
-                  onChange={handleIntegerChange}
-                />
-                {enableWhole}
-              </td>
-            )}
-            {numerator && (
-              <td id="td13" className="border-b-2">
-                <TextBox
-                  value={numerator || ""}
-                  type="number"
-                  additionalClass="text-center mb-1 w-30"
-                  onChange={handleNumberatorChange}
-                />
-              </td>
-            )}
-          </tr>
-          <tr>
-            {numerator && (
-              <td id="td21">
-                <TextBox
-                  value={denominator || ""}
-                  type="number"
-                  additionalClass="text-center mt-1 w-30"
-                  onChange={handleDenominatorChange}
-                />
-              </td>
-            )}
-          </tr>
+          <tr>{!!whole && !enableWhole && (
+            <td rowSpan={2}>
+              <TextBox
+                value={whole || ""}
+                type="number"
+                additionalClass="text-center w-20 mr-1"
+                onChange={handleIntegerChange}
+              />
+            </td>
+          )}{numerator && (
+            <td id="td13" className="border-b-2">
+              <TextBox
+                value={numerator || ""}
+                type="number"
+                additionalClass="text-center mb-1 w-30"
+                onChange={handleNumberatorChange}
+              />
+            </td>
+          )}</tr>
+          <tr>{numerator && (
+            <td id="td21">
+              <TextBox
+                value={denominator || ""}
+                type="number"
+                additionalClass="text-center mt-1 w-30"
+                onChange={handleDenominatorChange}
+              />
+            </td>
+          )}</tr>
         </tbody>
       </table>
     </>

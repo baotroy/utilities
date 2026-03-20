@@ -64,7 +64,7 @@ const EthereumInputDataDecoderComponent: FC<
               rows={35}
               additionalClass="w-full text-sm leading-4"
               value={output}
-              readOnly
+              readonly
             />
           </div>
         </div>

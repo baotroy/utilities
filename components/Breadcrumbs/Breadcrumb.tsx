@@ -2,33 +2,25 @@ import Link from "next/link";
 import convertCase, { CaseType } from "@/app/string/utils";
 import { usePathname } from "next/navigation";
 import { menuItems } from "@/common/menu";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 interface BreadcrumbProps {
   pageName?: string;
 }
 const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
   const pathname = usePathname();
-  const pathElements = pathname.split("/");
-  const [pageTitle, setPageTitle] = useState("");
-  const [pName, setPName] = useState("");
-  const [isBeta, setIsBeta] = useState(false);
-  useEffect(() => {
-    let pageTitle = "";
-    if (!pageName) {
-      const menu = menuItems.find((menu) => menu.href === pathname);
-      pageName = pathElements[pathElements.length - 1].split("-").join(" ");
-      pageTitle = pageName;
-      if (menu?.breadcrumbUseLabel) {
-        pageTitle = menu.label;
-      }
-      if (menu?.beta !== isBeta) {
-        setIsBeta(menu?.beta || false);
-      }
-      setPageTitle(pageTitle);
-      setPName(pageName);
-    }
-  }, [pathname]);
+
+  const { pageTitle, pName, isBeta } = useMemo(() => {
+    const pathElements = pathname.split("/");
+    const menu = menuItems.find((m) => m.href === pathname);
+    const name = pageName || pathElements[pathElements.length - 1].split("-").join(" ");
+    const title = menu?.breadcrumbUseLabel ? menu.label : name;
+    return {
+      pageTitle: title,
+      pName: name,
+      isBeta: menu?.beta || false,
+    };
+  }, [pathname, pageName]);
   return (
     <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
       <h2 className="text-2xl sm:text-3xl font-semibold text-graydark dark:text-bodydark2">

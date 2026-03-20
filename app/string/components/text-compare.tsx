@@ -168,7 +168,7 @@ export default function TextCompareComponent() {
                   key={idx}
                   className={`flex ${getLineClass(line.type)}`}
                 >
-                  <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark">
+                  <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark">
                     {line.lineNumber}
                   </span>
                   <pre className="flex-1 whitespace-pre-wrap break-all px-2 py-1 text-black dark:text-white">
@@ -184,7 +184,7 @@ export default function TextCompareComponent() {
                   key={idx}
                   className={`flex ${getLineClass(line.type)}`}
                 >
-                  <span className="w-10 flex-shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark">
+                  <span className="w-10 shrink-0 border-r border-stroke px-2 py-1 text-right text-xs text-bodydark2 dark:border-strokedark">
                     {line.lineNumber}
                   </span>
                   <pre className="flex-1 whitespace-pre-wrap break-all px-2 py-1 text-black dark:text-white">

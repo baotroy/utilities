@@ -25,6 +25,7 @@ const QRCodeReaderComponent = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const generatorCanvasRef = useRef<HTMLCanvasElement>(null);
+  const isScanningRef = useRef(false);
 
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,17 +80,26 @@ const QRCodeReaderComponent = () => {
   // Start camera
   const startCamera = async () => {
     try {
+      setCameraActive(true);
+      setIsScanning(true);
+      isScanningRef.current = true;
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setCameraActive(true);
-        setIsScanning(true);
-        scanFrame();
-      }
+      // Wait for next tick so video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().then(() => {
+            scanFrame();
+          }).catch(console.error);
+        }
+      }, 0);
     } catch (err) {
       toast.error("Unable to access camera");
+      setCameraActive(false);
+      setIsScanning(false);
+      isScanningRef.current = false;
       console.error(err);
     }
   };
@@ -128,13 +138,14 @@ const QRCodeReaderComponent = () => {
       }
     }
 
-    if (isScanning) {
+    if (isScanningRef.current) {
       animationFrameRef.current = requestAnimationFrame(scanFrame);
     }
   };
 
   // Stop camera
   const stopCamera = () => {
+    isScanningRef.current = false;
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach((track) => track.stop());
@@ -332,13 +343,13 @@ const QRCodeReaderComponent = () => {
 
           {/* Video Element */}
           {cameraActive && (
-            <div className="mb-6">
+            <div className="mb-6 flex justify-center">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
-                className="w-full rounded-lg border border-stroke dark:border-strokedark"
-                style={{ maxHeight: "400px", objectFit: "cover" }}
+                className="rounded-lg border border-stroke dark:border-strokedark"
+                style={{ width: "300px", height: "300px", objectFit: "cover" }}
               />
               <canvas
                 ref={canvasRef}

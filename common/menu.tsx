@@ -1,5 +1,14 @@
 import { IconType } from "react-icons";
-import { MdOutlineDashboard } from "react-icons/md";
+import {
+  MdOutlineDashboard,
+  MdTextFields,
+  MdNumbers,
+  MdCalendarToday,
+  MdCode,
+  MdInsertDriveFile,
+  MdImage,
+  MdApps,
+} from "react-icons/md";
 interface childProps {
   label: string;
   href: string;
@@ -15,12 +24,14 @@ interface itemProps {
 }
 interface menuProps {
   groupName: string | null;
+  groupIcon?: IconType | null;
   items: itemProps[];
 }
 
 const menus: menuProps[] = [
   {
     groupName: "",
+    groupIcon: null,
     items: [
       {
         label: "Home",
@@ -32,6 +43,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "STRING",
+    groupIcon: MdTextFields,
     items: [
       {
         label: "Convert Case",
@@ -53,6 +65,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "NUMBER",
+    groupIcon: MdNumbers,
     items: [
       {
         label: "Big Number Calculator",
@@ -81,6 +94,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "DATE",
+    groupIcon: MdCalendarToday,
     items: [
       {
         label: "Epoch Converter",
@@ -102,6 +116,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "DEV",
+    groupIcon: MdCode,
     items: [
       {
         label: "UUID Generator",
@@ -200,6 +215,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "FILE",
+    groupIcon: MdInsertDriveFile,
     items: [
       {
         label: "File To Base64",
@@ -226,6 +242,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "IMAGE",
+    groupIcon: MdImage,
     items: [
       {
         label: "Image Resize",
@@ -242,6 +259,7 @@ const menus: menuProps[] = [
   },
   {
     groupName: "MISC",
+    groupIcon: MdApps,
     items: [
       {
         label: "Random Password Generator",
@@ -280,14 +298,22 @@ const menus: menuProps[] = [
   },
 ];
 
-export const menuItems = menus.reduce(
+// Sort items within each group alphabetically (except Home group)
+const sortedMenus = menus.map((group) => ({
+  ...group,
+  items: group.groupName
+    ? [...group.items].sort((a, b) => a.label.localeCompare(b.label))
+    : group.items,
+}));
+
+export const menuItems = sortedMenus.reduce(
   (acc: itemProps[], curr: menuProps): itemProps[] => {
     return [...acc, ...curr.items];
   },
   []
 );
 
-export default menus;
+export default sortedMenus;
 
 // color picker
 // MongoDB ObjectId ↔ Timestamp Converter

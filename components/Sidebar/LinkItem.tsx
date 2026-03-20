@@ -37,12 +37,15 @@ const LinkItem: React.FC<LinkItemProps> = ({
           items-center
           rounded-sm 
           px-4 
+          py-1.5
+          text-base lg:text-sm
           duration-300
           ease-in-out 
           font-normal
           leading-tight
+          hover:bg-gray-100 dark:hover:bg-meta-4
           `,
-          isFocus ? "italic" : "text-graydark dark:text-bodydark2"
+          isFocus ? "text-primary font-medium bg-primary/10" : "text-gray-700 dark:text-bodydark2"
         )}
         onClick={handleClick}
       >

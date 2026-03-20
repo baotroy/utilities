@@ -231,7 +231,6 @@ export default function JwtDecoderComponent() {
               <textarea
                 rows={20}
                 placeholder=""
-                defaultValue={`${headerHash}.${payloadHash}.${secretHash}`}
                 value={token}
                 onChange={(e) => handleChangeToken(e.target.value)}
                 spellCheck={false}
@@ -260,7 +259,6 @@ export default function JwtDecoderComponent() {
               <textarea
                 rows={5}
                 placeholder=""
-                defaultValue={showJSON(header)}
                 value={showJSON(header)}
                 onChange={(e) => handleInputHeaderChange(e.target.value)}
                 spellCheck={false}
@@ -274,7 +272,6 @@ export default function JwtDecoderComponent() {
               <textarea
                 rows={6}
                 placeholder=""
-                defaultValue={showJSON(payload)}
                 value={showJSON(payload)}
                 onChange={(e) => handleInputPayloadChange(e.target.value)}
                 spellCheck={false}
@@ -288,7 +285,6 @@ export default function JwtDecoderComponent() {
               <textarea
                 rows={5}
                 placeholder=""
-                defaultValue={secret}
                 value={secret}
                 spellCheck={false}
                 onChange={(e) => handleUpdateSecret(e.target.value)}

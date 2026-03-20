@@ -1,5 +1,4 @@
 import { parse } from "@prantlf/jsonlint";
-import type { Secret } from "jsonwebtoken";
 import { TypeAlgorithm } from "./type";
 
 // JSON
@@ -58,67 +57,61 @@ export const base64UrlDecode = (input: string): string => {
   return decoded;
 };
 
-// Dynamically import jsonwebtoken only when needed (avoids SSR issues)
-export const createJwt = async (
-  payload: string | object | Buffer,
-  algorithm: TypeAlgorithm,
-  secret: Secret
-): Promise<string> => {
-  const jwt = (await import("jsonwebtoken")).default;
-  return jwt.sign(payload, secret, { algorithm });
+// Browser-compatible JWT creation using Web Crypto API
+const algorithmMap: Record<string, { name: string; hash: string }> = {
+  HS256: { name: "HMAC", hash: "SHA-256" },
+  HS384: { name: "HMAC", hash: "SHA-384" },
+  HS512: { name: "HMAC", hash: "SHA-512" },
 };
 
-// Synchronous version for client-side only (use with caution)
-let jwtModule: typeof import("jsonwebtoken") | null = null;
-
-export const createJwtSync = (
-  payload: string | object | Buffer,
-  algorithm: TypeAlgorithm,
-  secret: Secret
-): string => {
-  if (!jwtModule) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    jwtModule = require("jsonwebtoken");
+const arrayBufferToBase64Url = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-  return jwtModule!.sign(payload, secret, { algorithm });
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
 
-// export const jwtDecode = (token: string) => {
-//   // if (typeof token !== "string") {
-//   //     throw new InvalidTokenError("Invalid token specified: must be a string");
-//   // }
-//   // options || (options = {});
-//   const part = token.split(".")[0];
-//   // if (typeof part !== "string") {
-//   //     throw new InvalidTokenError(`Invalid token specified: missing part #${pos + 1}`);
-//   // }
-//   let decoded;
-//   try {
-//     decoded = base64UrlDecode(part);
-//   } catch (e) {
-//     ret
-//     // throw new InvalidTokenError(
-//     //   `Invalid token specified: invalid base64 for part #${pos + 1} (${
-//     //     e.message
-//     //   })`
-//     // );
-//   }
-//   try {
-//     return JSON.parse(decoded);
-//   } catch (e) {
-//     // throw new InvalidTokenError(
-//     //   `Invalid token specified: invalid json for part #${pos + 1} (${
-//     //     e.message
-//     //   })`
-//     // );
-//   }
-// };
-// export const verifyJwt = (token: string, secret: Secret, algorithms: TypeAlgorithm) : JwtPayload | string=> {
-//   try {
-//     const res = jwt.verify(token, secret, {algorithms: [algorithms] });
-//     return res;
-//   } catch (error: any) {
-//     console.error(error)
-//     return {};
-//   }
-// }
+export const createJwt = async (
+  payload: string | object,
+  algorithm: TypeAlgorithm,
+  secret: string
+): Promise<string> => {
+  const alg = algorithmMap[algorithm];
+  if (!alg) {
+    throw new Error(`Unsupported algorithm: ${algorithm}`);
+  }
+
+  const header = { alg: algorithm, typ: "JWT" };
+  const headerEncoded = base64UrlEncode(JSON.stringify(header));
+  const payloadEncoded = base64UrlEncode(
+    typeof payload === "string" ? payload : JSON.stringify(payload)
+  );
+
+  const data = `${headerEncoded}.${payloadEncoded}`;
+
+  // Import the secret key
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: alg.name, hash: alg.hash },
+    false,
+    ["sign"]
+  );
+
+  // Sign the data
+  const signature = await crypto.subtle.sign(
+    alg.name,
+    cryptoKey,
+    encoder.encode(data)
+  );
+
+  const signatureEncoded = arrayBufferToBase64Url(signature);
+
+  return `${data}.${signatureEncoded}`;
+};

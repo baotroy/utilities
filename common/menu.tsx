@@ -44,12 +44,11 @@ const menus: menuProps[] = [
         href: "/string/text-compare",
         icon: null,
       },
-      // {
-      //   label: "Convert Units",
-      //   // slug: "convert-units",
-      //   href: "/string/convert-units",
-      //   icon: null,
-      // },
+      {
+        label: "Regex Tester",
+        href: "/string/regex-tester",
+        icon: null,
+      },
     ],
   },
   {
@@ -168,6 +167,21 @@ const menus: menuProps[] = [
         icon: null,
         breadcrumbUseLabel: true,
       },
+      {
+        label: "Hash Generator",
+        href: "/dev/hash-generator",
+        icon: null,
+      },
+      {
+        label: "Keccak-256 Hash",
+        href: "/dev/keccak256",
+        icon: null,
+      },
+      {
+        label: "HTTP Status Codes",
+        href: "/dev/http-status-codes",
+        icon: null,
+      },
     ],
   },
   {
@@ -182,6 +196,16 @@ const menus: menuProps[] = [
       {
         label: "Chmod Calculator",
         href: "/file/chmod-calculator",
+        icon: null,
+      },
+      {
+        label: "CSV to JSON",
+        href: "/file/csv-to-json",
+        icon: null,
+      },
+      {
+        label: "JSON to CSV",
+        href: "/file/json-to-csv",
         icon: null,
       },
     ],
@@ -221,6 +245,16 @@ const menus: menuProps[] = [
       {
         label: "Ethereum Private Key Address Database",
         href: "/misc/ethereum-private-key-address-database",
+        icon: null,
+      },
+      {
+        label: "Color Picker",
+        href: "/misc/color-picker",
+        icon: null,
+      },
+      {
+        label: "IP Address Lookup",
+        href: "/misc/ip-address-lookup",
         icon: null,
       },
     ],

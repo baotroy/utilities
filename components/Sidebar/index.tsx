@@ -120,7 +120,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               return (
                 <div key={index}>
                   {group.groupName && (
-                    <h3 className="mb-1 ml-2 text-sm font-semibold text-gray-500 dark:text-bodydark2 flex items-center gap-1.5">
+                    <h3 className="mb-1 px-2 py-1.5 rounded-md text-sm font-semibold text-gray-600 dark:text-bodydark2 bg-gray-100 dark:bg-meta-4 flex items-center gap-1.5">
                       {GroupIcon && <GroupIcon size={16} />}
                       {group.groupName}
                     </h3>

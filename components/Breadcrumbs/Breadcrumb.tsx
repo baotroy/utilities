@@ -30,12 +30,12 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
     }
   }, [pathname]);
   return (
-    <div className="mb-6 flex flex-row items-center justify-between gap-3">
-      <h2 className="text-title-md2 font-semibold text-graydark dark:text-bodydark2">
+    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-graydark dark:text-bodydark2">
         {convertCase(pageTitle, CaseType.Title)}{isBeta && <i> (beta)</i>}
       </h2>
 
-      <nav>
+      <nav className="hidden sm:block">
         <ol className="flex items-center gap-2">
           <li>
             <Link className="font-medium" href="/">

@@ -233,6 +233,11 @@ const menus: menuProps[] = [
         href: "/image/image-resize",
         icon: null,
       },
+      {
+        label: "Favicon Generator",
+        href: "/image/favicon-generator",
+        icon: null,
+      },
     ],
   },
   {

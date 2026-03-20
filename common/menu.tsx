@@ -39,6 +39,11 @@ const menus: menuProps[] = [
         href: "/string/convert-case",
         icon: null,
       },
+      {
+        label: "Text Compare",
+        href: "/string/text-compare",
+        icon: null,
+      },
       // {
       //   label: "Convert Units",
       //   // slug: "convert-units",

@@ -268,12 +268,6 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
-        label: "RGB to Hex",
-        // slug: "image-resize",
-        href: "/misc/rgb-to-hex",
-        icon: null,
-      },
-      {
         label: "QR Code Reader & Generator",
         href: "/misc/qr-code-reader",
         icon: null,

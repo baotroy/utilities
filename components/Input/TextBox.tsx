@@ -7,6 +7,8 @@ interface TextBoxProps {
   type?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   additionalClass?: string;
   maxLength?: number;
@@ -20,6 +22,8 @@ const TextBox: React.FC<TextBoxProps> = ({
   value,
   onChange,
   onKeyDown,
+  onFocus,
+  onBlur,
   additionalClass,
   maxLength,
   readonly = false,
@@ -36,6 +40,8 @@ const TextBox: React.FC<TextBoxProps> = ({
         readOnly={readonly}
         onChange={onChange}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
     </>
   );

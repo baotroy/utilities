@@ -101,8 +101,12 @@ export default function ColorPickerComponent() {
     hsla: "hsla(231, 75%, 56%, 1)",
   });
   const [copied, setCopied] = useState<string | null>(null);
+  const [rgbInput, setRgbInput] = useState({ r: "60", g: "80", b: "224" });
+  const [hexInput, setHexInput] = useState("#3C50E0");
 
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const rgbEditingRef = useRef(false);
+  const hexEditingRef = useRef(false);
 
   const updateFormats = (hex: string, alphaVal: number) => {
     const rgb = hexToRgb(hex);
@@ -122,6 +126,15 @@ export default function ColorPickerComponent() {
 
   useEffect(() => {
     updateFormats(color, alpha);
+    const rgb = hexToRgb(color);
+    if (rgb) {
+      if (!rgbEditingRef.current) {
+        setRgbInput({ r: String(rgb.r), g: String(rgb.g), b: String(rgb.b) });
+      }
+      if (!hexEditingRef.current) {
+        setHexInput(color.toUpperCase());
+      }
+    }
   }, [color, alpha]);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,9 +143,41 @@ export default function ColorPickerComponent() {
 
   const handleHexInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    if (!value.startsWith("#")) value = "#" + value;
+    if (value !== "" && !value.startsWith("#")) value = "#" + value;
+    setHexInput(value);
     if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
       setColor(value);
+    }
+  };
+
+  const handleHexFocus = () => { hexEditingRef.current = true; };
+
+  const handleHexBlur = () => {
+    hexEditingRef.current = false;
+    setHexInput(color.toUpperCase());
+  };
+
+  const handleRgbInput = (channel: "r" | "g" | "b", value: string) => {
+    if (value !== "" && !/^\d+$/.test(value)) return;
+    const newRgb = { ...rgbInput, [channel]: value };
+    setRgbInput(newRgb);
+    const r = parseInt(newRgb.r);
+    const g = parseInt(newRgb.g);
+    const b = parseInt(newRgb.b);
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b) &&
+      r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+      const toHex = (n: number) => n.toString(16).padStart(2, "0");
+      setColor(`#${toHex(r)}${toHex(g)}${toHex(b)}`);
+    }
+  };
+
+  const handleRgbFocus = () => { rgbEditingRef.current = true; };
+
+  const handleRgbBlur = () => {
+    rgbEditingRef.current = false;
+    const rgb = hexToRgb(color);
+    if (rgb) {
+      setRgbInput({ r: String(rgb.r), g: String(rgb.g), b: String(rgb.b) });
     }
   };
 
@@ -191,12 +236,37 @@ export default function ColorPickerComponent() {
               <div className="mb-4">
                 <div className="mb-2">HEX</div>
                 <TextBox
-                  value={formats.hex}
+                  value={hexInput}
                   onChange={handleHexInput}
+                  onFocus={handleHexFocus}
+                  onBlur={handleHexBlur}
                   placeholder="#000000"
                   additionalClass="w-full font-mono"
                   maxLength={7}
                 />
+              </div>
+
+              {/* RGB Input */}
+              <div className="mb-4">
+                <div className="mb-2">RGB</div>
+                <div className="flex gap-2">
+                  {(["r", "g", "b"] as const).map((channel) => (
+                    <div key={channel} className="flex-1">
+                      <div className="text-xs text-body dark:text-bodydark2 mb-1 text-center uppercase">{channel}</div>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={rgbInput[channel]}
+                        onChange={(e) => handleRgbInput(channel, e.target.value)}
+                        onFocus={handleRgbFocus}
+                        onBlur={handleRgbBlur}
+                        className="custom-input w-full text-center font-mono"
+                        placeholder="0"
+                        maxLength={3}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Alpha Slider */}
@@ -271,8 +341,8 @@ export default function ColorPickerComponent() {
                   <button
                     onClick={() => handleCopy(format)}
                     className={`px-3 py-1 text-xs rounded transition-colors ${copied === format
-                        ? "bg-green-500 text-white"
-                        : "bg-primary text-white hover:bg-opacity-90"
+                      ? "bg-green-500 text-white"
+                      : "bg-primary text-white hover:bg-opacity-90"
                       }`}
                   >
                     {copied === format ? "Copied!" : "Copy"}

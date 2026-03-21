@@ -211,6 +211,17 @@ const menus: menuProps[] = [
         href: "/dev/base64-encoder",
         icon: null,
       },
+      {
+        label: "CSP Header Generator",
+        href: "/dev/csp-header-generator",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Regex Builder",
+        href: "/dev/regex-builder",
+        icon: null,
+      },
     ],
   },
   {
@@ -286,6 +297,11 @@ const menus: menuProps[] = [
       {
         label: "IP Address Lookup",
         href: "/misc/ip-address-lookup",
+        icon: null,
+      },
+      {
+        label: "DNS Lookup",
+        href: "/misc/dns-lookup",
         icon: null,
       },
     ],

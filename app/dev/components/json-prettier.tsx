@@ -72,6 +72,7 @@ export default function JsonPrettierComponent() {
           <div className="w-1/2">
             <AceEditor
               width="100%"
+              height="80vh"
               mode="json"
               theme="eclipse"
               name="blah0"
@@ -137,6 +138,7 @@ export default function JsonPrettierComponent() {
           <div className="w-1/2">
             <AceEditor
               width="100%"
+              height="80vh"
               mode="json"
               theme="eclipse"
               name="blah2"

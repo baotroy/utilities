@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SidebarLinkGroup from "./SidebarLinkGroup";
@@ -18,6 +18,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
+
+  // Lock body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [sidebarOpen]);
 
   // let storedSidebarExpanded = "true";
   // const [sidebarExpanded, setSidebarExpanded] = useState(storedSidebarExpanded === null ? false : storedSidebarExpanded === "true");
@@ -55,12 +65,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <>
       {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-998 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <div
+        className={`
+          fixed inset-0 z-998 bg-black/50 lg:hidden
+          transition-opacity duration-300 ease-in-out
+          ${sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
+        onClick={() => setSidebarOpen(false)}
+      />
       <aside
         ref={sidebar}
         className={`
@@ -73,8 +85,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         w-72 lg:w-72.5
         flex-col
         overflow-y-hidden
-        duration-300 
-        ease-linear
+        transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+        will-change-transform
         bg-white dark:bg-boxdark
         shadow-lg lg:shadow-none
         lg:static
@@ -89,7 +101,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           </Link>
 
           <button
-            ref={trigger}
             onClick={() => setSidebarOpen(false)}
             aria-controls="sidebar"
             aria-expanded={sidebarOpen}

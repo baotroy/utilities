@@ -1,9 +1,9 @@
 "use client";
 import { useState, Suspense, lazy } from "react";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 
-// Lazy load components to reduce initial bundle and defer non-critical
-const Sidebar = lazy(() => import("@/components/Sidebar"));
-const Header = lazy(() => import("@/components/Header"));
+// Lazy load non-critical components
 const ToasterContext = lazy(() => import("@/context/ToasterContext"));
 
 export default function ClientLayout({
@@ -20,19 +20,15 @@ export default function ClientLayout({
       </Suspense>
       <div className="dark:bg-boxdark-2 dark:text-bodydark">
         <div className="flex h-screen overflow-hidden">
-          <Suspense fallback={<aside className="w-72 lg:w-72.5 bg-white dark:bg-boxdark" />}>
-            <Sidebar
+          <Sidebar
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
+          <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <Header
               sidebarOpen={sidebarOpen}
               setSidebarOpen={setSidebarOpen}
             />
-          </Suspense>
-          <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <Suspense fallback={<header className="sticky top-0 z-999 flex w-full h-14 bg-transparent" />}>
-              <Header
-                sidebarOpen={sidebarOpen}
-                setSidebarOpen={setSidebarOpen}
-              />
-            </Suspense>
             <main>
               <div className="mx-auto max-w-screen-2xl p-4 pt-1 md:p-6 2xl:p-10">
                 {children}

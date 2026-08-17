@@ -17,6 +17,11 @@ export default function ObjectSerializerComponent() {
     return str.replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":');
   };
 
+  // Replace single quotes with double quotes
+  const replaceSingleQuotes = (str: string): string => {
+    return str.replace(/'/g, '"');
+  };
+
   const handleStringify = () => {
     try {
       setError("");
@@ -25,7 +30,9 @@ export default function ObjectSerializerComponent() {
       // Try to parse as JSON
       const parsed = JSON.parse(normalized);
       // Then stringify with pretty formatting
-      const stringified = JSON.stringify(parsed, null, 2);
+      let stringified = JSON.stringify(parsed, null, 2);
+      // Replace single quotes with double quotes
+      stringified = replaceSingleQuotes(stringified);
       setOutput(stringified);
       toast.success("Object stringified successfully");
     } catch (err) {
@@ -53,7 +60,9 @@ export default function ObjectSerializerComponent() {
       // Normalize the input to convert unquoted keys to quoted
       const normalized = normalizeJSON(input);
       const parsed = JSON.parse(normalized);
-      const minified = JSON.stringify(parsed);
+      let minified = JSON.stringify(parsed);
+      // Replace single quotes with double quotes
+      minified = replaceSingleQuotes(minified);
       setOutput(minified);
       toast.success("Object minified successfully");
     } catch (err) {

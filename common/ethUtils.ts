@@ -1,6 +1,7 @@
 import { getProvider } from "./provider";
 import abiMulticall from "./abis/multicall";
-import { Interface, Contract, JsonRpcProvider, formatUnits } from "ethers";
+import { Interface, Contract, JsonRpcProvider } from "ethers";
+import { formatUnits } from "ethers";
 import chainConfig from "./chainConfig";
 import abiBalances from "./abis/balances";
 

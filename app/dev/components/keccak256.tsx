@@ -6,7 +6,7 @@ import Button from "@/components/Input/Button";
 import Copy from "@/components/common/copy";
 import { MdOutlineClear } from "react-icons/md";
 import { LiaHashtagSolid } from "react-icons/lia";
-import { keccak256, toUtf8Bytes, hexlify, getBytes } from "ethers";
+import { keccak256, toUtf8Bytes, getBytes} from "ethers";
 
 type InputEncoding = "utf8" | "utf16" | "hex" | "base64" | "ascii";
 

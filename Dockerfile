@@ -20,8 +20,9 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Stage 3: Minimal runtime - bare Alpine + node binary only (no npm/npx/yarn/corepack)
+# libatomic: the node binary copied from the node image links against libatomic.so.1
 FROM alpine:3.24 AS runner
-RUN apk add --no-cache libstdc++ && \
+RUN apk add --no-cache libstdc++ libatomic && \
     addgroup -S -g 1001 nodejs && \
     adduser -S -u 1001 -G nodejs nextjs
 COPY --from=base /usr/local/bin/node /usr/local/bin/node

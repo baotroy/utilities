@@ -1,5 +1,4 @@
 import { parse } from "@prantlf/jsonlint";
-import { TypeAlgorithm } from "./type";
 
 // JSON
 export function prettyJson(str: string, indent = 2): string {
@@ -55,76 +54,4 @@ export const base64UrlDecode = (input: string): string => {
   }
   const decoded = Buffer.from(base64 + padding, "base64").toString("utf-8");
   return decoded;
-};
-
-// Browser-compatible JWT creation using Web Crypto API
-const algorithmMap: Record<string, { name: string; hash: string }> = {
-  HS256: { name: "HMAC", hash: "SHA-256" },
-  HS384: { name: "HMAC", hash: "SHA-384" },
-  HS512: { name: "HMAC", hash: "SHA-512" },
-};
-
-const arrayBufferToBase64Url = (buffer: ArrayBuffer): string => {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  const base64 = btoa(binary);
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-};
-
-export const createJwt = async (
-  payload: string | object,
-  algorithm: TypeAlgorithm,
-  secret: string
-): Promise<string> => {
-  const alg = algorithmMap[algorithm];
-  if (!alg) {
-    throw new Error(`Unsupported algorithm: ${algorithm}`);
-  }
-
-  const header = { alg: algorithm, typ: "JWT" };
-  const headerEncoded = base64UrlEncode(JSON.stringify(header));
-  const payloadEncoded = base64UrlEncode(
-    typeof payload === "string" ? payload : JSON.stringify(payload)
-  );
-
-  const data = `${headerEncoded}.${payloadEncoded}`;
-  const signatureEncoded = await signJwtData(data, algorithm, secret);
-
-  return `${data}.${signatureEncoded}`;
-};
-
-/** HMAC-sign "<header>.<payload>" and return the base64url signature. */
-export const signJwtData = async (
-  data: string,
-  algorithm: TypeAlgorithm,
-  secret: string
-): Promise<string> => {
-  const alg = algorithmMap[algorithm];
-  if (!alg) {
-    throw new Error(`Unsupported algorithm: ${algorithm}`);
-  }
-
-  // Import the secret key
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: alg.name, hash: alg.hash },
-    false,
-    ["sign"]
-  );
-
-  // Sign the data
-  const signature = await crypto.subtle.sign(
-    alg.name,
-    cryptoKey,
-    encoder.encode(data)
-  );
-
-  return arrayBufferToBase64Url(signature);
 };

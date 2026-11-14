@@ -31,6 +31,9 @@ export default function MongoObjectTimeComponent() {
   const [objectId, setObjectId] = useState(objectIdFromDate(date));
   const [mObjectId, setMObjectId] = useState(objectId);
   const [errorId, setErrorId] = useState(false);
+  // Text of the second input while it is being edited; null = show the
+  // ObjectId("...") form of the current id
+  const [wrappedText, setWrappedText] = useState<string | null>(null);
 
   const handleCopy = (objectId = false) => {
     if (objectId) copyToClipboard(`ObjectId("${mObjectId}")`);
@@ -46,8 +49,34 @@ export default function MongoObjectTimeComponent() {
     e.target.select();
   };
 
+  // Second input: accepts ObjectId("..."), ObjectId('...'), {"$oid":"..."}
+  // or the bare 24 hex characters
+  const parseWrapped = (value: string): string | null => {
+    const trimmed = value.trim();
+    const match =
+      trimmed.match(/^(?:new\s+)?ObjectId\(\s*["']?([0-9a-fA-F]{24})["']?\s*\)$/i) ||
+      trimmed.match(/^\{\s*"?\$oid"?\s*:\s*["']([0-9a-fA-F]{24})["']\s*\}$/) ||
+      trimmed.match(/^["']?([0-9a-fA-F]{24})["']?$/);
+    return match ? match[1] : null;
+  };
+
+  const handleInputWrapped = (value: string) => {
+    setWrappedText(value);
+    const id = parseWrapped(value);
+    if (id) {
+      setDate(dateFromObjectId(id));
+      setObjectId(id);
+      setMObjectId(id);
+      setErrorId(false);
+    }
+  };
+
+  const wrappedValue = wrappedText ?? `ObjectId("${mObjectId}")`;
+  const wrappedError = wrappedText !== null && !parseWrapped(wrappedText);
+
   const handleInputObjectId = (e: any) => {
     const value = e;
+    setWrappedText(null);
     if (isMongoObjectId(value)) {
       const date = dateFromObjectId(value);
       setDate(date);
@@ -62,6 +91,7 @@ export default function MongoObjectTimeComponent() {
   const handleInputTime = (value: string, type: TypeDate) => {
     if (!value) return;
     try {
+      setWrappedText(null);
       const newDate = new Date(date);
       switch (type) {
         case TypeDate.y:
@@ -123,10 +153,16 @@ export default function MongoObjectTimeComponent() {
             <div className="flex">
               <input
                 type="text"
-                readOnly
-                value={`ObjectId("${mObjectId}")`}
-                className="w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-t-bodydark border-b-bodydark dark:border-t-body dark:border-b-body border-bodydark dark:bg-graydark"
-                onFocus={onFocus}
+                aria-label="ObjectId expression"
+                spellCheck={false}
+                value={wrappedValue}
+                className={clsx(
+                  "w-full p-1.5 outline-none border-t border-b border-l rounded-tl-lg rounded-bl-lg border-bodydark dark:bg-graydark",
+                  wrappedError && "border-[#ff0000]"
+                )}
+                onChange={(e) => handleInputWrapped(e.target.value)}
+                // back to the normalized ObjectId("...") form when leaving
+                onBlur={() => setWrappedText(null)}
               />
               <div className="flex">
                 <span className="bg-gray-2 dark:bg-graydark border border-bodydark dark:border-body block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">

@@ -1,5 +1,5 @@
 # Stage 1: Install dependencies
-FROM node:25-slim AS deps
+FROM node:26-slim AS deps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends g++ make python3 && \
     rm -rf /var/lib/apt/lists/*
@@ -8,7 +8,7 @@ COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
 # Stage 2: Build the application
-FROM node:25-slim AS builder
+FROM node:26-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -16,7 +16,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Stage 3: Production runner
-FROM node:25-slim AS runner
+FROM node:26-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \

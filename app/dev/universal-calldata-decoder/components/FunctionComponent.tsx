@@ -30,6 +30,11 @@ const FunctionComponent: FC<FunctionComponentProps> = ({
           {fragment.selector && (
             <span className="ml-2 font-normal text-bodydark">{fragment.selector}</span>
           )}
+          {fragment.source === "abi" && (
+            <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-normal text-primary">
+              from your ABI
+            </span>
+          )}
         </p>
       </div>
       {fragment.inputs.length === 0 ? (

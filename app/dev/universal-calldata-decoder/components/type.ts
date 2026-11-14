@@ -26,6 +26,8 @@ export interface IFunctionFragement {
   exact?: boolean;
   // length of the re-encoded calldata (how much of the input it explains)
   matchedLength?: number;
+  // where the signature came from: the ABI the user entered or the database
+  source?: "abi" | "database";
 }
 
 export interface IDecodeResult {
@@ -38,4 +40,6 @@ export interface IDecodeResult {
   fragment: IFunctionFragement | null;
   // Raw 32-byte words after the selector (shown when fragment is null)
   words: string[];
+  // true when an ABI was entered but it has no function with this selector
+  notInAbi?: boolean;
 }

@@ -6,7 +6,7 @@ import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IDecodeResult, IFunctionFragement } from "./type";
 import { copyToClipboard } from "@/common/utils";
-import { decodeCalldata, decodeWithSignature } from "./utils";
+import { DecodeError, decodeCalldata, decodeWithSignature } from "./utils";
 import FunctionComponent from "./FunctionComponent";
 
 // multicall(bytes[]) wrapping transfer(address,uint256) and approve(address,uint256)
@@ -35,6 +35,11 @@ const UniversalCallDataDecoderComponent: FC<
   const [inputData, setInputData] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  // optional ABI: its functions are used before the signature database
+  const [showAbi, setShowAbi] = useState(false);
+  const [abiText, setAbiText] = useState("");
+  const [abiError, setAbiError] = useState("");
+  const activeAbi = showAbi ? abiText : "";
   const [result, setResult] = useState<IDecodeResult | null>(null);
   // signature currently shown (one of result.candidates) and its decoding
   const [signature, setSignature] = useState("");
@@ -48,8 +53,9 @@ const UniversalCallDataDecoderComponent: FC<
     const request = ++requestRef.current;
     setIsLoading(true);
     setError("");
+    setAbiError("");
     try {
-      const decoded = await decodeCalldata(calldata);
+      const decoded = await decodeCalldata(calldata, activeAbi);
       if (request !== requestRef.current) return;
       setResult(decoded);
       setFragment(decoded.fragment);
@@ -62,7 +68,9 @@ const UniversalCallDataDecoderComponent: FC<
       if (request !== requestRef.current) return;
       setResult(null);
       setFragment(null);
-      setError(e instanceof Error ? e.message : "Unable to decode the calldata");
+      const message = e instanceof Error ? e.message : "Unable to decode the calldata";
+      if (e instanceof DecodeError && e.code === "abi") setAbiError(message);
+      else setError(message);
     } finally {
       if (request === requestRef.current) setIsLoading(false);
     }
@@ -75,7 +83,7 @@ const UniversalCallDataDecoderComponent: FC<
     setSignature(newSignature);
     setIsLoading(true);
     try {
-      const decoded = await decodeWithSignature(result.calldata, newSignature);
+      const decoded = await decodeWithSignature(result.calldata, newSignature, activeAbi);
       if (request !== requestRef.current) return;
       setFragment(decoded);
       setDecodeId(request);
@@ -114,6 +122,7 @@ const UniversalCallDataDecoderComponent: FC<
     setFragment(null);
     setSignature("");
     setError("");
+    setAbiError("");
     setIsLoading(false);
   };
 
@@ -139,6 +148,43 @@ const UniversalCallDataDecoderComponent: FC<
             isError={!!error}
           />
           {error && <div className="mt-1 text-sm text-red-500">{error}</div>}
+        </div>
+
+        <div className="mb-4">
+          <label className="flex w-fit cursor-pointer items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={showAbi}
+              onChange={(e) => setShowAbi(e.target.checked)}
+            />
+            Decode with my ABI
+          </label>
+          {showAbi && (
+            <div className="mt-2">
+              <TextArea
+                rows={6}
+                additionalClass="w-full text-sm leading-4 font-mono"
+                placeholder={
+                  'JSON ABI: [{"type":"function","name":"transfer","inputs":[...]}]\nor one signature per line: function transfer(address to, uint256 amount)'
+                }
+                onChange={(e) => {
+                  setAbiText(e.target.value);
+                  setAbiError("");
+                }}
+                value={abiText}
+                isError={!!abiError}
+              />
+              {abiError ? (
+                <div className="mt-1 text-sm text-red-500">{abiError}</div>
+              ) : (
+                <div className="mt-1 text-xs text-bodydark">
+                  Functions of this ABI are used first, with their parameter names, also for
+                  nested calls. Selectors it does not have are looked up in the signature
+                  database.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="text-right mb-4">
@@ -171,13 +217,23 @@ const UniversalCallDataDecoderComponent: FC<
           </div>
         )}
 
+        {result?.notInAbi && fragment && (
+          <div className="mb-3 text-sm text-warning">
+            Your ABI has no function with selector{" "}
+            <span className="font-mono">{result.selector}</span>, so the signature database
+            was used.
+          </div>
+        )}
+
         {fragment && <FunctionComponent key={decodeId} fragment={fragment} />}
 
         {/* Unknown selector: still show something useful */}
         {result && !fragment && (
           <div>
             <div className="mb-3 rounded-lg border border-stroke bg-gray-50 p-3 text-sm">
-              No known function signature matches selector{" "}
+              {result.notInAbi
+                ? "Neither your ABI nor the signature database has a function for selector "
+                : "No known function signature matches selector "}
               <span className="font-mono font-semibold">{result.selector}</span>.
               Below are the raw 32-byte words of the arguments.
             </div>

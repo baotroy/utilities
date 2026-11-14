@@ -169,9 +169,15 @@ const menus: menuProps[] = [
         beta: true,
       },
       {
-        label: "Encode Function",
+        label: "ABI Selectors",
         // slug: "convert-case",
-        href: "/dev/encode-function",
+        href: "/dev/abi-selectors",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Signature to Selector",
+        href: "/dev/signature-to-selector",
         icon: null,
         breadcrumbUseLabel: true,
       },

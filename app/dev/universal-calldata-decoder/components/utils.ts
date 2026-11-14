@@ -1,4 +1,4 @@
-import { Interface, ParamType } from "ethers";
+import { FunctionFragment, Interface, ParamType } from "ethers";
 import { IDecodedParam, IDecodeResult, IFunctionFragement } from "./type";
 
 const signatureDataApi = process.env.NEXT_PUBLIC_SIGNATURE_DATA_API;
@@ -8,7 +8,7 @@ const sourcify4ByteApi =
 // Maximum recursion depth to prevent infinite loops
 const MAX_DEPTH = 10;
 
-export type DecodeErrorCode = "invalid" | "network";
+export type DecodeErrorCode = "invalid" | "network" | "abi";
 
 export class DecodeError extends Error {
   code: DecodeErrorCode;
@@ -157,14 +157,65 @@ function formatValue(value: unknown): string {
   return String(value);
 }
 
-// Decode calldata with one specific signature. Throws when it does not fit.
+/**
+ * Parse the optional ABI entered by the user. Accepts a JSON ABI array, a
+ * compiler artifact ({ "abi": [...] }) or human-readable lines such as
+ * "function transfer(address to, uint256 amount)". Returns null when empty.
+ */
+export function parseAbi(text?: string): Interface | null {
+  const input = (text || "").trim();
+  if (!input) return null;
+  try {
+    let source: any;
+    if (input.startsWith("[") || input.startsWith("{")) {
+      const json = JSON.parse(input);
+      source = Array.isArray(json) ? json : json?.abi;
+      if (!Array.isArray(source)) throw new Error("no abi");
+    } else {
+      // one declaration per line; "function" may be left out
+      source = input
+        .split(/[\n;]+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) =>
+          /^(function|event|error|constructor|fallback|receive)\b/.test(line)
+            ? line
+            : `function ${line}`
+        );
+    }
+    return new Interface(source);
+  } catch {
+    throw new DecodeError(
+      "abi",
+      'The ABI is not valid. Use a JSON ABI array or lines like "function transfer(address to, uint256 amount)".'
+    );
+  }
+}
+
+// Functions of the user's ABI with this selector (normally 0 or 1)
+function abiFunctions(abi: Interface | null, selector: string): FunctionFragment[] {
+  if (!abi) return [];
+  const found: FunctionFragment[] = [];
+  abi.forEachFunction((fragment) => {
+    if (fragment.selector === selector.toLowerCase()) found.push(fragment);
+  });
+  return found;
+}
+
+// Decode calldata with one specific signature (a database signature or a
+// function of the user's ABI, which also carries the parameter names).
+// Throws when it does not fit.
 async function decodeWithSignatureAtDepth(
   calldata: string,
-  signature: string,
-  depth: number
+  signature: string | FunctionFragment,
+  depth: number,
+  abi: Interface | null
 ): Promise<IFunctionFragement> {
-  const iface = new Interface([`function ${signature}`]);
-  const funcFrag = iface.getFunction(signature);
+  const fromAbi = typeof signature !== "string";
+  const iface = new Interface([fromAbi ? signature : `function ${signature}`]);
+  const funcFrag = fromAbi
+    ? iface.getFunction(signature.selector)
+    : iface.getFunction(signature);
   if (!funcFrag) throw new Error("Invalid signature");
 
   const decoded = iface.decodeFunctionData(funcFrag, calldata);
@@ -180,7 +231,7 @@ async function decodeWithSignatureAtDepth(
 
   const inputs: IDecodedParam[] = [];
   for (let i = 0; i < funcFrag.inputs.length; i++) {
-    inputs.push(await toDecodedParam(funcFrag.inputs[i], decoded[i], depth));
+    inputs.push(await toDecodedParam(funcFrag.inputs[i], decoded[i], depth, abi));
   }
 
   return {
@@ -191,28 +242,46 @@ async function decodeWithSignatureAtDepth(
     inputs,
     exact,
     matchedLength: reEncoded.length,
+    source: fromAbi ? "abi" : "database",
   };
 }
 
 /** Decode calldata with a signature chosen by the user. */
 export const decodeWithSignature = (
   calldata: string,
-  signature: string
-): Promise<IFunctionFragement> =>
-  decodeWithSignatureAtDepth(normalizeCalldata(calldata), signature, 0);
+  signature: string,
+  abiText?: string
+): Promise<IFunctionFragement> => {
+  const data = normalizeCalldata(calldata);
+  const abi = parseAbi(abiText);
+  // prefer the ABI's own definition of this signature (parameter names)
+  const own = abiFunctions(abi, data.slice(0, 10)).find(
+    (fragment) => fragment.format("sighash") === signature
+  );
+  return decodeWithSignatureAtDepth(data, own || signature, 0, abi);
+};
 
 // Decode nested bytes as a call; null when unknown or not decodable
 async function tryDecodeNested(
   value: string,
-  depth: number
+  depth: number,
+  abi: Interface | null
 ): Promise<IFunctionFragement | null> {
   if (depth >= MAX_DEPTH || !looksLikeCalldata(value)) return null;
+  // the user's ABI wins over the database (and needs no network)
+  for (const fragment of abiFunctions(abi, value.slice(0, 10))) {
+    try {
+      return await decodeWithSignatureAtDepth(value, fragment, depth, abi);
+    } catch {
+      // does not fit: fall back to the database
+    }
+  }
   try {
     const candidates = await lookupSignatures(value.slice(0, 10));
     let loose: IFunctionFragement | null = null;
     for (const signature of candidates) {
       try {
-        const decoded = await decodeWithSignatureAtDepth(value, signature, depth);
+        const decoded = await decodeWithSignatureAtDepth(value, signature, depth, abi);
         if (decoded.exact) return decoded;
         if (!loose || (decoded.matchedLength || 0) > (loose.matchedLength || 0)) {
           loose = decoded;
@@ -233,7 +302,8 @@ async function tryDecodeNested(
 async function toDecodedParam(
   paramType: ParamType,
   value: any,
-  depth: number
+  depth: number,
+  abi: Interface | null
 ): Promise<IDecodedParam> {
   const param: IDecodedParam = {
     name: paramType.name || "",
@@ -247,24 +317,25 @@ async function toDecodedParam(
     const child = paramType.arrayChildren;
     param.arrayChildren = await Promise.all(
       Array.from(value as Iterable<unknown>).map((childValue) =>
-        toDecodedParam(child, childValue, depth)
+        toDecodedParam(child, childValue, depth, abi)
       )
     );
   } else if (paramType.baseType === "tuple" && paramType.components) {
     param.components = await Promise.all(
       paramType.components.map((child, index) =>
-        toDecodedParam(child, value[index], depth)
+        toDecodedParam(child, value[index], depth, abi)
       )
     );
   } else if (paramType.type === "bytes") {
     // dynamic bytes may hold another call (multicall, execute, proxies...)
-    param.functionFragment = await tryDecodeNested(toHexString(value), depth + 1);
+    param.functionFragment = await tryDecodeNested(toHexString(value), depth + 1, abi);
   } else if (paramType.type === "bytes4") {
     // a bytes4 argument is very often a function selector: name it
     const selector = toHexString(value);
     if (selector !== "0x00000000" && selector !== "0xffffffff") {
       try {
-        const signatures = await lookupSignatures(selector);
+        const own = abiFunctions(abi, selector).map((f) => f.format("sighash"));
+        const signatures = own.length > 0 ? own : await lookupSignatures(selector);
         if (signatures.length > 0) param.selectorSignatures = signatures.slice(0, 3);
       } catch {
         // optional hint only
@@ -279,10 +350,36 @@ async function toDecodedParam(
  * databases and tries every known signature (selectors can collide).
  * Throws DecodeError for invalid input or when the database is unreachable.
  * An unknown selector is not an error: the result then carries the raw words.
+ *
+ * With an ABI (see parseAbi) its functions are used first, for the call
+ * itself and for nested calls; the database is only asked for selectors the
+ * ABI does not have. A call fully covered by the ABI needs no network.
  */
-export async function decodeCalldata(input: string): Promise<IDecodeResult> {
+export async function decodeCalldata(
+  input: string,
+  abiText?: string
+): Promise<IDecodeResult> {
   const calldata = normalizeCalldata(input);
   const selector = calldata.slice(0, 10).toLowerCase();
+  const abi = parseAbi(abiText);
+
+  const fromAbi: IFunctionFragement[] = [];
+  for (const fragment of abiFunctions(abi, selector)) {
+    try {
+      fromAbi.push(await decodeWithSignatureAtDepth(calldata, fragment, 0, abi));
+    } catch {
+      // the ABI has this selector but the data does not fit it
+    }
+  }
+  if (fromAbi.length > 0) {
+    return {
+      selector,
+      calldata,
+      candidates: fromAbi.map((f) => f.signature || ""),
+      fragment: fromAbi[0],
+      words: toWords(calldata),
+    };
+  }
 
   const known = await lookupSignatures(selector);
 
@@ -290,7 +387,7 @@ export async function decodeCalldata(input: string): Promise<IDecodeResult> {
   const loose: IFunctionFragement[] = [];
   for (const signature of known) {
     try {
-      const decoded = await decodeWithSignatureAtDepth(calldata, signature, 0);
+      const decoded = await decodeWithSignatureAtDepth(calldata, signature, 0, abi);
       (decoded.exact ? exact : loose).push(decoded);
     } catch {
       // this signature does not fit the data
@@ -311,5 +408,6 @@ export async function decodeCalldata(input: string): Promise<IDecodeResult> {
     candidates,
     fragment: fitting[0] || null,
     words: toWords(calldata),
+    notInAbi: abi !== null,
   };
 }

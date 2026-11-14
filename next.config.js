@@ -10,6 +10,19 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["react-icons"],
   },
+  // Old URLs of renamed tools
+  redirects: async () => [
+    {
+      source: "/dev/encode-function",
+      destination: "/dev/abi-selectors",
+      permanent: true,
+    },
+    {
+      source: "/dev/abi-selector-extractor",
+      destination: "/dev/abi-selectors",
+      permanent: true,
+    },
+  ],
   // Cache headers for static assets
   headers: async () => [
     {

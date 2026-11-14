@@ -1,5 +1,5 @@
-import { Interface } from "ethers";
-import { IFunctionFragement } from "./type";
+import { Interface, ParamType } from "ethers";
+import { IDecodedParam, IDecodeResult, IFunctionFragement } from "./type";
 
 const signatureDataApi = process.env.NEXT_PUBLIC_SIGNATURE_DATA_API;
 const sourcify4ByteApi =
@@ -8,65 +8,127 @@ const sourcify4ByteApi =
 // Maximum recursion depth to prevent infinite loops
 const MAX_DEPTH = 10;
 
+export type DecodeErrorCode = "invalid" | "network";
+
+export class DecodeError extends Error {
+  code: DecodeErrorCode;
+  constructor(code: DecodeErrorCode, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+interface SignatureEntry {
+  name?: string;
+  filtered?: boolean;
+  hasVerifiedContract?: boolean;
+}
+
 // Both APIs answer with:
 // { "result": { "function": { "0x...": [{ "name": "transfer(address,uint256)" }] } } }
+// Throws when the service cannot be reached, returns [] when it knows nothing.
 async function fetchSignatures(url: string, selector: string): Promise<string[]> {
-  try {
-    const response = await fetch(url + selector);
-    if (!response.ok) return [];
-    const data = await response.json();
-    const list = data?.result?.function?.[selector];
-    return Array.isArray(list)
-      ? list
-          .map((item: { name?: string }) => item?.name)
-          .filter((name): name is string => !!name)
-      : [];
-  } catch (error) {
-    console.error("Signature lookup failed:", error);
-    return [];
-  }
+  const response = await fetch(url + selector);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+  const list: SignatureEntry[] = data?.result?.function?.[selector];
+  if (!Array.isArray(list)) return [];
+  const rank = (e: SignatureEntry) =>
+    (e.hasVerifiedContract ? 0 : 1) + (e.filtered ? 2 : 0);
+  return [...list]
+    .sort((a, b) => rank(a) - rank(b)) // verified, non-spam signatures first
+    .map((item) => item?.name)
+    .filter((name): name is string => !!name);
 }
 
 // Cache lookups per selector: nested calldata (multicall, batches) asks for
 // the same selector many times, which used to fire one request each time
 const signatureCache = new Map<string, Promise<string[]>>();
 
-// Fetch all known signatures for a selector, with fallback
-function fetchFunctionInterfaces(selector: string): Promise<string[]> {
+// All known signatures for a selector. Rejects only when every source failed.
+export function lookupSignatures(selector: string): Promise<string[]> {
+  selector = selector.toLowerCase();
   let cached = signatureCache.get(selector);
   if (!cached) {
     cached = (async () => {
-      // Try OpenChain API first (if configured)
-      if (signatureDataApi) {
-        const result = await fetchSignatures(signatureDataApi, selector);
-        if (result.length > 0) return result;
+      let failures = 0;
+      const sources = [signatureDataApi, sourcify4ByteApi].filter(
+        (url): url is string => !!url
+      );
+      for (const url of sources) {
+        try {
+          const result = await fetchSignatures(url, selector);
+          if (result.length > 0) return result;
+        } catch (error) {
+          failures++;
+          console.error("Signature lookup failed:", error);
+        }
       }
-      // Fallback to Sourcify 4byte API
-      return fetchSignatures(sourcify4ByteApi, selector);
+      if (failures === sources.length) {
+        throw new DecodeError(
+          "network",
+          "Could not reach the signature database. Check your connection and try again."
+        );
+      }
+      return [];
     })();
     signatureCache.set(selector, cached);
     // do not keep failed/empty lookups, so a retry can succeed
-    cached.then((list) => {
-      if (list.length === 0) signatureCache.delete(selector);
-    });
+    cached
+      .then((list) => {
+        if (list.length === 0) signatureCache.delete(selector);
+      })
+      .catch(() => signatureCache.delete(selector));
   }
   return cached;
 }
 
-// Check if a hex string looks like valid calldata (starts with 0x + 4 byte selector)
-function isValidCalldata(value: string): boolean {
-  if (typeof value !== "string") return false;
-  // Must be hex string starting with 0x, at least 10 chars (0x + 8 hex chars for selector)
-  if (!value.startsWith("0x") || value.length < 10) return false;
-  // Must be valid hex
-  if (!/^0x[0-9a-fA-F]+$/.test(value)) return false;
-  // Skip null selector to avoid spam results
-  if (value.slice(0, 10) === "0x00000000") return false;
-  return true;
+/**
+ * Clean up pasted calldata: trims, removes whitespace/quotes, adds the 0x
+ * prefix and validates. Throws a DecodeError("invalid") with a clear reason.
+ */
+export function normalizeCalldata(input: string): string {
+  let data = input.replace(/[\s"'`]/g, "");
+  if (!data) throw new DecodeError("invalid", "Please enter calldata");
+  if (/^0x/i.test(data)) data = data.slice(2);
+  if (!/^[0-9a-fA-F]*$/.test(data)) {
+    throw new DecodeError(
+      "invalid",
+      "Calldata must be a hex string (0-9, a-f), optionally starting with 0x"
+    );
+  }
+  if (data.length % 2 !== 0) {
+    throw new DecodeError("invalid", "Hex string has an odd number of characters");
+  }
+  if (data.length < 8) {
+    throw new DecodeError(
+      "invalid",
+      "Calldata is too short: it must start with a 4-byte function selector"
+    );
+  }
+  return "0x" + data;
 }
 
-// Convert bytes value to hex string
-function toHexString(value: any): string {
+// Split the arguments part into 32-byte words (raw view for unknown selectors)
+function toWords(calldata: string): string[] {
+  const body = calldata.slice(10);
+  const words: string[] = [];
+  for (let i = 0; i < body.length; i += 64) {
+    words.push("0x" + body.slice(i, i + 64));
+  }
+  return words;
+}
+
+// Nested bytes are only tried as calldata when they look ABI-encoded:
+// 4-byte selector followed by whole 32-byte words
+function looksLikeCalldata(value: string): boolean {
+  if (!/^0x[0-9a-fA-F]{8,}$/.test(value)) return false;
+  if ((value.length - 10) % 64 !== 0) return false;
+  // Skip null selector to avoid spam results
+  return value.slice(0, 10) !== "0x00000000";
+}
+
+function toHexString(value: unknown): string {
   if (typeof value === "string") {
     return value.startsWith("0x") ? value : "0x" + value;
   }
@@ -78,148 +140,176 @@ function toHexString(value: any): string {
         .join("")
     );
   }
-  if (Buffer.isBuffer(value)) {
-    return "0x" + value.toString("hex");
-  }
   return "";
 }
 
-// Try to decode bytes as calldata recursively with depth tracking
-async function tryDecodeAsCalldata(
-  value: string,
-  depth: number = 0
-): Promise<IFunctionFragement | null> {
-  // Check depth to prevent infinite recursion
-  if (depth >= MAX_DEPTH) {
-    console.log(`Max depth ${MAX_DEPTH} reached, stopping recursion`);
-    return null;
+// Text shown for a value of any type (arrays/tuples are joined recursively)
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "bigint" || typeof value === "boolean" || typeof value === "number") {
+    return value.toString();
   }
-
-  if (!isValidCalldata(value)) return null;
-
-  try {
-    const decoded = await decodeFunctionDataNoABI(value, false, depth + 1);
-    return decoded;
-  } catch {
-    return null;
+  if (value instanceof Uint8Array) return toHexString(value);
+  if (typeof (value as Iterable<unknown>)[Symbol.iterator] === "function") {
+    return `[${Array.from(value as Iterable<unknown>).map(formatValue).join(", ")}]`;
   }
+  return String(value);
 }
 
-export const decodeFunctionDataNoABI = async (
-  inputData: string,
-  root: boolean = false,
-  depth: number = 0
-): Promise<IFunctionFragement | null> => {
-  // Check depth limit
-  if (depth >= MAX_DEPTH) {
-    console.log(`Max depth ${MAX_DEPTH} reached at decodeFunctionDataNoABI`);
-    return null;
+// Decode calldata with one specific signature. Throws when it does not fit.
+async function decodeWithSignatureAtDepth(
+  calldata: string,
+  signature: string,
+  depth: number
+): Promise<IFunctionFragement> {
+  const iface = new Interface([`function ${signature}`]);
+  const funcFrag = iface.getFunction(signature);
+  if (!funcFrag) throw new Error("Invalid signature");
+
+  const decoded = iface.decodeFunctionData(funcFrag, calldata);
+  // ethers decodes lazily: re-encoding proves every value is readable.
+  // A signature really fits when encoding the values gives the same bytes
+  // back; a colliding selector (eg. many_msg_babbage(bytes1) for transfer)
+  // "decodes" too but ignores most of the data.
+  const reEncoded = iface.encodeFunctionData(funcFrag, decoded);
+  if (reEncoded.length > calldata.length) {
+    throw new Error("Signature does not match the calldata");
+  }
+  const exact = reEncoded.toLowerCase() === calldata.toLowerCase();
+
+  const inputs: IDecodedParam[] = [];
+  for (let i = 0; i < funcFrag.inputs.length; i++) {
+    inputs.push(await toDecodedParam(funcFrag.inputs[i], decoded[i], depth));
   }
 
-  inputData = inputData.trim();
-  // The signature databases are keyed by lowercase selector
-  const selector = getFunctionName(inputData).toLowerCase();
+  return {
+    type: "function",
+    name: funcFrag.name,
+    signature: funcFrag.format("sighash"),
+    selector: funcFrag.selector,
+    inputs,
+    exact,
+    matchedLength: reEncoded.length,
+  };
+}
 
-  // Skip null selector
-  if (selector === "0x00000000") {
-    if (root) throw Error("Cannot decode null selector");
-    return null;
-  }
+/** Decode calldata with a signature chosen by the user. */
+export const decodeWithSignature = (
+  calldata: string,
+  signature: string
+): Promise<IFunctionFragement> =>
+  decodeWithSignatureAtDepth(normalizeCalldata(calldata), signature, 0);
 
-  // Fetch function signatures using fallback strategy
-  const candidates = await fetchFunctionInterfaces(selector);
-
-  if (candidates.length === 0) {
-    if (root) throw Error("Function signature not found");
-    return null;
-  }
-
-  // Selectors can collide: try every known signature until one decodes
-  for (const funcRes of candidates) {
-    try {
-      const iface = new Interface([`function ${funcRes}`]);
-      const funcFrag = iface.getFunction(funcRes);
-      if (!funcFrag) continue;
-
-      const decodeData = iface.decodeFunctionData(funcFrag, inputData);
-
-      const newFuncFrag: IFunctionFragement = {
-        type: "function",
-        name: funcFrag.name,
-        inputs: [],
-      };
-
-      // Append inputs to newFuncFrag
-      for (let i = 0; i < funcFrag.inputs.length; i++) {
-        const paramType = funcFrag.inputs[i];
-        const newInput = await getParamType(paramType, decodeData[i], depth);
-        newFuncFrag.inputs.push(newInput);
+// Decode nested bytes as a call; null when unknown or not decodable
+async function tryDecodeNested(
+  value: string,
+  depth: number
+): Promise<IFunctionFragement | null> {
+  if (depth >= MAX_DEPTH || !looksLikeCalldata(value)) return null;
+  try {
+    const candidates = await lookupSignatures(value.slice(0, 10));
+    let loose: IFunctionFragement | null = null;
+    for (const signature of candidates) {
+      try {
+        const decoded = await decodeWithSignatureAtDepth(value, signature, depth);
+        if (decoded.exact) return decoded;
+        if (!loose || (decoded.matchedLength || 0) > (loose.matchedLength || 0)) {
+          loose = decoded;
+        }
+      } catch {
+        // try the next signature
       }
-
-      return newFuncFrag;
-    } catch (e) {
-      console.error(e);
     }
+    // non-canonical encoding: better than showing nothing
+    return loose;
+  } catch {
+    // lookup failed: show the raw bytes
   }
+  return null;
+}
 
-  if (!root) {
-    return null;
-  }
-  throw Error("Unable to decode function data");
-};
-
-// Recursively process parameter types with depth tracking
-async function getParamType(paramType: any, value: any, depth: number = 0) {
-  const newParamType: any = {
+// Recursively convert an ethers ParamType + value into display data
+async function toDecodedParam(
+  paramType: ParamType,
+  value: any,
+  depth: number
+): Promise<IDecodedParam> {
+  const param: IDecodedParam = {
     name: paramType.name || "",
     type: paramType.type,
     baseType: paramType.baseType,
-    value: paramType.arrayChildren ? value.flat().join(",") : value,
+    value: formatValue(value),
   };
 
-  // case array type[], eg: uint256[], string[], address[], tuple[]
   if (paramType.baseType === "array" && paramType.arrayChildren) {
+    // type[], eg: uint256[], string[], address[], tuple[]
     const child = paramType.arrayChildren;
-    newParamType.arrayChildren = await Promise.all(
-      value.map((childValue: any) => {
-        return getParamType(child, childValue, depth);
-      })
+    param.arrayChildren = await Promise.all(
+      Array.from(value as Iterable<unknown>).map((childValue) =>
+        toDecodedParam(child, childValue, depth)
+      )
     );
-  } else {
-    if (paramType.baseType === "tuple" && paramType.components) {
-      newParamType.components = await Promise.all(
-        paramType.components.map((child: any, index: number) => {
-          return getParamType(child, value[index], depth);
-        })
-      );
-    } else if (paramType.baseType === "bytes" || paramType.type === "bytes") {
-      // Try to decode dynamic bytes as nested calldata
-      const hexValue = toHexString(value);
-      if (isValidCalldata(hexValue)) {
-        newParamType.functionFragment = await tryDecodeAsCalldata(
-          hexValue,
-          depth
-        );
-      }
-    } else if (
-      paramType.type.startsWith("bytes") &&
-      paramType.type !== "bytes"
-    ) {
-      // Handle fixed-size bytes (bytes1-bytes32)
-      // Try to decode as calldata recursively
-      const hexValue = toHexString(value);
-      if (isValidCalldata(hexValue)) {
-        newParamType.functionFragment = await tryDecodeAsCalldata(
-          hexValue,
-          depth
-        );
+  } else if (paramType.baseType === "tuple" && paramType.components) {
+    param.components = await Promise.all(
+      paramType.components.map((child, index) =>
+        toDecodedParam(child, value[index], depth)
+      )
+    );
+  } else if (paramType.type === "bytes") {
+    // dynamic bytes may hold another call (multicall, execute, proxies...)
+    param.functionFragment = await tryDecodeNested(toHexString(value), depth + 1);
+  } else if (paramType.type === "bytes4") {
+    // a bytes4 argument is very often a function selector: name it
+    const selector = toHexString(value);
+    if (selector !== "0x00000000" && selector !== "0xffffffff") {
+      try {
+        const signatures = await lookupSignatures(selector);
+        if (signatures.length > 0) param.selectorSignatures = signatures.slice(0, 3);
+      } catch {
+        // optional hint only
       }
     }
-    newParamType.value = value;
   }
-  return newParamType;
+  return param;
 }
 
-function getFunctionName(inputData: string) {
-  return inputData.substring(0, 10);
+/**
+ * Decode calldata without an ABI: looks the selector up in public signature
+ * databases and tries every known signature (selectors can collide).
+ * Throws DecodeError for invalid input or when the database is unreachable.
+ * An unknown selector is not an error: the result then carries the raw words.
+ */
+export async function decodeCalldata(input: string): Promise<IDecodeResult> {
+  const calldata = normalizeCalldata(input);
+  const selector = calldata.slice(0, 10).toLowerCase();
+
+  const known = await lookupSignatures(selector);
+
+  const exact: IFunctionFragement[] = [];
+  const loose: IFunctionFragement[] = [];
+  for (const signature of known) {
+    try {
+      const decoded = await decodeWithSignatureAtDepth(calldata, signature, 0);
+      (decoded.exact ? exact : loose).push(decoded);
+    } catch {
+      // this signature does not fit the data
+    }
+  }
+  // Signatures that reproduce the calldata byte for byte win. The others
+  // (non-canonical encoding, trailing data) are only offered when none does.
+  // Among those, the one that accounts for most of the data comes first.
+  loose.sort((a, b) => (b.matchedLength || 0) - (a.matchedLength || 0));
+  const fitting = exact.length > 0 ? exact : loose;
+  const candidates = Array.from(
+    new Set(fitting.map((f) => f.signature || ""))
+  ).filter(Boolean);
+
+  return {
+    selector,
+    calldata,
+    candidates,
+    fragment: fitting[0] || null,
+    words: toWords(calldata),
+  };
 }

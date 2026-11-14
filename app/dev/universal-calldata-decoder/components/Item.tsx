@@ -1,40 +1,30 @@
-import { FC, useState } from "react";
-import { IFunctionFragement } from "./type";
+import { FC, useMemo, useState } from "react";
+import { IDecodedParam } from "./type";
 import { MdContentCopy } from "react-icons/md";
 import { copyToClipboard } from "@/common/utils";
 import clsx from "clsx";
 import FunctionComponent from "./FunctionComponent";
-import { convertNumberBetweenEtherUnit, ethUnitDecimals } from "@/app/number/utils";
+import { convertNumberBetweenEtherUnit } from "@/app/number/utils";
 
-enum Uint {
-  ether = "ETH",
-  wei = "WEI",
-}
+const UNITS = { wei: "WEI", gwei: "GWEI", ether: "ETH" } as const;
+type Unit = keyof typeof UNITS;
 
-enum BytesFormat {
-  hex = "Hex",
-  decimal = "Decimal",
-  binary = "Binary",
-  text = "Text",
-}
+const BYTES_FORMATS = {
+  hex: "Hex",
+  decimal: "Decimal",
+  binary: "Binary",
+  text: "Text",
+} as const;
+type BytesFormat = keyof typeof BYTES_FORMATS;
 
-// Convert hex string to decimal string
-function hexToDecimal(hex: string): string {
+const stripHexPrefix = (hex: string) => (hex.startsWith("0x") ? hex.slice(2) : hex);
+
+// Convert hex string to decimal / binary string
+function hexToBase(hex: string, base: 2 | 10): string {
   try {
-    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+    const cleanHex = stripHexPrefix(hex);
     if (!cleanHex) return "0";
-    return BigInt("0x" + cleanHex).toString(10);
-  } catch {
-    return "Invalid hex";
-  }
-}
-
-// Convert hex string to binary string
-function hexToBinary(hex: string): string {
-  try {
-    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
-    if (!cleanHex) return "0";
-    return BigInt("0x" + cleanHex).toString(2);
+    return BigInt("0x" + cleanHex).toString(base);
   } catch {
     return "Invalid hex";
   }
@@ -43,13 +33,12 @@ function hexToBinary(hex: string): string {
 // Convert hex string to text (UTF-8)
 function hexToText(hex: string): string {
   try {
-    const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+    const cleanHex = stripHexPrefix(hex);
     if (!cleanHex) return "";
     // Remove trailing null bytes (whole "00" pairs only: stripping single
     // zeros broke values whose last byte ends in 0, e.g. 0x...30)
     const trimmedHex = cleanHex.replace(/(?:00)+$/, "");
     if (trimmedHex.length % 2 !== 0) return "Invalid hex length";
-
     const bytes = [];
     for (let i = 0; i < trimmedHex.length; i += 2) {
       bytes.push(parseInt(trimmedHex.substring(i, i + 2), 16));
@@ -60,209 +49,134 @@ function hexToText(hex: string): string {
   }
 }
 
-// Check if type is a fixed-size bytes type (bytes1 to bytes32)
-function isFixedBytesType(type: string): boolean {
-  return /^bytes([1-9]|[12][0-9]|3[0-2])$/.test(type);
-}
+const isBytesType = (type: string) => /^bytes\d*$/.test(type);
+const isUintType = (type: string) => /^u?int\d*$/.test(type);
 
 interface ItemProps {
-  name: string;
-  type: string;
-  baseType: string;
-  value: string;
-  components?: ItemProps[];
-  funcFragment?: IFunctionFragement
-  arrayChildren?: ItemProps[],
-  childIndex?: number,
-  depth: number
+  param: IDecodedParam;
+  // position in the parent (function argument, tuple member or array element)
+  index: number;
+  // true when the parent is an array
+  isArrayElement?: boolean;
+  depth?: number;
 }
 
-const Item: FC<ItemProps> = ({
-  name,
-  type,
-  baseType,
-  value,
-  funcFragment,
-  arrayChildren,
-  components,
-  childIndex,
-  depth = 0,
-}) => {
-  depth++;
+const Item: FC<ItemProps> = ({ param, index, isArrayElement, depth = 0 }) => {
+  const { name, type, baseType, value, components, arrayChildren } = param;
 
-  const [sltUint, setSltUint] = useState("wei");
-  const [sltBytesFormat, setSltBytesFormat] = useState<keyof typeof BytesFormat>("hex");
-  const [values, setValue] = useState(value);
+  const [unit, setUnit] = useState<Unit>("wei");
+  const [bytesFormat, setBytesFormat] = useState<BytesFormat>("hex");
 
-  const handleCopy = (v: string) => {
-    copyToClipboard(v);
-  };
+  const isContainer = baseType === "array" || baseType === "tuple";
+  const showUnit = isUintType(type);
+  const showBytesFormat = isBytesType(type);
 
-  const handleUnitChange = (newUnit: string) => {
-    convertData(sltUint, newUnit);
-    setSltUint(newUnit as Uint);
-  }
-
-  const handleBytesFormatChange = (newFormat: keyof typeof BytesFormat) => {
-    setSltBytesFormat(newFormat);
-    const hexValue = value.toString();
-
-    switch (newFormat) {
-      case "hex":
-        setValue(hexValue);
-        break;
-      case "decimal":
-        setValue(hexToDecimal(hexValue));
-        break;
-      case "binary":
-        setValue(hexToBinary(hexValue));
-        break;
-      case "text":
-        setValue(hexToText(hexValue));
-        break;
-      default:
-        setValue(hexValue);
+  // Derived from props + selected format, so a new decode never shows the
+  // values of the previous one
+  const displayValue = useMemo(() => {
+    if (showUnit && unit !== "wei") {
+      return convertNumberBetweenEtherUnit(value, "wei", unit);
     }
-  }
-
-  const convertData = (fromUnit: string, toUnit: string) => {
-
-    if (typeof values !== "object") {
-
-      if (baseType.includes("uint")) {
-        const newValue = convertNumberBetweenEtherUnit(
-          value,
-          fromUnit.toLowerCase() as keyof typeof ethUnitDecimals,
-          toUnit.toLowerCase() as keyof typeof ethUnitDecimals);
-        setValue(newValue);
-      }
+    if (showBytesFormat) {
+      if (bytesFormat === "decimal") return hexToBase(value, 10);
+      if (bytesFormat === "binary") return hexToBase(value, 2);
+      if (bytesFormat === "text") return hexToText(value);
     }
-  }
+    return value;
+  }, [value, unit, bytesFormat, showUnit, showBytesFormat]);
 
-  return <>
-    {
-
-      <div className={clsx(`block px-4 my-3 bg-level-${depth} rounded-lg py-4`)}>
-        <div className="mb-1 mt-2">{type}
-          {childIndex !== undefined && ` (index: ${childIndex})`}
-          {arrayChildren?.length && ` (length: ${arrayChildren.length})`}
-        </div>
-        <div className="flex">
-          {baseType !== "array" && (
-            <>
-              <div className="w-full">
-                <input
-                  type="text"
-                  className="
-                      w-full p-1.5 
-                      outline-none 
-                      border-t 
-                      border-l 
-                      border-b
-                      border-t-bodydark 
-                      border-l-bodydark 
-                      border-b-bodydark
-                      border-bodydark 
-                      rounded-tl-lg 
-                      rounded-bl-lg"
-                  value={values.toString()}
-                  onChange={() => { }}
-                />
-
-
-              </div>
-              <div className="flex">
-                <span className="bg-gray-2  dark:bg-graydark border border-bodydark  block py-2 px-4 rounded-tr-lg rounded-br-lg hover:cursor-pointer">
-                  <MdContentCopy size={20} onClick={() => handleCopy(values.toString())} />
-                </span>
-              </div>
-            </>
-          )
-          }
-          {
-            baseType.includes("uint") ? (
-              <div className="ml-2">
-                <select value={sltUint} className="p-1.5 rounded-lg border-bodydark border" onChange={(e) => handleUnitChange(e.target.value)}>
-                  {
-                    Object.keys(Uint).map((unit, index) => {
-                      return <option key={index} value={unit}>{Uint[unit as keyof typeof Uint]}</option>
-                    })
-                  }
-                </select>
-              </div>
-            ) : null
-          }
-          {
-            isFixedBytesType(type) ? (
-              <div className="ml-2">
-                <select
-                  value={sltBytesFormat}
-                  className="p-1.5 rounded-lg border-bodydark border"
-                  onChange={(e) => handleBytesFormatChange(e.target.value as keyof typeof BytesFormat)}
-                >
-                  {
-                    Object.keys(BytesFormat).map((format, index) => {
-                      return <option key={index} value={format}>{BytesFormat[format as keyof typeof BytesFormat]}</option>
-                    })
-                  }
-                </select>
-              </div>
-            ) : null
-          }
-        </div>
-
-        {
-          baseType === "array" && (
-            <div className="flex flex-col">
-              {
-                arrayChildren?.map((item, index) => <Item
-                  key={index}
-                  name={item.name}
-                  baseType={item.baseType}
-                  type={item.type}
-                  value={item.value}
-                  funcFragment={item.funcFragment}
-                  arrayChildren={item.arrayChildren}
-                  components={item.components}
-                  childIndex={index}
-                  depth={depth}
-                />)
-              }
-            </div>
-          )
-        }
-
-        {
-          components && (
-            <div className="flex flex-col">
-              {
-                components?.map((item, index) => <Item
-                  key={index}
-                  name={item.name}
-                  baseType={item.baseType}
-                  type={item.type}
-                  value={item.value}
-                  funcFragment={item.funcFragment}
-                  arrayChildren={item.arrayChildren}
-                  components={item.components}
-                  depth={depth}
-                />)
-              }
-            </div>
-          )
-        }
-        {
-          funcFragment && (
-            <div className="flex flex-col">
-              <FunctionComponent
-                fragment={funcFragment}
-                isChild={true}
-              />
-            </div>
-          )
-        }
+  return (
+    <div
+      className={clsx(
+        "my-2 rounded-lg border border-stroke px-3 py-2",
+        // alternate the background so nesting levels stay readable
+        depth % 2 === 0 ? "bg-white" : "bg-gray-50"
+      )}
+    >
+      <div className="mb-1 flex flex-wrap items-baseline gap-x-2 text-sm">
+        <span className="text-bodydark">
+          {isArrayElement ? `[${index}]` : `#${index}`}
+        </span>
+        <span className="font-mono font-semibold">{type}</span>
+        {name && <span className="text-bodydark">{name}</span>}
+        {arrayChildren && (
+          <span className="text-bodydark">(length: {arrayChildren.length})</span>
+        )}
       </div>
-    }
-  </>;
+
+      {!isContainer && (
+        <div className="flex">
+          <input
+            type="text"
+            readOnly
+            aria-label={`${type} value`}
+            className="w-full min-w-0 rounded-l-lg border border-r-0 border-bodydark bg-white p-1.5 font-mono text-sm outline-none"
+            value={displayValue}
+          />
+          <button
+            type="button"
+            title="Copy"
+            aria-label="Copy value"
+            onClick={() => copyToClipboard(displayValue)}
+            className="rounded-r-lg border border-bodydark bg-gray-2 px-3 hover:cursor-pointer"
+          >
+            <MdContentCopy size={18} />
+          </button>
+          {showUnit && (
+            <select
+              value={unit}
+              aria-label="Unit"
+              className="ml-2 rounded-lg border border-bodydark p-1.5 text-sm"
+              onChange={(e) => setUnit(e.target.value as Unit)}
+            >
+              {Object.entries(UNITS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
+          {showBytesFormat && (
+            <select
+              value={bytesFormat}
+              aria-label="Format"
+              className="ml-2 rounded-lg border border-bodydark p-1.5 text-sm"
+              onChange={(e) => setBytesFormat(e.target.value as BytesFormat)}
+            >
+              {Object.entries(BYTES_FORMATS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
+      {param.selectorSignatures && (
+        <div className="mt-1 text-xs text-bodydark">
+          Selector of{" "}
+          <span className="font-mono">{param.selectorSignatures.join(" or ")}</span>
+        </div>
+      )}
+
+      {arrayChildren && arrayChildren.length === 0 && (
+        <div className="text-sm text-bodydark">Empty array</div>
+      )}
+
+      {arrayChildren?.map((item, i) => (
+        <Item key={i} param={item} index={i} isArrayElement depth={depth + 1} />
+      ))}
+
+      {components?.map((item, i) => (
+        <Item key={i} param={item} index={i} depth={depth + 1} />
+      ))}
+
+      {param.functionFragment && (
+        <FunctionComponent fragment={param.functionFragment} isChild depth={depth + 1} />
+      )}
+    </div>
+  );
 };
+
 export default Item;

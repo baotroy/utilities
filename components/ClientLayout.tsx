@@ -1,7 +1,9 @@
 "use client";
-import { useState, Suspense, lazy } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { rememberTool } from "@/common/toolInfo";
 
 // Lazy load non-critical components
 const ToasterContext = lazy(() => import("@/context/ToasterContext"));
@@ -12,6 +14,12 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  // feeds "Recently used" on the home page
+  useEffect(() => {
+    rememberTool(pathname);
+  }, [pathname]);
 
   return (
     <>

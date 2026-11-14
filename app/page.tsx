@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ConvertComponent from "./string/components/convert-case";
+import HomeComponent from "@/components/Home";
 export const metadata: Metadata = {
   title: "Holaa - Utilities for developers and more.",
   description: "Utilities for developers and more.",
@@ -9,10 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return (
-    <>
-      <h1 className="text-2xl font-bold">Latest Function</h1>
-      <ConvertComponent />
-    </>
-  );
+  return <HomeComponent />;
 }

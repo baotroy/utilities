@@ -1,6 +1,7 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState, useEffect } from "react";
+import { findMatches } from "@/common/regex";
 import Button from "@/components/Input/Button";
 import TextBox from "@/components/Input/TextBox";
 import { MdOutlineClear } from "react-icons/md";
@@ -47,33 +48,7 @@ export default function RegexTesterComponent() {
     }
 
     try {
-      const regex = new RegExp(pattern, flags);
-      const results: MatchResult[] = [];
-
-      if (flags.includes("g")) {
-        let match;
-        while ((match = regex.exec(testString)) !== null) {
-          results.push({
-            match: match[0],
-            index: match.index,
-            groups: match.slice(1),
-          });
-          // Prevent infinite loop for zero-length matches
-          if (match[0].length === 0) {
-            regex.lastIndex++;
-          }
-        }
-      } else {
-        const match = regex.exec(testString);
-        if (match) {
-          results.push({
-            match: match[0],
-            index: match.index,
-            groups: match.slice(1),
-          });
-        }
-      }
-
+      const results: MatchResult[] = findMatches(pattern, flags, testString);
       setMatches(results);
 
       // Create highlighted text
@@ -82,6 +57,7 @@ export default function RegexTesterComponent() {
         let lastIndex = 0;
 
         results.forEach((result, i) => {
+          if (result.match.length === 0) return;
           if (result.index > lastIndex) {
             parts.push(
               <span key={`text-${i}`}>{testString.slice(lastIndex, result.index)}</span>

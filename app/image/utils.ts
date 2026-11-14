@@ -41,6 +41,12 @@ export const resizeImageExec = (
       canvas.width = newWidth;
       canvas.height = newHeight;
       if (ctx !== null) {
+        if (outFormat === "image/jpeg") {
+          // JPEG has no alpha channel: transparent areas would turn black
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, newWidth, newHeight);
+        }
+        ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
         return resolve(canvas.toDataURL(outFormat));
       }
@@ -191,6 +197,8 @@ export const rotate = (
 
       resolve(canvas.toDataURL(outFormat, 1));
     };
+    // Without this the promise never settled for an unreadable image
+    image.onerror = () => reject(new Error("Invalid image"));
   });
 };
 
@@ -223,5 +231,6 @@ export const flip = (
 
       resolve(canvas.toDataURL(outFormat, 1));
     };
+    image.onerror = () => reject(new Error("Invalid image"));
   });
 };

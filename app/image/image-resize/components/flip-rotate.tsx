@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Dimensions, FileFormat } from "../../type";
 import { flip, rotate } from "../../utils";
+import { extensionFromMime } from "@/common/utils";
 import { MdOutlineRotateLeft, MdOutlineRotateRight } from "react-icons/md";
 import { RiMergeCellsHorizontal, RiMergeCellsVertical } from "react-icons/ri";
 
@@ -37,7 +38,8 @@ const FlipRotate: React.FC<FlipRotateProps> = ({
 
   const saveTransformImage = () => {
     const link = document.createElement("a");
-    link.download = "transformed-image";
+    const mime = base64Data.slice(5, base64Data.indexOf(";"));
+    link.download = `transformed-image.${extensionFromMime(mime)}`;
     link.href = base64Data;
     link.click();
   };

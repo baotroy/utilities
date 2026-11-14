@@ -1,16 +1,24 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import convertCase, { CaseType } from "../utils";
-import { copyToClipboard } from "@/common/utils";
-import clsx from "clsx";
+import { copyToClipboard, download } from "@/common/utils";
 
 export default function ConvertCaseComponent() {
   const [text, setText] = useState("");
-  const [characterCount, setCharacterCount] = useState(0);
-  const [wordCount, setWordCount] = useState(0);
-  const [lineCount, setLineCount] = useState(0);
-  const [sentenceCount, setSentenceCount] = useState(0);
+  // Derive counts from the current text so they stay correct after a
+  // conversion or Clear (not only while typing)
+  const { characterCount, wordCount, lineCount, sentenceCount } = useMemo(() => {
+    if (!text) {
+      return { characterCount: 0, wordCount: 0, lineCount: 0, sentenceCount: 0 };
+    }
+    return {
+      characterCount: text.length,
+      wordCount: text.split(/\s+/).filter(Boolean).length,
+      lineCount: text.split("\n").length,
+      sentenceCount: text.split(/[.!?]+/).filter((s) => s.trim() !== "").length,
+    };
+  }, [text]);
   const buttons = [
     {
       label: "lower case",
@@ -93,12 +101,7 @@ export default function ConvertCaseComponent() {
     {
       label: "Download Text",
       handleClick: () => {
-        const element = document.createElement("a");
-        const file = new Blob([text], { type: "text/plain" });
-        element.href = URL.createObjectURL(file);
-        element.download = "text.txt";
-        document.body.appendChild(element);
-        element.click();
+        download(text, "text.txt");
       },
     },
     {
@@ -124,13 +127,7 @@ export default function ConvertCaseComponent() {
         <textarea
           rows={15}
           placeholder="Paste or type your text here..."
-          onChange={(e) => {
-            setCharacterCount(e.target.value.length);
-            setWordCount(e.target.value.replaceAll("\n", " ").split(" ").length);
-            setLineCount(e.target.value.split("\n").length);
-            setSentenceCount(e.target.value.split(".").length);
-            setText(e.target.value);
-          }}
+          onChange={(e) => setText(e.target.value)}
           value={text}
           className="
             dark:text-graydark2

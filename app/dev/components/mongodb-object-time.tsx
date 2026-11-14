@@ -16,7 +16,11 @@ export default function MongoObjectTimeComponent() {
   }
   const h3Style = "text-[26px] mb-2";
   const objectIdFromDate = function (date: Date): string {
-    return Math.floor(date.getTime() / 1000).toString(16) + "0000000000000000";
+    // pad to 8 hex chars: dates before 1978 produced an invalid (short) ObjectId
+    return (
+      Math.floor(date.getTime() / 1000).toString(16).padStart(8, "0") +
+      "0000000000000000"
+    );
   };
 
   const dateFromObjectId = function (objectId: string): Date {
@@ -80,7 +84,10 @@ export default function MongoObjectTimeComponent() {
           break;
       }
       setDate(newDate);
-      setObjectId(objectIdFromDate(newDate));
+      const newObjectId = objectIdFromDate(newDate);
+      setObjectId(newObjectId);
+      // keep the ObjectId("...") output and its copy button in sync
+      setMObjectId(newObjectId);
     } catch (error) {
       console.error(error);
     }

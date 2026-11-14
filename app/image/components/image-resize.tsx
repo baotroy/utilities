@@ -30,10 +30,11 @@ export default function ImageResizeComponent() {
       reader.onload = async () => {
         const b64 = reader.result as string;
         try {
+          // await so an unreadable image is reported instead of becoming an
+          // unhandled promise rejection
+          const dimens = await getImageDimensions(b64);
           setBase64(b64);
-          getImageDimensions(b64).then((dimens) => {
-            setDimensions(dimens);
-          });
+          setDimensions(dimens);
           setFormat(file.type as FileFormat);
         } catch (error: any) {
           Toast.error(error.message);

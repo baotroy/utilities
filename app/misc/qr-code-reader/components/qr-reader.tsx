@@ -26,6 +26,10 @@ const QRCodeReaderComponent = () => {
   const animationFrameRef = useRef<number | null>(null);
   const generatorCanvasRef = useRef<HTMLCanvasElement>(null);
   const isScanningRef = useRef(false);
+  // Keep the stream itself: on unmount the <video> ref is already cleared, so
+  // the camera could stay on after leaving the page
+  const streamRef = useRef<MediaStream | null>(null);
+  const lastScanRef = useRef(0);
 
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +90,12 @@ const QRCodeReaderComponent = () => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
+      if (!isScanningRef.current) {
+        // stopped (or left the page) while the permission prompt was open
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      streamRef.current = stream;
       // Wait for next tick so video element is rendered
       setTimeout(() => {
         if (videoRef.current) {
@@ -109,7 +119,13 @@ const QRCodeReaderComponent = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+    // Decode ~8 frames per second instead of every animation frame: jsQR on a
+    // full camera frame is expensive and pinned the CPU at 60 fps
+    const now = performance.now();
+    const due = now - lastScanRef.current >= 120;
+
+    if (due && video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+      lastScanRef.current = now;
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
 
@@ -124,8 +140,8 @@ const QRCodeReaderComponent = () => {
           canvas.width,
           canvas.height
         );
-        const data = new Uint8ClampedArray(imageData.data);
-        const code = jsQR(data, canvas.width, canvas.height);
+        // imageData.data already is a Uint8ClampedArray: no copy needed
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
 
         if (code) {
           setQrContent(code.data);
@@ -146,12 +162,13 @@ const QRCodeReaderComponent = () => {
   // Stop camera
   const stopCamera = () => {
     isScanningRef.current = false;
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track) => track.stop());
-      setCameraActive(false);
-      setIsScanning(false);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      if (videoRef.current) videoRef.current.srcObject = null;
     }
+    setCameraActive(false);
+    setIsScanning(false);
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }

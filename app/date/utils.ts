@@ -42,9 +42,8 @@ export const getTimestampUnit = (timestamp?: number): string => {
 };
 
 const dateDiff = (timestamp: number): TimestampDifferenceType => {
-  const s = formatString(timestamp.toString());
   const now = dayjs();
-  const then = dayjs(parseInt(s));
+  const then = dayjs(toMilliseconds(timestamp));
   return {
     second: then.diff(now, TimestampUnit.SECOND, true),
     minute: then.diff(now, TimestampUnit.MINUTE, true),
@@ -56,12 +55,16 @@ const dateDiff = (timestamp: number): TimestampDifferenceType => {
   };
 };
 
-const formatString = (str: string): string => {
-  if (str.length > 13) {
-    return str.slice(0, 13);
-  } else {
-    return str.padEnd(13, "0");
-  }
+// Convert a timestamp in s / ms / µs / ns (detected by its number of digits,
+// same thresholds as getTimestampUnit) to milliseconds. The previous approach
+// padded every value to 13 digits, which broke 9-digit second timestamps
+// (dates before Sep 2001) and 11-digit ones.
+export const toMilliseconds = (timestamp: number): number => {
+  const digits = Math.abs(Math.trunc(timestamp)).toString().length;
+  if (digits >= 17) return Math.floor(timestamp / 1e6); // nanoseconds
+  if (digits >= 15) return Math.floor(timestamp / 1e3); // microseconds
+  if (digits >= 12) return timestamp; // milliseconds
+  return timestamp * 1000; // seconds
 };
 
 const convertSecondsToNearestUnit = (
@@ -111,11 +114,8 @@ export const getRelativeTime = (timestamp?: number): string => {
 
 export const dateFormat = (timestamp?: number, utc = false): string => {
   if (!timestamp) return "";
-  return utc
-    ? dayjs(parseInt(formatString(timestamp.toString())))
-      .utc()
-      .format("dddd, MMMM D, YYYY h:mm:ss A")
-    : dayjs(parseInt(formatString(timestamp.toString()))).format("dddd, MMMM D, YYYY h:mm:ss A");
+  const date = dayjs(toMilliseconds(timestamp));
+  return (utc ? date.utc() : date).format("dddd, MMMM D, YYYY h:mm:ss A");
 };
 
 export const createTimeUnix = (dateStr: string, utc = false): number => {

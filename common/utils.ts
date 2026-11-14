@@ -40,10 +40,48 @@ export const download = (
 ) => {
   const element = document.createElement("a");
   const file = new Blob([content], { type });
-  element.href = URL.createObjectURL(file);
+  const url = URL.createObjectURL(file);
+  element.href = url;
   element.download = filename;
   document.body.appendChild(element); // Required for this to work in FireFox
   element.click();
+  document.body.removeChild(element);
+  // Release the blob once the browser has started the download
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+
+/**
+ * Convert bytes to a Base64 string. Works in chunks so large inputs do not
+ * overflow the call stack (String.fromCharCode(...bytes) fails above ~100k).
+ */
+export const bytesToBase64 = (bytes: Uint8Array): string => {
+  const CHUNK = 0x8000;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + CHUNK) as unknown as number[]
+    );
+  }
+  return btoa(binary);
+};
+
+/** Base64-encode a string as UTF-8 (browser-safe, no Buffer polyfill). */
+export const utf8ToBase64 = (str: string): string =>
+  bytesToBase64(new TextEncoder().encode(str));
+
+/** Add a file extension that matches an image MIME type, e.g. image/jpeg -> .jpg */
+export const extensionFromMime = (mime: string): string => {
+  const map: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "image/bmp": "bmp",
+    "image/svg+xml": "svg",
+    "image/avif": "avif",
+  };
+  return map[mime] || "png";
 };
 
 export const getSizeFileFromBase64 = (str: string) => {

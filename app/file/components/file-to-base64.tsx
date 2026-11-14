@@ -2,7 +2,6 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import React, { useState } from "react";
 import clsx from "clsx";
-import { prettyJson } from "@/app/dev/utils";
 import { bytesToSize, copyToClipboard, download } from "@/common/utils";
 
 export default function File2Base64Component() {
@@ -47,25 +46,19 @@ export default function File2Base64Component() {
       case "html_hyperlink":
         return `<a href="${base64}">File</a>`;
       case "json":
-        return prettyJson(
-          JSON.stringify({ file: { mime: selectFile?.type, data: base64 } })
+        return JSON.stringify(
+          { file: { mime: selectFile?.type, data: base64 } },
+          null,
+          2
         );
       case "xml":
-        return formatXml(
-          `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`
-        );
+        // Built directly: the old DOMParser + XMLSerializer round trip
+        // returned the same string but was very slow for large files
+        return `<?xml version="1.0" encoding="UTF-8"?><root><file>${base64}</file></root>`;
       default:
         return base64;
     }
   };
-
-  // need optimizing
-  function formatXml(xmlString: string) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-    const serializer = new XMLSerializer();
-    return serializer.serializeToString(xmlDoc);
-  }
 
   const handleDownload = () => {
     if (formatData) download(formatData, "base64.txt", "text/plain");

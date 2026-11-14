@@ -1,38 +1,49 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState, useMemo } from "react";
+import { lcsDiff } from "@/common/diff";
 
 interface DiffLine {
   type: "equal" | "added" | "removed";
   text: string;
-  lineNumber: number;
+  lineNumber?: number;
 }
 
+// Line-based diff using LCS so an inserted/deleted line does not mark every
+// following line as changed. Rows of the two panels stay aligned.
 function computeDiff(text1: string, text2: string): { left: DiffLine[]; right: DiffLine[] } {
-  const lines1 = text1.split("\n");
-  const lines2 = text2.split("\n");
+  const ops = lcsDiff(text1.split("\n"), text2.split("\n"));
 
   const left: DiffLine[] = [];
   const right: DiffLine[] = [];
+  const blank: DiffLine = { type: "equal", text: "" };
 
-  const maxLen = Math.max(lines1.length, lines2.length);
+  let k = 0;
+  while (k < ops.length) {
+    const op = ops[k];
+    if (op.type === "equal") {
+      left.push({ type: "equal", text: op.value, lineNumber: op.aIndex! + 1 });
+      right.push({ type: "equal", text: op.value, lineNumber: op.bIndex! + 1 });
+      k++;
+      continue;
+    }
+    const removed: typeof ops = [];
+    const added: typeof ops = [];
+    while (k < ops.length && ops[k].type === "removed") removed.push(ops[k++]);
+    while (k < ops.length && ops[k].type === "added") added.push(ops[k++]);
 
-  for (let i = 0; i < maxLen; i++) {
-    const line1 = lines1[i];
-    const line2 = lines2[i];
-
-    if (line1 === undefined) {
-      right.push({ type: "added", text: line2, lineNumber: i + 1 });
-      left.push({ type: "equal", text: "", lineNumber: i + 1 });
-    } else if (line2 === undefined) {
-      left.push({ type: "removed", text: line1, lineNumber: i + 1 });
-      right.push({ type: "equal", text: "", lineNumber: i + 1 });
-    } else if (line1 === line2) {
-      left.push({ type: "equal", text: line1, lineNumber: i + 1 });
-      right.push({ type: "equal", text: line2, lineNumber: i + 1 });
-    } else {
-      left.push({ type: "removed", text: line1, lineNumber: i + 1 });
-      right.push({ type: "added", text: line2, lineNumber: i + 1 });
+    const rows = Math.max(removed.length, added.length);
+    for (let r = 0; r < rows; r++) {
+      left.push(
+        removed[r]
+          ? { type: "removed", text: removed[r].value, lineNumber: removed[r].aIndex! + 1 }
+          : blank
+      );
+      right.push(
+        added[r]
+          ? { type: "added", text: added[r].value, lineNumber: added[r].bIndex! + 1 }
+          : blank
+      );
     }
   }
 
@@ -52,7 +63,7 @@ export default function TextCompareComponent() {
 
     diff.left.forEach((line) => {
       if (line.type === "removed") removed++;
-      else if (line.text !== "") unchanged++;
+      else if (line.lineNumber !== undefined) unchanged++;
     });
     diff.right.forEach((line) => {
       if (line.type === "added") added++;

@@ -66,19 +66,28 @@ function convert(str: string, type: CaseType): string {
 }
 
 function _sentense(str: string): string {
+  if (!str) return str;
   const cs = str.toLowerCase().split("");
 
-  cs[0] = cs[0].toUpperCase();
-  let dot = false;
-  for (let j = 2; j < cs.length; j++) {
-    if (cs[j] === ".") dot = true;
-    if (!isAlphabet(cs[j])) continue;
-    if (dot) {
+  // Capitalize the first letter of the text and the first letter after
+  // every sentence terminator (. ! ?)
+  let capitalizeNext = true;
+  for (let j = 0; j < cs.length; j++) {
+    if (cs[j] === "." || cs[j] === "!" || cs[j] === "?") {
+      capitalizeNext = true;
+      continue;
+    }
+    if (!isLetter(cs[j])) continue;
+    if (capitalizeNext) {
       cs[j] = cs[j].toUpperCase();
-      dot = false;
+      capitalizeNext = false;
     }
   }
   return cs.join("");
+}
+
+function isLetter(char: string): boolean {
+  return isAlphabet(char) || /\p{L}/u.test(char);
 }
 
 function _alternating(str: string): string {
@@ -166,18 +175,29 @@ function _rotate(str: string): string {
   return str.split("").reverse().join("");
 }
 
+// Split text into words. Unicode-aware so letters with diacritics
+// (e.g. Vietnamese) are kept instead of being stripped.
 function _toWords(str: string): string[] {
   return str
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/(\p{Ll})(\p{Lu})/gu, "$1 $2")
     .replace(/[_\-]+/g, " ")
-    .replace(/[^\w\s]/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
     .trim()
     .split(/\s+/)
     .filter(Boolean);
 }
 
+// Remove diacritics so slugs are URL-safe ASCII (e.g. "Tiếng Việt" -> "tieng-viet")
+function _removeDiacritics(str: string): string {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+}
+
 function _slug(str: string): string {
-  return _toWords(str)
+  return _toWords(_removeDiacritics(str))
     .map((w) => w.toLowerCase())
     .join("-");
 }

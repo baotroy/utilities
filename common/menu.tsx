@@ -222,6 +222,12 @@ const menus: menuProps[] = [
         href: "/dev/regex-builder",
         icon: null,
       },
+      {
+        label: "EVM Transaction Simulator",
+        href: "/dev/evm-transaction-simulator",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {

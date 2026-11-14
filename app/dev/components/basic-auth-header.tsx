@@ -1,24 +1,27 @@
 "use client";
-import { copyToClipboard } from "@/common/utils";
+import { copyToClipboard, utf8ToBase64 } from "@/common/utils";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { MdContentCopy } from "react-icons/md";
 
 export default function BasicAuthHeaderComponent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [authHeader, setAuthHeader] = useState("");
+  // Derived value: stays in sync when a field is cleared (it used to keep the
+  // old header) and uses the standard "Authorization: Basic <base64>" format.
+  // An empty password is valid for Basic auth, so either field is enough.
+  const authHeader = useMemo(
+    () =>
+      username || password
+        ? `Authorization: Basic ${utf8ToBase64(`${username}:${password}`)}`
+        : "",
+    [username, password]
+  );
 
   const handleCopy = () => {
     copyToClipboard(authHeader);
   };
 
-  useEffect(() => {
-    if (username && password) {
-      const base64 = Buffer.from(`${username}:${password}`).toString("base64");
-      setAuthHeader(`Authorization Basic: ${base64}`);
-    }
-  }, [username, password]);
 
   return (
     <>

@@ -17,6 +17,8 @@ interface HashResult {
 
 export default function HashGeneratorComponent() {
   const [input, setInput] = useState("");
+  // Raw bytes of the uploaded file: hashing it as text corrupted binary files
+  const [fileData, setFileData] = useState<Uint8Array | null>(null);
   const [inputType, setInputType] = useState<"text" | "file">("text");
   const [results, setResults] = useState<HashResult[]>([]);
   const [selectedAlgorithms, setSelectedAlgorithms] = useState<HashAlgorithm[]>(["md5", "sha1", "sha256", "sha512"]);
@@ -42,28 +44,30 @@ export default function HashGeneratorComponent() {
   };
 
   const generateHashes = () => {
-    if (!input) {
+    const data = inputType === "file" ? fileData : input;
+    if (!data) {
       setResults([]);
       return;
     }
+    const useHmac = isHmac && !!hmacKey;
 
     const newResults: HashResult[] = [];
 
     for (const algo of selectedAlgorithms) {
       let hash: crypto.Hash | crypto.Hmac;
 
-      if (isHmac && hmacKey) {
+      if (useHmac) {
         hash = crypto.createHmac(algo, hmacKey);
       } else {
         hash = crypto.createHash(algo);
       }
 
-      hash.update(input);
+      hash.update(data);
 
       const digest = outputFormat === "hex" ? hash.digest("hex") : hash.digest("base64");
 
       newResults.push({
-        algorithm: isHmac ? `HMAC-${algo.toUpperCase()}` : algo.toUpperCase(),
+        algorithm: useHmac ? `HMAC-${algo.toUpperCase()}` : algo.toUpperCase(),
         hash: digest,
       });
     }
@@ -75,16 +79,12 @@ export default function HashGeneratorComponent() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      setInput(content);
-    };
-    reader.readAsText(file);
+    setFileData(new Uint8Array(await file.arrayBuffer()));
   };
 
   const reset = () => {
     setInput("");
+    setFileData(null);
     setResults([]);
     setHmacKey("");
   };

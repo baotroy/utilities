@@ -12,7 +12,8 @@ import {
 } from ".";
 import { useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
-BigNumber.config({ ROUNDING_MODE: 2 }); // ROUND CEIL
+// Note: no global BigNumber.config here. It changed the rounding mode for
+// every other tool (e.g. the Big Number Calculator) once this page was opened.
 
 import { getBalances, parseBalance } from "@/common/ethUtils";
 import clsx from "clsx";
@@ -20,11 +21,12 @@ import PaginatorBox from "./paginatorBox";
 
 const EthereumPrivateKeyAddressComponent = () => {
   const getValidPage = (page: BigNumber | number | string): BigNumber => {
-    const t =
+    const t = (
       typeof page === "number" || typeof page === "string"
         ? BigNumber(page)
-        : page;
-    if (t.lt(1)) {
+        : page
+    ).integerValue(BigNumber.ROUND_FLOOR);
+    if (t.isNaN() || t.lt(1)) {
       return BigNumber(1);
     }
     if (t.gt(TOTAL_PAGES)) {
@@ -49,11 +51,11 @@ const EthereumPrivateKeyAddressComponent = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    setKeys(getKeysListFromPage(page));
+    // build the key list once (it was generated twice per page)
+    const pageKeys = getKeysListFromPage(page);
+    setKeys(pageKeys);
     setBalances([]);
-    setAddresses(
-      getKeysListFromPage(page).map((key) => getAddressFromPrivateKey(key))
-    );
+    setAddresses(pageKeys.map((key) => getAddressFromPrivateKey(key)));
     setTempPage(page.toString(10));
 
     // push router
@@ -70,18 +72,31 @@ const EthereumPrivateKeyAddressComponent = () => {
   };
 
   useEffect(() => {
-    getBalances(addresses, 1, customRpc.trim()).then((bals) => {
-      if (bals) {
-        console.log("bals", bals)
-        setBalances(bals.map((b) => parseBalance(b)));
-        setTotalBalances(
-          bals.reduce((acc, cur) => {
-            return BigNumber(acc).plus(cur ?? 0).toString(10);
-          }, "0")
-        );
-      }
-      setIsLoading(false);
-    });
+    if (addresses.length === 0) return;
+    // Ignore the answer of an outdated request when the page changes quickly
+    let cancelled = false;
+    getBalances(addresses, 1, customRpc.trim())
+      .then((bals) => {
+        if (cancelled) return;
+        if (bals) {
+          setBalances(bals.map((b) => parseBalance(b)));
+          setTotalBalances(
+            bals.reduce((acc, cur) => {
+              return BigNumber(acc).plus(cur ?? 0).toString(10);
+            }, "0")
+          );
+        }
+      })
+      .catch((error) => {
+        // RPC failure: stop the loading state instead of spinning forever
+        console.error(error);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [addresses]);
 
   const handlePageChange = (newPage: BigNumber | number) => {
@@ -110,8 +125,11 @@ const EthereumPrivateKeyAddressComponent = () => {
   };
 
   const randomPage = () => {
-    const newPage = BigNumber.random().multipliedBy(TOTAL_PAGES).integerValue();
-    setPage(newPage);
+    // 80 random decimals so every page of the ~5.8e74 can be reached
+    const newPage = BigNumber.random(80)
+      .multipliedBy(TOTAL_PAGES)
+      .integerValue(BigNumber.ROUND_CEIL);
+    setPage(getValidPage(newPage));
   };
 
   return (

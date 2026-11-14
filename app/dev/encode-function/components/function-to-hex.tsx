@@ -2,12 +2,13 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Button from "@/components/Input/Button";
 import TextArea from "@/components/Input/TextArea";
-import { Web3 } from "web3";
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
 import {
   getFunctionSignature,
   keccak256,
+  toEventSelector,
+  toFunctionSelector,
 } from "viem";
 
 interface FunctionToHexComponentProps { }
@@ -30,13 +31,14 @@ const FunctionToHexComponent: FC<
       const jsonAbi = JSON.parse(abi);
       const functions = jsonAbi.filter((item: any) => item.type === "function");
       setFunctions(functions);
-      const web3 = new Web3();
-      const hexs = functions.map((item: any) => web3.eth.abi.encodeFunctionSignature(item));
+      // viem (already used below) replaces web3, which was bundled only for
+      // these two calls
+      const hexs = functions.map((item: any) => toFunctionSelector(item));
       setViews(hexs);
 
       const events = jsonAbi.filter((item: any) => item.type === "event");
       setEvents(events);
-      const hexEvents = events.map((item: any) => web3.eth.abi.encodeEventSignature(item));
+      const hexEvents = events.map((item: any) => toEventSelector(item));
       setHexEvents(hexEvents);
 
       const errs = jsonAbi.filter((item: any) => item.type === "error");
@@ -53,6 +55,8 @@ const FunctionToHexComponent: FC<
       setViews([]);
       setEvents([]);
       setHexEvents([]);
+      setErrors([]);
+      setHexErrors([]);
     }
   };
   return (

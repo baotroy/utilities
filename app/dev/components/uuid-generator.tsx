@@ -8,6 +8,7 @@ import Copy from "@/components/common/copy";
 import { MdOutlineClear, MdRefresh } from "react-icons/md";
 import { LiaHashtagSolid } from "react-icons/lia";
 import crypto from "crypto";
+import toast from "react-hot-toast";
 
 type UUIDVersion = "v1" | "v4" | "v5";
 
@@ -56,6 +57,8 @@ function generateUUIDv1(): string {
   clockSeq[0] = (clockSeq[0] & 0x3f) | 0x80; // Set variant bits
 
   const node = crypto.randomBytes(6);
+  // RFC 4122 §4.5: a random node ID must have the multicast bit set
+  node[0] |= 0x01;
 
   const bytes = new Uint8Array(16);
 
@@ -130,6 +133,17 @@ export default function UuidGeneratorComponent() {
   const [useCustomNamespace, setUseCustomNamespace] = useState(false);
 
   const generate = () => {
+    // An invalid custom namespace used to be silently hashed as garbage bytes
+    if (
+      version === "v5" &&
+      useCustomNamespace &&
+      !/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(
+        customNamespace.trim()
+      )
+    ) {
+      toast.error("Custom namespace must be a valid UUID");
+      return;
+    }
     const results: string[] = [];
     const genCount = Math.min(Math.max(1, count), 1000);
 
@@ -144,7 +158,7 @@ export default function UuidGeneratorComponent() {
           uuid = generateUUIDv4();
           break;
         case "v5":
-          const ns = useCustomNamespace ? customNamespace : NAMESPACES[namespace];
+          const ns = useCustomNamespace ? customNamespace.trim() : NAMESPACES[namespace];
           uuid = generateUUIDv5(ns, name || `name-${i}`);
           break;
         default:

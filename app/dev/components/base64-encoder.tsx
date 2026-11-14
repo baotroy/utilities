@@ -3,7 +3,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState, useEffect } from "react";
 import Button from "@/components/Input/Button";
 import { MdOutlineClear, MdSwapVert, MdContentCopy } from "react-icons/md";
-import { copyToClipboard } from "@/common/utils";
+import { copyToClipboard, utf8ToBase64 } from "@/common/utils";
 
 type Mode = "encode" | "decode";
 
@@ -29,9 +29,9 @@ export default function Base64EncoderComponent() {
     try {
       if (mode === "encode") {
         // Encode to Base64
-        const encoder = new TextEncoder();
-        const data = encoder.encode(input);
-        let base64 = btoa(String.fromCharCode(...data));
+        // Chunked conversion: spreading a large byte array into
+        // String.fromCharCode overflowed the call stack on big inputs
+        let base64 = utf8ToBase64(input);
 
         if (urlSafe) {
           // Convert to URL-safe Base64

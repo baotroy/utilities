@@ -54,7 +54,11 @@ export default function FaviconGeneratorComponent() {
     try {
       const img = new Image();
       img.src = sourceImage;
-      await new Promise((resolve) => (img.onload = resolve));
+      // reject on a broken image, otherwise "Generating..." never ended
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error("Invalid image"));
+      });
 
       const generatedFavicons: FaviconSize[] = [];
 

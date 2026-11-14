@@ -1,5 +1,6 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { findMatches, splitByMatches } from "@/common/regex";
 import { useState, useMemo } from "react";
 import { copyToClipboard } from "@/common/utils";
 import clsx from "clsx";
@@ -240,31 +241,7 @@ export default function RegexBuilderComponent() {
   const matches: MatchInfo[] = useMemo(() => {
     if (!pattern || !testString) return [];
     try {
-      const flagStr = flags.join("");
-      const re = new RegExp(pattern, flagStr);
-      const results: MatchInfo[] = [];
-      let match;
-
-      if (flagStr.includes("g")) {
-        while ((match = re.exec(testString)) !== null) {
-          results.push({
-            match: match[0],
-            index: match.index,
-            groups: match.slice(1),
-          });
-          if (!match[0]) re.lastIndex++;
-        }
-      } else {
-        match = re.exec(testString);
-        if (match) {
-          results.push({
-            match: match[0],
-            index: match.index,
-            groups: match.slice(1),
-          });
-        }
-      }
-      return results;
+      return findMatches(pattern, flags.join(""), testString);
     } catch {
       return [];
     }
@@ -280,43 +257,12 @@ export default function RegexBuilderComponent() {
     }
   }, [pattern, flags]);
 
+  // Reuse the matches above instead of running the regex a second time
   const highlightedText = useMemo(() => {
     if (!pattern || !testString || regexError) return null;
-    try {
-      const re = new RegExp(pattern, flags.join(""));
-      const parts: { text: string; isMatch: boolean }[] = [];
-      let lastIndex = 0;
-      let m;
-
-      if (flags.includes("g")) {
-        const reGlobal = new RegExp(pattern, flags.join(""));
-        while ((m = reGlobal.exec(testString)) !== null) {
-          if (m.index > lastIndex) {
-            parts.push({ text: testString.slice(lastIndex, m.index), isMatch: false });
-          }
-          parts.push({ text: m[0], isMatch: true });
-          lastIndex = m.index + m[0].length;
-          if (!m[0]) {
-            reGlobal.lastIndex++;
-            lastIndex = reGlobal.lastIndex;
-          }
-        }
-      } else {
-        m = re.exec(testString);
-        if (m) {
-          if (m.index > 0) parts.push({ text: testString.slice(0, m.index), isMatch: false });
-          parts.push({ text: m[0], isMatch: true });
-          lastIndex = m.index + m[0].length;
-        }
-      }
-      if (lastIndex < testString.length) {
-        parts.push({ text: testString.slice(lastIndex), isMatch: false });
-      }
-      return parts.length > 0 ? parts : null;
-    } catch {
-      return null;
-    }
-  }, [pattern, testString, flags, regexError]);
+    const parts = splitByMatches(testString, matches);
+    return parts.length > 0 ? parts : null;
+  }, [pattern, testString, regexError, matches]);
 
   const replaceResult = useMemo(() => {
     if (!pattern || !testString || regexError) return "";

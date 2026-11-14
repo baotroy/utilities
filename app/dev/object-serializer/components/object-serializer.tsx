@@ -10,16 +10,53 @@ export default function ObjectSerializerComponent() {
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
 
-  // Convert unquoted keys to quoted keys in object literals
+  // Convert a JS object literal to valid JSON text: single-quoted strings
+  // become double-quoted, unquoted keys get quoted and trailing commas are
+  // dropped. It walks the text token by token so the content of string values
+  // is never touched (the old regex version rewrote text inside strings and
+  // turned every apostrophe in the output into a double quote).
   const normalizeJSON = (str: string): string => {
-    // Replace unquoted keys with quoted keys
-    // Matches: word: or ,word: and replaces with "word": or ,"word":
-    return str.replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":');
-  };
-
-  // Replace single quotes with double quotes
-  const replaceSingleQuotes = (str: string): string => {
-    return str.replace(/'/g, '"');
+    let out = "";
+    let i = 0;
+    while (i < str.length) {
+      const ch = str[i];
+      if (ch === '"' || ch === "'") {
+        // string literal
+        let j = i + 1;
+        let content = "";
+        while (j < str.length && str[j] !== ch) {
+          if (str[j] === "\\" && j + 1 < str.length) {
+            // keep escapes, except \' which JSON does not know
+            content += str[j + 1] === "'" ? "'" : str[j] + str[j + 1];
+            j += 2;
+          } else {
+            content += ch === "'" && str[j] === '"' ? '\\"' : str[j];
+            j++;
+          }
+        }
+        out += `"${content}"`;
+        i = j + 1;
+      } else if (/[A-Za-z_$]/.test(ch)) {
+        // identifier: quote it when it is used as a key
+        let j = i;
+        while (j < str.length && /[\w$]/.test(str[j])) j++;
+        const word = str.slice(i, j);
+        let k = j;
+        while (k < str.length && /\s/.test(str[k])) k++;
+        out += str[k] === ":" ? `"${word}"` : word;
+        i = j;
+      } else if (ch === ",") {
+        // drop trailing commas
+        let k = i + 1;
+        while (k < str.length && /\s/.test(str[k])) k++;
+        if (str[k] !== "}" && str[k] !== "]") out += ch;
+        i++;
+      } else {
+        out += ch;
+        i++;
+      }
+    }
+    return out;
   };
 
   const handleStringify = () => {
@@ -30,9 +67,7 @@ export default function ObjectSerializerComponent() {
       // Try to parse as JSON
       const parsed = JSON.parse(normalized);
       // Then stringify with pretty formatting
-      let stringified = JSON.stringify(parsed, null, 2);
-      // Replace single quotes with double quotes
-      stringified = replaceSingleQuotes(stringified);
+      const stringified = JSON.stringify(parsed, null, 2);
       setOutput(stringified);
       toast.success("Object stringified successfully");
     } catch (err) {
@@ -60,9 +95,7 @@ export default function ObjectSerializerComponent() {
       // Normalize the input to convert unquoted keys to quoted
       const normalized = normalizeJSON(input);
       const parsed = JSON.parse(normalized);
-      let minified = JSON.stringify(parsed);
-      // Replace single quotes with double quotes
-      minified = replaceSingleQuotes(minified);
+      const minified = JSON.stringify(parsed);
       setOutput(minified);
       toast.success("Object minified successfully");
     } catch (err) {

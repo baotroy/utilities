@@ -1,7 +1,6 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { useEffect, useState } from "react";
-import { Metadata } from "next";
+import { useEffect, useRef, useState } from "react";
 import {
   getCurrent,
   getRelativeTime,
@@ -15,51 +14,46 @@ import clsx from "clsx";
 import Toast from "react-hot-toast";
 import dayjs from "dayjs";
 
-export const metadata: Metadata = {
-  title: "Epoch Converter ",
-  description:
-    " Convert Timestamp To Human Readable Date. Supports Unix timestamps in seconds, milliseconds, microseconds and nanoseconds. Convert Human Readable Date To Timestamp",
-  // other metadata
-};
-
 export default function EpochConverterComponent() {
   const [tickingUnixTimestamp, setTickingUnixTimestamp] =
     useState(getCurrent());
-  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
+  // Keep the ticking interval in a ref so the one created on mouse leave is
+  // also cleared on unmount (it used to leak)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [locale, setLocale] = useState("GMT");
   const [convertTimestampVal, setConvertTimestampVal] = useState("");
   const [inputCurrentTimestamp, setInputCurrentTimestamp] = useState("");
 
   const now = new Date();
   const [convertDateUnixVal, setConvertDateUnixVal] = useState("");
-  const [inputYear, setInputYear] = useState(now.getFullYear().toString());
-  const [inputMonth, setInputMonth] = useState((now.getMonth() + 1).toString());
-  const [inputDay, setInputDay] = useState(now.getDate().toString());
+  const [inputYear, setInputYear] = useState(now.getUTCFullYear().toString());
+  const [inputMonth, setInputMonth] = useState((now.getUTCMonth() + 1).toString());
+  const [inputDay, setInputDay] = useState(now.getUTCDate().toString());
+  // Default inputs are in GMT (the default mode), so every field uses UTC
   const [inputHour, setInputHour] = useState(now.getUTCHours().toString());
-  const [inputMinute, setInputMinute] = useState(now.getMinutes().toString());
-  const [inputSecond, setInputSecond] = useState(now.getSeconds().toString());
+  const [inputMinute, setInputMinute] = useState(now.getUTCMinutes().toString());
+  const [inputSecond, setInputSecond] = useState(now.getUTCSeconds().toString());
+
+  const stopTicking = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  };
+
+  const startTicking = () => {
+    stopTicking();
+    setTickingUnixTimestamp(getCurrent());
+    intervalRef.current = setInterval(() => {
+      setTickingUnixTimestamp(getCurrent());
+    }, 1000);
+  };
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setTickingUnixTimestamp(getCurrent());
-    }, 1000);
-
-
-    setIntervalId(id);
-
-    return () => clearInterval(id);
+    startTicking();
+    return stopTicking;
   }, []);
-  const handleMouseEnter = () => {
-    if (intervalId) clearInterval(intervalId);
-  };
 
-  const handleMouseLeave = () => {
-    const id = setInterval(() => {
-      setTickingUnixTimestamp(getCurrent());
-    }, 1000);
-
-    setIntervalId(id);
-  };
+  const handleMouseEnter = stopTicking;
+  const handleMouseLeave = startTicking;
 
   const handleOnChangeInputTimestamp = (str: string) => {
     setInputCurrentTimestamp(str);
@@ -113,7 +107,9 @@ export default function EpochConverterComponent() {
           Convert Unix timestamps to human-readable dates and vice versa. Supports seconds, milliseconds, microseconds and nanoseconds.
         </p>
         {/* The current Unix Timestamp is: */}
+        {/* the prerendered timestamp is always older than the client one */}
         <span
+          suppressHydrationWarning
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onClick={() => copyToClipboard(tickingUnixTimestamp.toString())}

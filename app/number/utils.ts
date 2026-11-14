@@ -39,41 +39,11 @@ export const convertNumberBetweenEtherUnit = (
   const fromDecimal = ethUnitDecimals[from as keyof typeof ethUnitDecimals];
   const toDecimal = ethUnitDecimals[to as keyof typeof ethUnitDecimals];
   const result = BigNumber(value).multipliedBy(BigNumber(10).pow(fromDecimal - toDecimal));
-  return parseScientific(result.toString());
+  // toFixed() prints the exact value without exponent notation. The previous
+  // helper went through Number() and lost precision on large/small values.
+  return result.isNaN() ? "NaN" : result.toFixed();
 }
 
-function parseScientific(num: string): string {
-  // If the number is not in scientific notation return it as it is.
-  if (!/\d+\.?\d*e[+-]*\d+/i.test(num)) {
-    return num;
-  }
-
-  // Remove the sign.
-  const numberSign = Math.sign(Number(num));
-  num = Math.abs(Number(num)).toString();
-
-  // Parse into coefficient and exponent.
-  const [coefficient, exponent] = num.toLowerCase().split("e");
-  let zeros = Math.abs(Number(exponent));
-  const exponentSign = Math.sign(Number(exponent));
-  const [integer, decimals] = (coefficient.indexOf(".") != -1 ? coefficient : `${coefficient}.`).split(".");
-
-  if (exponentSign === -1) {
-    zeros -= integer.length;
-    num =
-      zeros < 0
-        ? integer.slice(0, zeros) + "." + integer.slice(zeros) + decimals
-        : "0." + "0".repeat(zeros) + integer + decimals;
-  } else {
-    if (decimals) zeros -= decimals.length;
-    num =
-      zeros < 0
-        ? integer + decimals.slice(0, zeros) + "." + decimals.slice(zeros)
-        : integer + decimals + "0".repeat(zeros);
-  }
-
-  return numberSign < 0 ? "-" + num : num;
-}
 // const convertToWei = (
 //   weiValue: string,
 //   from: keyof typeof ethUnitDecimals

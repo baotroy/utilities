@@ -41,11 +41,19 @@ export default function RandomPasswordGeneratorComponent() {
     if (numbers) characters += numberChars;
     if (symbols) characters += specialCharsList;
 
+    if (!characters) return "";
+
+    // Use the cryptographically secure generator (Math.random is predictable
+    // and must not be used for passwords). Values above `limit` are rejected
+    // so every character is equally likely (no modulo bias).
+    const limit = Math.floor(0x100000000 / characters.length) * characters.length;
+    const buffer = new Uint32Array(1);
     let password = "";
-    for (let i = 0; i < length; i++) {
-      password += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
+    while (password.length < length) {
+      crypto.getRandomValues(buffer);
+      if (buffer[0] < limit) {
+        password += characters.charAt(buffer[0] % characters.length);
+      }
     }
 
     return password;

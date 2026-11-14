@@ -35,7 +35,14 @@ export default function NumberConversionComponent() {
 
   const convert = () => {
     setError(false);
-    const bn = BN(value, name2base[from]);
+    // Accept common prefixes (0x / 0b / 0o) and surrounding spaces
+    const prefixes: Record<number, RegExp> = { 16: /^0x/i, 2: /^0b/i, 8: /^0o/i };
+    let cleaned = value.trim();
+    const negative = cleaned.startsWith("-");
+    if (negative) cleaned = cleaned.slice(1);
+    const prefix = prefixes[name2base[from]];
+    if (prefix) cleaned = cleaned.replace(prefix, "");
+    const bn = BN((negative ? "-" : "") + cleaned, name2base[from]);
     if (bn.isNaN()) {
       setError(true);
       setResult("");

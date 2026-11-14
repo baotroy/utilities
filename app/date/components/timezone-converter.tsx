@@ -95,6 +95,20 @@ const buildTimezoneList = () => {
 // Flatten for select dropdown
 const allTimezones = buildTimezoneList();
 
+const offsetCache = new Map<string, string>();
+const getCachedOffset = (zone: string): string => {
+  let offset = offsetCache.get(zone);
+  if (offset === undefined) {
+    try {
+      offset = dayjs().tz(zone).format("Z");
+    } catch {
+      offset = "";
+    }
+    offsetCache.set(zone, offset);
+  }
+  return offset;
+};
+
 // Searchable Timezone Select Component
 interface SearchableTimezoneSelectProps {
   value: string;
@@ -285,8 +299,10 @@ export default function TimezoneConverterComponent() {
     setError("");
   };
 
+  // "Now" must be the current wall-clock time in the source timezone,
+  // not the browser's local time (which was wrong whenever From != local)
   const setNow = () => {
-    const now = dayjs().format("YYYY-MM-DDTHH:mm");
+    const now = dayjs().tz(fromZone).format("YYYY-MM-DDTHH:mm");
     setDateTime(now);
   };
 
@@ -294,14 +310,9 @@ export default function TimezoneConverterComponent() {
     setFromZone(localTimezone);
   };
 
-  // Get current offset for a timezone
-  const getOffset = (zone: string): string => {
-    try {
-      return dayjs().tz(zone).format("Z");
-    } catch {
-      return "";
-    }
-  };
+  // Current offset for a timezone (cached: computing it via Intl is slow and
+  // the dropdown asks for every zone on each render/keystroke)
+  const getOffset = getCachedOffset;
 
   return (
     <>
@@ -419,7 +430,7 @@ export default function TimezoneConverterComponent() {
                         {dayjs.tz(dateTime, fromZone).format("HH:mm:ss")}
                       </div>
                       <div className="text-sm text-body dark:text-bodydark2">
-                        {dayjs.tz(dateTime, fromZone).format("dddd")} • UTC{getOffset(fromZone)}
+                        {dayjs.tz(dateTime, fromZone).format("dddd")} • UTC{dayjs.tz(dateTime, fromZone).format("Z")}
                       </div>
                     </div>
                     <div>
@@ -433,7 +444,7 @@ export default function TimezoneConverterComponent() {
                         {dayjs.tz(dateTime, fromZone).tz(toZone).format("HH:mm:ss")}
                       </div>
                       <div className="text-sm text-body dark:text-bodydark2">
-                        {dayjs.tz(dateTime, fromZone).tz(toZone).format("dddd")} • UTC{getOffset(toZone)}
+                        {dayjs.tz(dateTime, fromZone).tz(toZone).format("dddd")} • UTC{dayjs.tz(dateTime, fromZone).tz(toZone).format("Z")}
                       </div>
                     </div>
                   </div>

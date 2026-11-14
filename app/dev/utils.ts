@@ -91,6 +91,21 @@ export const createJwt = async (
   );
 
   const data = `${headerEncoded}.${payloadEncoded}`;
+  const signatureEncoded = await signJwtData(data, algorithm, secret);
+
+  return `${data}.${signatureEncoded}`;
+};
+
+/** HMAC-sign "<header>.<payload>" and return the base64url signature. */
+export const signJwtData = async (
+  data: string,
+  algorithm: TypeAlgorithm,
+  secret: string
+): Promise<string> => {
+  const alg = algorithmMap[algorithm];
+  if (!alg) {
+    throw new Error(`Unsupported algorithm: ${algorithm}`);
+  }
 
   // Import the secret key
   const encoder = new TextEncoder();
@@ -111,7 +126,5 @@ export const createJwt = async (
     encoder.encode(data)
   );
 
-  const signatureEncoded = arrayBufferToBase64Url(signature);
-
-  return `${data}.${signatureEncoded}`;
+  return arrayBufferToBase64Url(signature);
 };

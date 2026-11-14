@@ -34,8 +34,11 @@ function generateSalt(length: number = 8): string {
 }
 
 // APR1-MD5 algorithm (Apache htpasswd compatible)
-function apr1Md5(password: string): string {
+function apr1Md5(passwordStr: string): string {
   const salt = generateSalt(8);
+  // Work on UTF-8 bytes: the algorithm uses the byte length of the password,
+  // so string length gave wrong hashes for non-ASCII passwords
+  const password = Buffer.from(passwordStr, "utf8");
 
   // APR1-MD5 algorithm implementation
   const apr1Magic = "$apr1$";
@@ -63,7 +66,7 @@ function apr1Md5(password: string): string {
     if (i & 1) {
       ctx.update(new Uint8Array([0]));
     } else {
-      ctx.update(password.charAt(0));
+      ctx.update(password.subarray(0, 1));
     }
   }
 
@@ -149,7 +152,13 @@ export default function HttpBasicAuthenticationComponent() {
   };
 
   useEffect(() => {
-    if (username && password) {
+    if (!username || !password) {
+      setHtpasswd("");
+      setNginxConfig("");
+      return;
+    }
+    // Debounce: bcrypt (cost 10) takes ~100ms and used to run on every keystroke
+    const timer = setTimeout(() => {
       let hash = "";
       switch (sltAlgorithm) {
         case Algorithm.APR1:
@@ -174,10 +183,8 @@ export default function HttpBasicAuthenticationComponent() {
       setNginxConfig(`# Add to your NGINX server block or location
 auth_basic "Restricted Area";
 auth_basic_user_file /etc/nginx/.htpasswd;`);
-    } else {
-      setHtpasswd("");
-      setNginxConfig("");
-    }
+    }, 250);
+    return () => clearTimeout(timer);
   }, [username, password, sltAlgorithm]);
 
   return (

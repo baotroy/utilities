@@ -5,6 +5,7 @@ import {
   base64UrlDecode,
   base64UrlEncode,
   createJwt,
+  signJwtData,
   prettyJson,
   validJSON,
 } from "../utils";
@@ -44,7 +45,6 @@ export default function JwtDecoderComponent() {
   const [headerHash, setHeaderHash] = useState("");
   const [payloadHash, setPayloadHash] = useState("");
   const [secretHash, setSecretHash] = useState("");
-  const [verifiedSecretHash, setVerifiedSecretHash] = useState("");
 
   const [token, setToken] = useState("");
   const [verified, setVerified] = useState(true);
@@ -64,7 +64,6 @@ export default function JwtDecoderComponent() {
       setHeaderHash(tokens[0]);
       setPayloadHash(tokens[1]);
       setSecretHash(tokens[2]);
-      setVerifiedSecretHash(tokens[2]);
       setToken(defaultToken);
       setIsLoading(false);
     };
@@ -72,17 +71,27 @@ export default function JwtDecoderComponent() {
   }, []);
 
   // User changes token
+  // A malformed segment must not throw (atob / decodeURIComponent do)
+  const safeDecode = (segment: string): string => {
+    try {
+      return base64UrlDecode(segment);
+    } catch {
+      return "";
+    }
+  };
+
   const handleChangeToken = (newToken: string) => {
-    const newHashes = newToken.split(".");
+    const newHashes = newToken.trim().split(".");
     if (newHashes[0] && newHashes[0] !== headerHash) {
       setHeaderHash(newHashes[0]);
 
-      const decode = base64UrlDecode(newHashes[0]);
+      const decode = safeDecode(newHashes[0]);
       if (validJSON(decode)) {
         setHeader(decode);
         // check if algorithm is changed
         const decodeJson = JSON.parse(decode);
-        if (decodeJson.alg !== algorithm) {
+        // only switch to algorithms we can sign (e.g. RS256 made re-signing throw)
+        if (decodeJson.alg !== algorithm && algorithms.includes(decodeJson.alg)) {
           setAlgorithm(decodeJson.alg);
         }
       } else {
@@ -93,7 +102,7 @@ export default function JwtDecoderComponent() {
     if (newHashes[1] && newHashes[1] !== payloadHash) {
       setPayloadHash(newHashes[1]);
 
-      const decode = base64UrlDecode(newHashes[1]);
+      const decode = safeDecode(newHashes[1]);
       if (validJSON(decode)) {
         setPayload(prettyJson(decode, tabSize));
         setErrorPayload(false);
@@ -129,7 +138,6 @@ export default function JwtDecoderComponent() {
 
       const newToken = await createJwt(JSON.parse(validPayload), algorithm, secret);
       updateToken(newToken);
-      setVerifiedSecretHash(newToken.split(".")[2]);
     };
     updateAlgorithm();
   }, [algorithm, isLoading, secret, validPayload, updateToken]);
@@ -172,14 +180,29 @@ export default function JwtDecoderComponent() {
     const newToken = await createJwt(JSON.parse(validPayload), algorithm, value);
     const hashes = newToken.split(".");
     setSecretHash(hashes[2]);
-    setVerifiedSecretHash(hashes[2]);
     updateToken(newToken);
   };
 
+  // Verify the signature of the token as it is (also for a pasted token),
+  // instead of comparing with the last signature we generated ourselves
   useEffect(() => {
-    const tokens = token.split(".");
-    setVerified(tokens[2] === verifiedSecretHash);
-  }, [token, verifiedSecretHash]);
+    let cancelled = false;
+    const [h, p, sig] = token.split(".");
+    if (!h || !p || !sig || !algorithms.includes(algorithm)) {
+      setVerified(false);
+      return;
+    }
+    signJwtData(`${h}.${p}`, algorithm, secret)
+      .then((expected) => {
+        if (!cancelled) setVerified(expected === sig);
+      })
+      .catch(() => {
+        if (!cancelled) setVerified(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, algorithm, secret]);
 
   const showJSON = (s: string) => {
     try {

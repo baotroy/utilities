@@ -1,5 +1,5 @@
 "use client";
-import { copyToClipboard } from "@/common/utils";
+import { copyToClipboard, download } from "@/common/utils";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
 import Button from "@/components/Input/Button";
@@ -50,11 +50,15 @@ export default function JsonToCsvComponent() {
         return;
       }
 
+      // The Tab option's value is the two characters "\\t": turn it into a real
+      // tab (the output used to contain a literal \\t between columns)
+      const delim = delimiter === "\\t" ? "\t" : delimiter;
+
       // Escape value for CSV
       const escapeValue = (val: unknown): string => {
         if (val === null || val === undefined) return "";
         const str = typeof val === "object" ? JSON.stringify(val) : String(val);
-        if (str.includes(delimiter) || str.includes('"') || str.includes("\n")) {
+        if (str.includes(delim) || str.includes('"') || str.includes("\n") || str.includes("\r")) {
           return `"${str.replace(/"/g, '""')}"`;
         }
         return str;
@@ -64,13 +68,13 @@ export default function JsonToCsvComponent() {
 
       // Add headers
       if (includeHeaders) {
-        lines.push(headers.map(escapeValue).join(delimiter));
+        lines.push(headers.map(escapeValue).join(delim));
       }
 
       // Add data rows
       data.forEach((item) => {
         const row = headers.map((header) => escapeValue(item[header]));
-        lines.push(row.join(delimiter));
+        lines.push(row.join(delim));
       });
 
       setCsv(lines.join("\n"));
@@ -90,12 +94,7 @@ export default function JsonToCsvComponent() {
   };
 
   const downloadCsv = () => {
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "data.csv";
-    link.click();
-    URL.revokeObjectURL(link.href);
+    download(csv, "data.csv", "text/csv;charset=utf-8;");
   };
 
   const loadSample = () => {

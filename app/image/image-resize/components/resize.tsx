@@ -3,6 +3,7 @@ import { Dimensions, FileFormat, Measure, Unit } from "../../type";
 import Image from "next/image";
 import ResizeDimensions from "./resize/resize-dimensions";
 import ResizePercentage from "./resize/resize-percentage";
+import { extensionFromMime } from "@/common/utils";
 import {
   convertOtherUnitToPixel,
   convertPixelOtherUnit,
@@ -83,7 +84,8 @@ const Resize: React.FC<ResizeProps> = ({
 
   const handleChangeOutputWidth = (w: string) => {
     if (w.trim() === "") w = "0";
-    if (Number.isNaN(w)) {
+    // Number.isNaN on a string is always false, so check the parsed value
+    if (Number.isNaN(Number(w))) {
       return;
     }
     setWidthString(w);
@@ -99,7 +101,7 @@ const Resize: React.FC<ResizeProps> = ({
 
   const handleChangeOutputHeight = (h: string) => {
     if (h.trim() === "") h = "0";
-    if (Number.isNaN(h)) {
+    if (Number.isNaN(Number(h))) {
       return;
     }
     setHeightString(h);
@@ -194,7 +196,10 @@ const Resize: React.FC<ResizeProps> = ({
     );
     // download image file with input base 64
     const link = document.createElement("a");
-    link.download = "resized";
+    // the data URL knows the real output type (the browser falls back to PNG
+    // for types it cannot encode), so name the file after it
+    const mime = resizedImageBase64.slice(5, resizedImageBase64.indexOf(";"));
+    link.download = `resized.${extensionFromMime(mime)}`;
     link.href = resizedImageBase64;
     link.click();
   };

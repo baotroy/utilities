@@ -132,65 +132,104 @@ function describeCron(parts: string[]): string {
   return [timeDesc, dayDesc, monthDesc].filter(Boolean).join(" ") || "Custom schedule";
 }
 
+const MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+// Parse one cron field into the set of matching values. Supports
+// "*", "?", lists (1,5), ranges (1-5), steps (*/5, 10-50/5, 5/15) and names
+// (JAN-DEC, SUN-SAT). Returns null when the field is invalid.
+function parseCronField(
+  expr: string,
+  min: number,
+  max: number,
+  names?: string[],
+  namesOffset = 0
+): Set<number> | null {
+  const toNumber = (token: string): number => {
+    const nameIndex = names ? names.indexOf(token.toUpperCase()) : -1;
+    if (nameIndex !== -1) return nameIndex + namesOffset;
+    return /^\d+$/.test(token) ? parseInt(token, 10) : NaN;
+  };
+
+  const values = new Set<number>();
+  for (const part of expr.split(",")) {
+    const [range, stepStr, ...rest] = part.split("/");
+    if (rest.length > 0 || range === "") return null;
+    const step = stepStr === undefined ? 1 : /^\d+$/.test(stepStr) ? parseInt(stepStr, 10) : NaN;
+    if (!(step >= 1)) return null; // also rejects "*/0", which used to crash
+
+    let start: number;
+    let end: number;
+    if (range === "*" || range === "?") {
+      start = min;
+      end = max;
+    } else if (range.includes("-")) {
+      const [s, e] = range.split("-");
+      start = toNumber(s);
+      end = toNumber(e);
+    } else {
+      start = toNumber(range);
+      // "5/15" means "from 5, every 15"
+      end = stepStr === undefined ? start : max;
+    }
+    if (Number.isNaN(start) || Number.isNaN(end) || start < min || end > max || start > end) {
+      return null;
+    }
+    for (let v = start; v <= end; v += step) values.add(v);
+  }
+  return values;
+}
+
 // Calculate next run times
 function getNextRuns(cronExpression: string, count: number = 5): Date[] {
-  const parts = cronExpression.split(/\s+/);
+  const parts = cronExpression.trim().split(/\s+/);
   if (parts.length !== 5) return [];
 
   const [minuteExpr, hourExpr, dayOfMonthExpr, monthExpr, dayOfWeekExpr] = parts;
-  const runs: Date[] = [];
-  const now = new Date();
-  const current = new Date(now);
-  current.setSeconds(0);
-  current.setMilliseconds(0);
 
-  // Parse cron field
-  const parseField = (expr: string, min: number, max: number): number[] => {
-    if (expr === "*") return Array.from({ length: max - min + 1 }, (_, i) => i + min);
-    if (expr === "?") return Array.from({ length: max - min + 1 }, (_, i) => i + min);
-    if (expr.startsWith("*/")) {
-      const step = parseInt(expr.slice(2), 10);
-      return Array.from({ length: Math.ceil((max - min + 1) / step) }, (_, i) => min + i * step);
-    }
-    if (expr.includes("-")) {
-      const [start, end] = expr.split("-").map(Number);
-      return Array.from({ length: end - start + 1 }, (_, i) => i + start);
-    }
-    if (expr.includes(",")) {
-      return expr.split(",").map(Number).filter(n => !isNaN(n));
-    }
-    const num = parseInt(expr, 10);
-    return isNaN(num) ? [] : [num];
+  const minutes = parseCronField(minuteExpr, 0, 59);
+  const hours = parseCronField(hourExpr, 0, 23);
+  const daysOfMonth = parseCronField(dayOfMonthExpr, 1, 31);
+  const months = parseCronField(monthExpr, 1, 12, MONTH_NAMES, 1);
+  // 7 is accepted as Sunday too
+  const daysOfWeek = parseCronField(dayOfWeekExpr, 0, 7, DAY_NAMES);
+  if (!minutes || !hours || !daysOfMonth || !months || !daysOfWeek) return [];
+  if (daysOfWeek.has(7)) daysOfWeek.add(0);
+
+  // Standard cron: when both day-of-month and day-of-week are restricted,
+  // a day matches if EITHER of them matches
+  const domRestricted = dayOfMonthExpr !== "*" && dayOfMonthExpr !== "?";
+  const dowRestricted = dayOfWeekExpr !== "*" && dayOfWeekExpr !== "?";
+  const dayMatches = (d: Date): boolean => {
+    const dom = daysOfMonth.has(d.getDate());
+    const dow = daysOfWeek.has(d.getDay());
+    if (domRestricted && dowRestricted) return dom || dow;
+    return dom && dow;
   };
 
-  const minutes = parseField(minuteExpr, 0, 59);
-  const hours = parseField(hourExpr, 0, 23);
-  const daysOfMonth = parseField(dayOfMonthExpr, 1, 31);
-  const months = parseField(monthExpr, 1, 12);
-  const daysOfWeek = parseField(dayOfWeekExpr, 0, 6);
+  const runs: Date[] = [];
+  const current = new Date();
+  current.setSeconds(0, 0);
+  current.setMinutes(current.getMinutes() + 1);
 
-  // Find next runs (simple approach - iterate forward)
-  const maxIterations = 525600; // 1 year in minutes
-  let iterations = 0;
-
-  while (runs.length < count && iterations < maxIterations) {
-    current.setMinutes(current.getMinutes() + 1);
-    iterations++;
-
-    const m = current.getMinutes();
-    const h = current.getHours();
-    const dom = current.getDate();
-    const mon = current.getMonth() + 1;
-    const dow = current.getDay();
-
-    if (
-      minutes.includes(m) &&
-      hours.includes(h) &&
-      daysOfMonth.includes(dom) &&
-      months.includes(mon) &&
-      daysOfWeek.includes(dow)
-    ) {
+  // Jump over whole months / days / hours that cannot match instead of
+  // testing every single minute (was up to 525,600 iterations per keystroke)
+  const limit = current.getTime() + 5 * 366 * 24 * 60 * 60 * 1000;
+  let guard = 0;
+  while (runs.length < count && current.getTime() < limit && guard++ < 200000) {
+    if (!months.has(current.getMonth() + 1)) {
+      current.setMonth(current.getMonth() + 1, 1);
+      current.setHours(0, 0, 0, 0);
+    } else if (!dayMatches(current)) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    } else if (!hours.has(current.getHours())) {
+      current.setHours(current.getHours() + 1, 0, 0, 0);
+    } else if (!minutes.has(current.getMinutes())) {
+      current.setMinutes(current.getMinutes() + 1);
+    } else {
       runs.push(new Date(current));
+      current.setMinutes(current.getMinutes() + 1);
     }
   }
 

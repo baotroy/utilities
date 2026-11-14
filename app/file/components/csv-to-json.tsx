@@ -24,43 +24,43 @@ export default function CsvToJsonComponent() {
     }
 
     try {
-      const lines = csv.trim().split("\n");
-      if (lines.length === 0) {
-        setError("No data to convert");
-        return;
-      }
-
       // Parse delimiter (handle tab)
       const delim = delimiter === "\\t" ? "\t" : delimiter;
 
-      // Parse CSV considering quoted values
-      const parseRow = (line: string): string[] => {
-        const result: string[] = [];
-        let current = "";
-        let inQuotes = false;
+      // Parse the whole text in one pass so quoted values may contain the
+      // delimiter, escaped quotes ("") and line breaks
+      const text = csv.trim();
+      const rows: string[][] = [];
+      let row: string[] = [];
+      let current = "";
+      let inQuotes = false;
 
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-
-          if (char === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-              current += '"';
-              i++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (char === delim && !inQuotes) {
-            result.push(current.trim());
-            current = "";
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+          if (inQuotes && text[i + 1] === '"') {
+            current += '"';
+            i++;
           } else {
-            current += char;
+            inQuotes = !inQuotes;
           }
+        } else if (inQuotes) {
+          current += char;
+        } else if (char === delim) {
+          row.push(current.trim());
+          current = "";
+        } else if (char === "\n" || char === "\r") {
+          if (char === "\r" && text[i + 1] === "\n") i++;
+          row.push(current.trim());
+          rows.push(row);
+          row = [];
+          current = "";
+        } else {
+          current += char;
         }
-        result.push(current.trim());
-        return result;
-      };
-
-      const rows = lines.map(parseRow);
+      }
+      row.push(current.trim());
+      rows.push(row);
 
       let result: Record<string, string>[] | string[][];
 

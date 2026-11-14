@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Interface } from "ethers";
 import { IFunctionFragement } from "./type";
 
@@ -9,54 +8,49 @@ const sourcify4ByteApi =
 // Maximum recursion depth to prevent infinite loops
 const MAX_DEPTH = 10;
 
-// Fetch function signature from primary API (OpenChain)
-async function fetchFunctionFromOpenChain(
-  selector: string
-): Promise<string | null> {
+// Both APIs answer with:
+// { "result": { "function": { "0x...": [{ "name": "transfer(address,uint256)" }] } } }
+async function fetchSignatures(url: string, selector: string): Promise<string[]> {
   try {
-    const response = await axios.get(signatureDataApi + selector);
-    const funcRes = response.data.result.function[selector]
-      ? response.data.result.function[selector][0].name
-      : null;
-    return funcRes;
+    const response = await fetch(url + selector);
+    if (!response.ok) return [];
+    const data = await response.json();
+    const list = data?.result?.function?.[selector];
+    return Array.isArray(list)
+      ? list
+          .map((item: { name?: string }) => item?.name)
+          .filter((name): name is string => !!name)
+      : [];
   } catch (error) {
-    console.error("OpenChain API failed:", error);
-    return null;
+    console.error("Signature lookup failed:", error);
+    return [];
   }
 }
 
-// Fetch function signature from Sourcify 4byte API (fallback)
-async function fetchFunctionFromSourcify(
-  selector: string
-): Promise<string | null> {
-  try {
-    const response = await axios.get(sourcify4ByteApi + selector);
-    // Sourcify API returns: { "result": { "function": { "0x...": [{ "name": "transfer(address,uint256)" }] } } }
-    if (response.data?.result?.function?.[selector]?.length > 0) {
-      return response.data.result.function[selector][0].name;
-    }
-    return null;
-  } catch (error) {
-    console.error("Sourcify 4byte API failed:", error);
-    return null;
+// Cache lookups per selector: nested calldata (multicall, batches) asks for
+// the same selector many times, which used to fire one request each time
+const signatureCache = new Map<string, Promise<string[]>>();
+
+// Fetch all known signatures for a selector, with fallback
+function fetchFunctionInterfaces(selector: string): Promise<string[]> {
+  let cached = signatureCache.get(selector);
+  if (!cached) {
+    cached = (async () => {
+      // Try OpenChain API first (if configured)
+      if (signatureDataApi) {
+        const result = await fetchSignatures(signatureDataApi, selector);
+        if (result.length > 0) return result;
+      }
+      // Fallback to Sourcify 4byte API
+      return fetchSignatures(sourcify4ByteApi, selector);
+    })();
+    signatureCache.set(selector, cached);
+    // do not keep failed/empty lookups, so a retry can succeed
+    cached.then((list) => {
+      if (list.length === 0) signatureCache.delete(selector);
+    });
   }
-}
-
-// Fetch function signature with fallback
-async function fetchFunctionInterface(
-  selector: string
-): Promise<string | null> {
-  // Try OpenChain API first (if configured)
-  if (signatureDataApi) {
-    const result = await fetchFunctionFromOpenChain(selector);
-    if (result) return result;
-  }
-
-  // Fallback to Sourcify 4byte API
-  const sourcifyResult = await fetchFunctionFromSourcify(selector);
-  if (sourcifyResult) return sourcifyResult;
-
-  return null;
+  return cached;
 }
 
 // Check if a hex string looks like valid calldata (starts with 0x + 4 byte selector)
@@ -122,7 +116,9 @@ export const decodeFunctionDataNoABI = async (
     return null;
   }
 
-  const selector = getFunctionName(inputData);
+  inputData = inputData.trim();
+  // The signature databases are keyed by lowercase selector
+  const selector = getFunctionName(inputData).toLowerCase();
 
   // Skip null selector
   if (selector === "0x00000000") {
@@ -130,24 +126,23 @@ export const decodeFunctionDataNoABI = async (
     return null;
   }
 
-  try {
-    // Fetch function signature using fallback strategy
-    const funcRes = await fetchFunctionInterface(selector);
+  // Fetch function signatures using fallback strategy
+  const candidates = await fetchFunctionInterfaces(selector);
 
-    if (!funcRes) {
-      if (root) throw Error("Function signature not found");
-      return null;
-    }
+  if (candidates.length === 0) {
+    if (root) throw Error("Function signature not found");
+    return null;
+  }
 
-    const functionName = funcRes.split("(")[0];
+  // Selectors can collide: try every known signature until one decodes
+  for (const funcRes of candidates) {
+    try {
+      const iface = new Interface([`function ${funcRes}`]);
+      const funcFrag = iface.getFunction(funcRes);
+      if (!funcFrag) continue;
 
-    const iface = new Interface([`function ${funcRes}`]);
+      const decodeData = iface.decodeFunctionData(funcFrag, inputData);
 
-    const decodeData = iface.decodeFunctionData(functionName, inputData);
-
-    const funcFrag = iface.getFunction(funcRes);
-
-    if (funcFrag) {
       const newFuncFrag: IFunctionFragement = {
         type: "function",
         name: funcFrag.name,
@@ -162,16 +157,15 @@ export const decodeFunctionDataNoABI = async (
       }
 
       return newFuncFrag;
+    } catch (e) {
+      console.error(e);
     }
-
-    return null;
-  } catch (e) {
-    console.error(e);
-    if (!root) {
-      return null;
-    }
-    throw Error("Unable to decode function data");
   }
+
+  if (!root) {
+    return null;
+  }
+  throw Error("Unable to decode function data");
 };
 
 // Recursively process parameter types with depth tracking

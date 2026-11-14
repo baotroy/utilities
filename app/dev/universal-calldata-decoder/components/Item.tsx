@@ -45,8 +45,9 @@ function hexToText(hex: string): string {
   try {
     const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
     if (!cleanHex) return "";
-    // Remove trailing zeros (null bytes)
-    const trimmedHex = cleanHex.replace(/0+$/, "");
+    // Remove trailing null bytes (whole "00" pairs only: stripping single
+    // zeros broke values whose last byte ends in 0, e.g. 0x...30)
+    const trimmedHex = cleanHex.replace(/(?:00)+$/, "");
     if (trimmedHex.length % 2 !== 0) return "Invalid hex length";
 
     const bytes = [];

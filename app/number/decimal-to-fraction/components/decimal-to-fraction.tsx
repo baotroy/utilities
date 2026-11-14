@@ -33,10 +33,19 @@ export default function DecimalToFractionComponent() {
         resetFrac();
         return;
       }
-      const fraction = new Fraction(decimal);
-      if (fraction.n > fraction.d) {
+      let fraction: Fraction;
+      try {
+        fraction = new Fraction(decimal);
+      } catch {
+        // not a valid number (yet): do not crash the page
+        resetFrac();
+        return;
+      }
+      // n >= d so whole numbers (1, 2, ...) are shown too; truncate toward
+      // zero so -3.5 becomes -3 1/2 (Math.floor gave -4 1/2)
+      if (fraction.n >= fraction.d || fraction.n === 0) {
         setResultFracWhole(
-          Math.floor((fraction.s * fraction.n) / fraction.d).toString()
+          (fraction.s * Math.floor(fraction.n / fraction.d)).toString()
         );
       } else {
         setResultFracWhole("");

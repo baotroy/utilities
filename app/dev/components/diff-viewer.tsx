@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Button from "@/components/Input/Button";
 import { MdOutlineClear, MdSwapHoriz, MdContentCopy } from "react-icons/md";
 import { copyToClipboard } from "@/common/utils";
+import { lcsDiff } from "@/common/diff";
 
 type ViewMode = "split" | "unified";
 
@@ -22,7 +23,7 @@ interface DiffLine {
   rightSegments?: DiffSegment[];
 }
 
-// LCS-based diff for character-level comparison
+// Word-level diff used to highlight changes inside a modified line
 function lcsCharDiff(str1: string, str2: string): { left: DiffSegment[]; right: DiffSegment[] } {
   if (str1 === str2) {
     return {
@@ -32,155 +33,81 @@ function lcsCharDiff(str1: string, str2: string): { left: DiffSegment[]; right: 
   }
 
   // Simple word-based diff for better readability
-  const words1 = str1.split(/(\s+)/);
-  const words2 = str2.split(/(\s+)/);
+  const ops = lcsDiff(str1.split(/(\s+)/), str2.split(/(\s+)/));
 
-  const m = words1.length;
-  const n = words2.length;
-
-  // Build LCS table
-  const dp: number[][] = Array(m + 1)
-    .fill(null)
-    .map(() => Array(n + 1).fill(0));
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (words1[i - 1] === words2[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-  }
-
-  // Backtrack to find diff
-  const leftSegments: DiffSegment[] = [];
-  const rightSegments: DiffSegment[] = [];
-
-  let i = m,
-    j = n;
-  const leftStack: DiffSegment[] = [];
-  const rightStack: DiffSegment[] = [];
-
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && words1[i - 1] === words2[j - 1]) {
-      leftStack.push({ type: "equal", text: words1[i - 1] });
-      rightStack.push({ type: "equal", text: words2[j - 1] });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      rightStack.push({ type: "added", text: words2[j - 1] });
-      j--;
-    } else {
-      leftStack.push({ type: "removed", text: words1[i - 1] });
-      i--;
-    }
-  }
-
-  // Reverse and merge consecutive segments of the same type
-  const mergeSegments = (stack: DiffSegment[]): DiffSegment[] => {
-    const result: DiffSegment[] = [];
-    for (let k = stack.length - 1; k >= 0; k--) {
-      const seg = stack[k];
-      if (result.length > 0 && result[result.length - 1].type === seg.type) {
-        result[result.length - 1].text += seg.text;
-      } else {
-        result.push({ ...seg });
-      }
-    }
-    return result;
+  // Merge consecutive segments of the same type
+  const push = (list: DiffSegment[], type: DiffSegment["type"], text: string) => {
+    const last = list[list.length - 1];
+    if (last && last.type === type) last.text += text;
+    else list.push({ type, text });
   };
 
-  return {
-    left: mergeSegments(leftStack),
-    right: mergeSegments(rightStack),
-  };
+  const left: DiffSegment[] = [];
+  const right: DiffSegment[] = [];
+  for (const op of ops) {
+    if (op.type !== "added") push(left, op.type, op.value);
+    if (op.type !== "removed") push(right, op.type, op.value);
+  }
+  return { left, right };
 }
 
 // Main diff computation
 function computeDiff(text1: string, text2: string): DiffLine[] {
   const lines1 = text1.split("\n");
   const lines2 = text2.split("\n");
+  const ops = lcsDiff(lines1, lines2);
 
-  const m = lines1.length;
-  const n = lines2.length;
-
-  // LCS for lines
-  const dp: number[][] = Array(m + 1)
-    .fill(null)
-    .map(() => Array(n + 1).fill(0));
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (lines1[i - 1] === lines2[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-  }
-
-  // Backtrack
   const result: DiffLine[] = [];
-  let i = m,
-    j = n;
-
-  const stack: DiffLine[] = [];
-
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && lines1[i - 1] === lines2[j - 1]) {
-      stack.push({
+  let k = 0;
+  while (k < ops.length) {
+    const op = ops[k];
+    if (op.type === "equal") {
+      result.push({
         type: "equal",
-        leftLine: i,
-        rightLine: j,
-        leftText: lines1[i - 1],
-        rightText: lines2[j - 1],
+        leftLine: op.aIndex! + 1,
+        rightLine: op.bIndex! + 1,
+        leftText: op.value,
+        rightText: op.value,
       });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      stack.push({
-        type: "added",
-        rightLine: j,
-        leftText: "",
-        rightText: lines2[j - 1],
-      });
-      j--;
-    } else {
-      stack.push({
-        type: "removed",
-        leftLine: i,
-        leftText: lines1[i - 1],
-        rightText: "",
-      });
-      i--;
+      k++;
+      continue;
     }
-  }
 
-  // Reverse stack and detect modified lines
-  for (let k = stack.length - 1; k >= 0; k--) {
-    const line = stack[k];
+    // Collect a changed block: removals followed by additions
+    const removed: typeof ops = [];
+    const added: typeof ops = [];
+    while (k < ops.length && ops[k].type === "removed") removed.push(ops[k++]);
+    while (k < ops.length && ops[k].type === "added") added.push(ops[k++]);
 
-    // Check if this removed line is followed by an added line (modification)
-    if (
-      line.type === "removed" &&
-      k > 0 &&
-      stack[k - 1].type === "added"
-    ) {
-      const addedLine = stack[k - 1];
-      const charDiff = lcsCharDiff(line.leftText, addedLine.rightText);
+    // Pair removed/added lines one-to-one as "modified", the rest stay as is
+    const paired = Math.min(removed.length, added.length);
+    for (let p = 0; p < paired; p++) {
+      const charDiff = lcsCharDiff(removed[p].value, added[p].value);
       result.push({
         type: "modified",
-        leftLine: line.leftLine,
-        rightLine: addedLine.rightLine,
-        leftText: line.leftText,
-        rightText: addedLine.rightText,
+        leftLine: removed[p].aIndex! + 1,
+        rightLine: added[p].bIndex! + 1,
+        leftText: removed[p].value,
+        rightText: added[p].value,
         leftSegments: charDiff.left,
         rightSegments: charDiff.right,
       });
-      k--; // Skip the added line
-    } else {
-      result.push(line);
+    }
+    for (let p = paired; p < removed.length; p++) {
+      result.push({
+        type: "removed",
+        leftLine: removed[p].aIndex! + 1,
+        leftText: removed[p].value,
+        rightText: "",
+      });
+    }
+    for (let p = paired; p < added.length; p++) {
+      result.push({
+        type: "added",
+        rightLine: added[p].bIndex! + 1,
+        leftText: "",
+        rightText: added[p].value,
+      });
     }
   }
 

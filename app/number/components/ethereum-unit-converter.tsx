@@ -1,7 +1,6 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { convertEthereumUnits, ethUnitDecimals } from "../utils";
-import { ethUnitMap } from "web3-utils";
 import EtherUnit from "./ethereum-unit";
 import { useState } from "react";
 
@@ -25,7 +24,7 @@ export default function EtherUnitConverterComponent() {
           return (
             <EtherUnit
               key={index}
-              unit={unit as keyof typeof ethUnitMap}
+              unit={unit as keyof typeof ethUnitDecimals}
               decimals={ethUnitDecimals[unit as keyof typeof ethUnitDecimals]}
               value={inputValues[unit as keyof typeof inputValues]}
               handleOnChange={(e) =>

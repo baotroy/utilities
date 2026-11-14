@@ -1,12 +1,12 @@
 import { MdContentCopy } from "react-icons/md";
-import { ethUnitMap } from "web3-utils";
+import { ethUnitDecimals } from "../utils";
 import convertCase, { CaseType } from "@/app/string/utils";
 import { copyToClipboard } from "@/common/utils";
 interface EtherUnitProps {
-  unit: keyof typeof ethUnitMap;
+  unit: keyof typeof ethUnitDecimals;
   decimals: number;
   value: string;
-  handleOnChange: (str: string, unit: keyof typeof ethUnitMap) => void;
+  handleOnChange: (str: string, unit: keyof typeof ethUnitDecimals) => void;
 }
 
 const EtherUnit: React.FC<EtherUnitProps> = ({

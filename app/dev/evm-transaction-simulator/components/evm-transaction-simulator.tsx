@@ -81,6 +81,18 @@ const ArgsTable: FC<{ args: { name: string; type: string; value: unknown }[] }> 
   </table>
 );
 
+interface LoadedTx {
+  hash: string;
+  blockNumber: bigint;
+  index: number;
+  status: "success" | "reverted" | "pending";
+  from: string;
+  to: string;
+  value: bigint;
+  data: string;
+  gas: bigint;
+}
+
 const EvmTransactionSimulatorComponent = () => {
   const [chainName, setChainName] = useState(CHAINS[0].name);
   const [customRpc, setCustomRpc] = useState("");
@@ -95,6 +107,9 @@ const EvmTransactionSimulatorComponent = () => {
   const [abiText, setAbiText] = useState("");
   const [overrideBalance, setOverrideBalance] = useState(false);
   const [withTrace, setWithTrace] = useState(true);
+  // The mined transaction last loaded by hash (so it can be replayed in its block)
+  const [loaded, setLoaded] = useState<LoadedTx | null>(null);
+  const [replayInBlock, setReplayInBlock] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [loadingTx, setLoadingTx] = useState(false);
@@ -138,10 +153,15 @@ const EvmTransactionSimulatorComponent = () => {
       setData(tx.input);
       setGas(BigInt(tx.gas).toString());
       if (tx.blockNumber) {
-        setBlock((BigInt(tx.blockNumber) - 1n).toString());
-        toast.success(`Loaded (on-chain status: ${status}). Block set to the one before it was mined.`);
+        const blockNumber = BigInt(tx.blockNumber);
+        const index = tx.transactionIndex ? Number(BigInt(tx.transactionIndex)) : 0;
+        setBlock((blockNumber - 1n).toString());
+        setLoaded({ hash, blockNumber, index, status, from: tx.from, to: tx.to || "", value: BigInt(tx.value), data: tx.input, gas: BigInt(tx.gas) });
+        setReplayInBlock(true);
+        toast.success(`Loaded (on-chain status: ${status}). It will be replayed at position ${index} of block ${blockNumber}.`);
       } else {
         setBlock("latest");
+        setLoaded(null);
         toast.success("Loaded pending transaction");
       }
     } catch (e) {
@@ -150,6 +170,11 @@ const EvmTransactionSimulatorComponent = () => {
       setLoadingTx(false);
     }
   };
+
+  // Replay only while the Block field still points at the block before the
+  // one the loaded transaction was mined in.
+  const canReplay =
+    !!loaded && replayInBlock && block.trim() === (loaded.blockNumber - 1n).toString();
 
   const buildTx = (): TxRequest => {
     const f = from.trim();
@@ -198,6 +223,21 @@ const EvmTransactionSimulatorComponent = () => {
         block,
         overrideBalance,
         trace: withTrace,
+        replay: canReplay
+          ? {
+              hash: loaded.hash,
+              blockNumber: loaded.blockNumber,
+              index: loaded.index,
+              status: loaded.status,
+              pristine:
+                !overrideBalance &&
+                tx.from.toLowerCase() === loaded.from.toLowerCase() &&
+                (tx.to || "").toLowerCase() === loaded.to.toLowerCase() &&
+                tx.value === loaded.value &&
+                tx.data.toLowerCase() === loaded.data.toLowerCase() &&
+                tx.gas === loaded.gas,
+            }
+          : undefined,
       });
       if (chain && res.chainId && res.chainId !== chain.id && customRpc) {
         res.warnings.push(`The RPC reports chain id ${res.chainId}, not ${chain.id} (${chain.name}).`);
@@ -231,6 +271,7 @@ const EvmTransactionSimulatorComponent = () => {
     setData("");
     setGas("");
     setBlock("latest");
+    setLoaded(null);
     setResult(null);
     setError("");
   };
@@ -348,6 +389,18 @@ const EvmTransactionSimulatorComponent = () => {
           </Field>
 
           <div className="flex flex-col gap-2 text-sm">
+            {loaded && (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={replayInBlock} onChange={(e) => setReplayInBlock(e.target.checked)} />
+                <span>
+                  Replay at its original position in block {loaded.blockNumber.toString()} (after the {loaded.index} transaction
+                  {loaded.index === 1 ? "" : "s"} mined before it)
+                  {block.trim() !== (loaded.blockNumber - 1n).toString() && (
+                    <span className="text-bodydark dark:text-bodydark2"> · off because the Block field was changed</span>
+                  )}
+                </span>
+              </label>
+            )}
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={withTrace} onChange={(e) => setWithTrace(e.target.checked)} />
               Call trace (<code>debug_traceCall</code>, needs an RPC with the debug API; events do not need it)
@@ -386,7 +439,12 @@ const EvmTransactionSimulatorComponent = () => {
                   {result.chainId !== undefined && ` (chain id ${result.chainId})`}
                 </Row>
                 <Row label="Block">
-                  {result.blockNumber !== undefined ? result.blockNumber.toString() : block} · simulated in {result.durationMs} ms
+                  {result.replay
+                    ? `${result.replay.blockNumber}, position ${result.replay.index} · replayed after the ${result.replay.index} earlier transaction(s) of the block (${result.replay.method})`
+                    : result.blockNumber !== undefined
+                      ? result.blockNumber.toString()
+                      : block}{" "}
+                  · simulated in {result.durationMs} ms
                 </Row>
                 {!result.success && (
                   <>

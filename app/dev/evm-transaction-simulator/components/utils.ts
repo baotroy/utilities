@@ -133,7 +133,16 @@ export interface SimulationResult {
   traceError?: string;
   logs: TraceLog[];
   /** how the events were obtained; undefined when the RPC could not give them */
-  logsSource?: "debug_traceCall" | "eth_simulateV1";
+  logsSource?: "debug_traceCall" | "debug_traceTransaction" | "eth_simulateV1";
+  /**
+   * Set when the transaction was replayed at its original position in its
+   * block (after the transactions that were mined before it).
+   */
+  replay?: {
+    method: "debug_traceTransaction" | "eth_simulateV1";
+    blockNumber: bigint;
+    index: number;
+  };
   /** why the events could not be read (neither method is supported) */
   logsError?: string;
   blockNumber?: bigint;
@@ -142,10 +151,27 @@ export interface SimulationResult {
   warnings: string[];
 }
 
+export interface ReplayTarget {
+  hash: string;
+  /** block the transaction was mined in */
+  blockNumber: bigint;
+  /** position of the transaction inside that block */
+  index: number;
+  /** true when the form still holds exactly the mined transaction */
+  pristine: boolean;
+  status: "success" | "reverted" | "pending";
+}
+
 export interface SimulateOptions {
   block: string; // "latest" or decimal number
   overrideBalance: boolean;
   trace: boolean;
+  /**
+   * Replay a mined transaction inside its own block. Without this the call
+   * runs on the state at the END of `block`, which misses everything the
+   * earlier transactions of the same block did (funding, approvals, swaps...).
+   */
+  replay?: ReplayTarget;
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +222,9 @@ export async function simulateTransaction(
 ): Promise<SimulationResult> {
   const started = performance.now();
   const warnings: string[] = [];
-  const blockTag = blockTagOf(opts.block);
+  const replay = opts.replay;
+  // A replay always starts from the block before the one it was mined in
+  const blockTag = replay ? toQuantity(replay.blockNumber - 1n) : blockTagOf(opts.block);
 
   const call: Record<string, string> = {
     from: tx.from,
@@ -233,8 +261,49 @@ export async function simulateTransaction(
     blockNumber: blockHex ? BigInt(blockHex) : undefined,
   };
 
+  // 0. Mined transaction: replay it at its original position in its block
+  let replayed = false;
+  if (replay) {
+    const errors: string[] = [];
+    const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+    if (replay.pristine) {
+      try {
+        await replayWithTrace(rpc, replay, result);
+        replayed = true;
+      } catch (e) {
+        errors.push(`debug_traceTransaction: ${msg(e)}`);
+      }
+    }
+    if (!replayed) {
+      try {
+        await replayWithSimulate(rpc, replay, tx, call, overrides, result);
+        replayed = true;
+      } catch (e) {
+        errors.push(`eth_simulateV1: ${msg(e)}`);
+      }
+    }
+    if (replayed) {
+      if (
+        replay.pristine &&
+        replay.status !== "pending" &&
+        (replay.status === "success") !== result.success
+      ) {
+        warnings.push(
+          `The replay ${result.success ? "succeeded" : "reverted"} but the transaction ${
+            replay.status === "success" ? "succeeded" : "reverted"
+          } on chain. The RPC may have capped the gas of the replayed block; try an RPC with the debug API.`
+        );
+      }
+    } else if (replay.index > 0) {
+      warnings.push(
+        `This transaction was number ${replay.index + 1} in block ${replay.blockNumber}, but this RPC could not replay the ${replay.index} transaction(s) mined before it (${errors.join("; ")}). ` +
+          `It was simulated on the state at the end of block ${replay.blockNumber - 1n} instead, so the result is wrong if it depends on those earlier transactions. Use an RPC that supports eth_simulateV1 or the debug API.`
+      );
+    }
+  }
+
   // 1. eth_call -> success / revert + return data
-  try {
+  if (!replayed) try {
     result.returnData = await rpcRequest<Hex>(
       rpc,
       "eth_call",
@@ -249,7 +318,7 @@ export async function simulateTransaction(
 
   // 2. gas estimate + gas price (in parallel with trace)
   const estimate = async () => {
-    if (!result.success) return;
+    if (!result.success || replayed) return;
     const params = [{ ...call, gas: undefined }, pinnedTag];
     try {
       result.gasEstimate = BigInt(
@@ -278,7 +347,7 @@ export async function simulateTransaction(
 
   // 3. debug_traceCall (callTracer) -> call tree, logs, exact gas used
   const trace = async () => {
-    if (!opts.trace) return;
+    if (!opts.trace || replayed) return;
     const config: Record<string, unknown> = {
       tracer: "callTracer",
       tracerConfig: { withLog: true },
@@ -306,7 +375,7 @@ export async function simulateTransaction(
   //    not expose debug_traceCall but do support eth_simulateV1, which runs
   //    the call in a simulated block and returns the logs it emitted.
   const simulateV1 = async () => {
-    if (result.logsSource) return; // the trace already gave the events
+    if (result.logsSource || replayed) return; // the trace already gave the events
     const block: Record<string, unknown> = { calls: [call] };
     if (overrides) block.stateOverrides = overrides;
     try {
@@ -337,6 +406,175 @@ export async function simulateTransaction(
 
   result.durationMs = Math.round(performance.now() - started);
   return result;
+}
+
+// Exact replay of a mined transaction (needs the debug API).
+async function replayWithTrace(rpc: string, replay: ReplayTarget, result: SimulationResult) {
+  const frame = await rpcRequest<CallFrame>(rpc, "debug_traceTransaction", [
+    replay.hash,
+    { tracer: "callTracer", tracerConfig: { withLog: true } },
+  ]);
+  if (!frame || typeof frame !== "object" || !frame.from) {
+    throw new Error("empty debug_traceTransaction response");
+  }
+  result.trace = frame;
+  if (frame.gasUsed) result.gasUsed = BigInt(frame.gasUsed);
+  result.logs = collectLogs(frame);
+  result.logsSource = "debug_traceTransaction";
+  result.success = !frame.error;
+  if (result.success) {
+    result.returnData = frame.output ?? "0x";
+  } else {
+    if (frame.output && frame.output !== "0x") result.revertData = frame.output;
+    result.errorMessage = frame.revertReason || frame.error;
+  }
+  result.replay = {
+    method: "debug_traceTransaction",
+    blockNumber: replay.blockNumber,
+    index: replay.index,
+  };
+}
+
+interface BlockTx {
+  hash: string;
+  from: string;
+  to: string | null;
+  gas: Hex;
+  value: Hex;
+  input: Hex;
+  type?: Hex;
+  gasPrice?: Hex;
+  maxFeePerGas?: Hex;
+  maxPriorityFeePerGas?: Hex;
+  maxFeePerBlobGas?: Hex;
+  blobVersionedHashes?: Hex[];
+  accessList?: unknown[];
+  authorizationList?: unknown[];
+}
+
+interface FullBlock {
+  number: Hex;
+  timestamp: Hex;
+  gasLimit: Hex;
+  miner: string;
+  mixHash?: Hex;
+  baseFeePerGas?: Hex;
+  transactions: BlockTx[];
+}
+
+// How a mined transaction is passed to eth_simulateV1. `full` keeps the fee
+// and access-list fields so fees, tips and warm slots match the chain.
+function replayCall(t: BlockTx, full: boolean): Record<string, unknown> {
+  const c: Record<string, unknown> = {
+    from: t.from,
+    gas: t.gas,
+    value: t.value,
+    input: t.input,
+  };
+  if (t.to) c.to = t.to;
+  if (!full) return c;
+  if (t.maxFeePerGas) {
+    c.maxFeePerGas = t.maxFeePerGas;
+    c.maxPriorityFeePerGas = t.maxPriorityFeePerGas ?? "0x0";
+  } else if (t.gasPrice) {
+    c.gasPrice = t.gasPrice;
+  }
+  if (t.accessList?.length) c.accessList = t.accessList;
+  if (t.blobVersionedHashes?.length) {
+    c.blobVersionedHashes = t.blobVersionedHashes;
+    if (t.maxFeePerBlobGas) c.maxFeePerBlobGas = t.maxFeePerBlobGas;
+  }
+  if (t.authorizationList?.length) c.authorizationList = t.authorizationList;
+  return c;
+}
+
+// Replay with eth_simulateV1: rebuild the block on top of its parent, run
+// the transactions that were mined before the target, then the target (as
+// entered in the form, so an edited copy can be tried in the same context).
+async function replayWithSimulate(
+  rpc: string,
+  replay: ReplayTarget,
+  tx: TxRequest,
+  call: Record<string, string>,
+  overrides: Record<string, unknown> | undefined,
+  result: SimulationResult
+) {
+  const block = await rpcRequest<FullBlock | null>(rpc, "eth_getBlockByNumber", [
+    toQuantity(replay.blockNumber),
+    true,
+  ]);
+  const original = block?.transactions?.[replay.index];
+  if (!block || !original || original.hash?.toLowerCase() !== replay.hash.toLowerCase()) {
+    throw new Error(`block ${replay.blockNumber} does not hold the transaction at position ${replay.index}`);
+  }
+
+  const blockOverrides: Record<string, unknown> = {
+    number: block.number,
+    time: block.timestamp,
+    gasLimit: block.gasLimit,
+    feeRecipient: block.miner,
+  };
+  if (block.mixHash) blockOverrides.prevRandao = block.mixHash;
+  if (block.baseFeePerGas) blockOverrides.baseFeePerGas = block.baseFeePerGas;
+
+  const sameSender = original.from.toLowerCase() === tx.from.toLowerCase();
+  const parentTag = toQuantity(replay.blockNumber - 1n);
+
+  let lastError: unknown;
+  // Some nodes reject fee / blob / authorization fields: retry with bare calls
+  for (const full of [true, false]) {
+    const target: Record<string, unknown> = { ...call };
+    if (full && sameSender) {
+      const fees = replayCall(original, true);
+      for (const key of ["maxFeePerGas", "maxPriorityFeePerGas", "gasPrice", "accessList"]) {
+        if (fees[key] !== undefined) target[key] = fees[key];
+      }
+    }
+    const stateCall: Record<string, unknown> = {
+      blockOverrides,
+      calls: [
+        ...block.transactions.slice(0, replay.index).map((t) => replayCall(t, full)),
+        target,
+      ],
+    };
+    if (overrides) stateCall.stateOverrides = overrides;
+    try {
+      const blocks = await rpcRequest<SimulatedBlock[]>(rpc, "eth_simulateV1", [
+        { blockStateCalls: [stateCall], validation: false, traceTransfers: false },
+        parentTag,
+      ]);
+      const calls = blocks?.[0]?.calls;
+      if (!calls || calls.length !== replay.index + 1) {
+        throw new Error("incomplete eth_simulateV1 response");
+      }
+      const sim = calls[replay.index];
+      result.success = sim.status ? BigInt(sim.status) === 1n : !sim.error;
+      if (result.success) {
+        result.returnData = sim.returnData ?? "0x";
+      } else {
+        result.revertData =
+          extractRevertData(sim.error) ??
+          (sim.returnData && sim.returnData !== "0x" ? sim.returnData : undefined);
+        result.errorMessage = sim.error?.message || "execution reverted";
+      }
+      result.logs = (sim.logs || []).map((l) => ({
+        address: l.address,
+        topics: l.topics || [],
+        data: l.data || "0x",
+      }));
+      result.logsSource = "eth_simulateV1";
+      if (sim.gasUsed) result.gasUsed = BigInt(sim.gasUsed);
+      result.replay = {
+        method: "eth_simulateV1",
+        blockNumber: replay.blockNumber,
+        index: replay.index,
+      };
+      return;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError;
 }
 
 interface SimulatedBlock {
@@ -378,6 +616,7 @@ export interface FetchedTx {
   input: Hex;
   gas: Hex;
   blockNumber: Hex | null;
+  transactionIndex: Hex | null;
 }
 
 export async function fetchTransaction(rpc: string, hash: string) {

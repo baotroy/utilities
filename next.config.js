@@ -13,6 +13,12 @@ const nextConfig = {
   // Old URLs of renamed tools
   redirects: async () => [
     {
+      // removed: the universal decoder also decodes with an ABI
+      source: "/dev/ethereum-input-data-decoder",
+      destination: "/dev/universal-calldata-decoder",
+      permanent: true,
+    },
+    {
       source: "/dev/encode-function",
       destination: "/dev/abi-selectors",
       permanent: true,

@@ -32,7 +32,6 @@
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "eslint-config-next": "^16.0.0",
-    "ethereum-input-data-decoder": "^0.4.2",
     "ethers": "^6.11.1",
     "fraction.js": "^4.3.7",
     "glob": "^13.0.6",

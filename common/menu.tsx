@@ -156,12 +156,6 @@ const menus: menuProps[] = [
         breadcrumbUseLabel: true,
       },
       {
-        label: "Calldata Decoder",
-        href: "/dev/ethereum-input-data-decoder",
-        icon: null,
-        breadcrumbUseLabel: true,
-      },
-      {
         label: "Universal Calldata Decoder",
         href: "/dev/universal-calldata-decoder",
         icon: null,
@@ -180,6 +174,11 @@ const menus: menuProps[] = [
         href: "/dev/signature-to-selector",
         icon: null,
         breadcrumbUseLabel: true,
+      },
+      {
+        label: "Array Sorter",
+        href: "/dev/array-sorter",
+        icon: null,
       },
       {
         label: "Cron Expression Editor",

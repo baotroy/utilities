@@ -1,4 +1,5 @@
 import type { Abi, AbiEvent, AbiFunction, Hex } from "viem";
+import { formatAbiItem } from "viem/utils";
 import {
   decodeErrorResult,
   decodeEventLog,
@@ -9,6 +10,7 @@ import {
   isHex,
   parseAbi,
   parseAbiItem,
+  toEventSelector,
   trim,
 } from "viem";
 
@@ -130,6 +132,10 @@ export interface SimulationResult {
   trace?: CallFrame;
   traceError?: string;
   logs: TraceLog[];
+  /** how the events were obtained; undefined when the RPC could not give them */
+  logsSource?: "debug_traceCall" | "eth_simulateV1";
+  /** why the events could not be read (neither method is supported) */
+  logsError?: string;
   blockNumber?: bigint;
   chainId?: number;
   durationMs: number;
@@ -287,6 +293,7 @@ export async function simulateTransaction(
       result.trace = frame;
       if (frame?.gasUsed) result.gasUsed = BigInt(frame.gasUsed);
       result.logs = collectLogs(frame);
+      result.logsSource = "debug_traceCall";
       if (!result.success && !result.revertData && frame?.output && frame.output !== "0x") {
         result.revertData = frame.output;
       }
@@ -295,10 +302,51 @@ export async function simulateTransaction(
     }
   };
 
+  // 4. eth_simulateV1 -> events without the debug API. Most public RPCs do
+  //    not expose debug_traceCall but do support eth_simulateV1, which runs
+  //    the call in a simulated block and returns the logs it emitted.
+  const simulateV1 = async () => {
+    if (result.logsSource) return; // the trace already gave the events
+    const block: Record<string, unknown> = { calls: [call] };
+    if (overrides) block.stateOverrides = overrides;
+    try {
+      const blocks = await rpcRequest<SimulatedBlock[]>(rpc, "eth_simulateV1", [
+        { blockStateCalls: [block], validation: false, traceTransfers: false },
+        pinnedTag,
+      ]);
+      const sim = blocks?.[0]?.calls?.[0];
+      if (!sim) throw new Error("empty eth_simulateV1 response");
+      // a reverted call has no logs (they are rolled back on chain as well)
+      result.logs = (sim.logs || []).map((l) => ({
+        address: l.address,
+        topics: l.topics || [],
+        data: l.data || "0x",
+      }));
+      result.logsSource = "eth_simulateV1";
+      if (result.gasUsed === undefined && sim.gasUsed) result.gasUsed = BigInt(sim.gasUsed);
+      if (!result.success && !result.revertData && sim.error) {
+        result.revertData = extractRevertData(sim.error) ?? (sim.returnData && sim.returnData !== "0x" ? sim.returnData : undefined);
+      }
+    } catch (e) {
+      result.logsError = e instanceof Error ? e.message : String(e);
+    }
+  };
+
   await Promise.all([estimate(), gasPrice(), trace()]);
+  await simulateV1();
 
   result.durationMs = Math.round(performance.now() - started);
   return result;
+}
+
+interface SimulatedBlock {
+  calls?: {
+    status?: Hex;
+    returnData?: Hex;
+    gasUsed?: Hex;
+    logs?: TraceLog[];
+    error?: { code?: number; message?: string; data?: unknown };
+  }[];
 }
 
 // Logs emitted by reverted frames are discarded, matching on-chain behaviour.
@@ -367,23 +415,97 @@ export function parseUserAbi(text: string): Abi | undefined {
   return parseAbi(lines) as Abi;
 }
 
-const COMMON_ABI = parseAbi([
+// Well-known events, used when the user gave no ABI (or it does not have the
+// event). Overloads with the same name but different indexed parameters
+// (ERC-20 vs ERC-721 Transfer) are told apart by the number of topics.
+const COMMON_EVENTS = parseAbi([
+  // ERC-20 / ERC-721 / ERC-1155
   "event Transfer(address indexed from, address indexed to, uint256 value)",
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
   "event Approval(address indexed owner, address indexed spender, uint256 value)",
+  "event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)",
   "event ApprovalForAll(address indexed owner, address indexed operator, bool approved)",
   "event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)",
   "event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values)",
+  "event URI(string value, uint256 indexed id)",
+  // WETH
   "event Deposit(address indexed dst, uint256 wad)",
   "event Withdrawal(address indexed src, uint256 wad)",
+  // ERC-4626 vaults
+  "event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)",
+  "event Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)",
+  // Uniswap V2 (and forks)
   "event Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)",
-  "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)",
   "event Sync(uint112 reserve0, uint112 reserve1)",
+  "event Mint(address indexed sender, uint256 amount0, uint256 amount1)",
+  "event Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to)",
+  "event PairCreated(address indexed token0, address indexed token1, address pair, uint256 allPairsLength)",
+  // Uniswap V3 (and forks)
+  "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)",
+  "event Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)",
+  "event Burn(address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)",
+  "event Collect(address indexed owner, address recipient, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount0, uint128 amount1)",
+  "event PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)",
+  "event IncreaseLiquidity(uint256 indexed tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)",
+  "event DecreaseLiquidity(uint256 indexed tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)",
+  "event Collect(uint256 indexed tokenId, address recipient, uint256 amount0, uint256 amount1)",
+  // Curve
+  "event TokenExchange(address indexed buyer, int128 sold_id, uint256 tokens_sold, int128 bought_id, uint256 tokens_bought)",
+  // Aave V3
+  "event Supply(address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint16 indexed referralCode)",
+  "event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount)",
+  "event Borrow(address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint8 interestRateMode, uint256 borrowRate, uint16 indexed referralCode)",
+  "event Repay(address indexed reserve, address indexed user, address indexed repayer, uint256 amount, bool useATokens)",
+  // Permit2
+  "event Approval(address indexed owner, address indexed token, address indexed spender, uint160 amount, uint48 expiration)",
+  "event Permit(address indexed owner, address indexed token, address indexed spender, uint160 amount, uint48 expiration, uint48 nonce)",
+  // Ownership, roles, pausing, proxies
   "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
-]) as Abi;
+  "event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)",
+  "event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)",
+  "event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)",
+  "event Paused(address account)",
+  "event Unpaused(address account)",
+  "event Upgraded(address indexed implementation)",
+  "event AdminChanged(address previousAdmin, address newAdmin)",
+  "event BeaconUpgraded(address indexed beacon)",
+  "event Initialized(uint8 version)",
+  "event Initialized(uint64 version)",
+  // Governance tokens
+  "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
+  "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+  // Safe
+  "event ExecutionSuccess(bytes32 txHash, uint256 payment)",
+  "event ExecutionSuccess(bytes32 indexed txHash, uint256 payment)",
+  "event ExecutionFailure(bytes32 txHash, uint256 payment)",
+  "event ExecutionFailure(bytes32 indexed txHash, uint256 payment)",
+  // ERC-4337 EntryPoint
+  "event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)",
+]) as unknown as AbiEvent[];
 
-const ERC721_TRANSFER = parseAbi([
-  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
-]) as Abi;
+// topic0 -> candidate events
+function indexEvents(events: readonly AbiEvent[]): Map<string, AbiEvent[]> {
+  const map = new Map<string, AbiEvent[]>();
+  for (const ev of events) {
+    if (ev.type !== "event" || ev.anonymous) continue;
+    try {
+      const topic = toEventSelector(ev).toLowerCase();
+      map.set(topic, [...(map.get(topic) || []), ev]);
+    } catch {}
+  }
+  return map;
+}
+
+const COMMON_EVENT_INDEX = indexEvents(COMMON_EVENTS);
+const userEventIndexCache = new WeakMap<object, Map<string, AbiEvent[]>>();
+function userEventIndex(abi: Abi): Map<string, AbiEvent[]> {
+  let index = userEventIndexCache.get(abi);
+  if (!index) {
+    index = indexEvents(abi.filter((i) => i.type === "event") as AbiEvent[]);
+    userEventIndexCache.set(abi, index);
+  }
+  return index;
+}
 
 export interface DecodedValue {
   name: string;
@@ -538,6 +660,8 @@ export interface DecodedLog {
   signature?: string;
   args: DecodedValue[];
   guessed?: boolean;
+  /** which definition decoded the event */
+  source?: "abi" | "common" | "4byte";
 }
 
 export function decodeLog(
@@ -546,24 +670,33 @@ export function decodeLog(
   signatures: SignatureMap
 ): DecodedLog | undefined {
   if (!log.topics?.length) return undefined;
-  const abis: Abi[] = [];
-  if (abi) abis.push(abi);
-  abis.push(log.topics.length === 4 ? ERC721_TRANSFER : COMMON_ABI, COMMON_ABI);
-  for (const a of abis) {
-    try {
-      const d = decodeEventLog({
-        abi: a,
-        data: log.data,
-        topics: log.topics as [Hex, ...Hex[]],
-        strict: true,
-      });
-      const ev = (a as AbiEvent[]).find(
-        (i) => i.type === "event" && i.name === d.eventName &&
-          i.inputs.filter((x) => x.indexed).length === log.topics.length - 1
-      ) || (a as AbiEvent[]).find((i) => i.type === "event" && i.name === d.eventName);
-      if (!ev) continue;
-      return { name: d.eventName, signature: sigOf(ev), args: toDecodedValues(ev.inputs, d.args as any) };
-    } catch {}
+  const topic0 = log.topics[0].toLowerCase();
+  const indexedCount = log.topics.length - 1;
+
+  // The user's ABI first, then the built-in common events. A definition only
+  // fits when it has as many indexed parameters as the log has topics.
+  const sources: ["abi" | "common", AbiEvent[]][] = [
+    ["abi", abi ? userEventIndex(abi).get(topic0) || [] : []],
+    ["common", COMMON_EVENT_INDEX.get(topic0) || []],
+  ];
+  for (const [source, candidates] of sources) {
+    for (const ev of candidates) {
+      if (ev.inputs.filter((x) => x.indexed).length !== indexedCount) continue;
+      try {
+        const d = decodeEventLog({
+          abi: [ev],
+          data: log.data,
+          topics: log.topics as [Hex, ...Hex[]],
+          strict: true,
+        });
+        return {
+          name: ev.name,
+          signature: formatAbiItem(ev), // tuples expanded: Order((address,uint256))
+          args: toDecodedValues(ev.inputs, d.args as any),
+          source,
+        };
+      } catch {}
+    }
   }
   // Lookup from signature database: we only know types, not which ones are indexed.
   // Assume the first N params are indexed (the usual convention) and try to decode.
@@ -577,10 +710,10 @@ export function decodeLog(
         inputs: generic.inputs.map((inp, i) => ({ ...inp, name: `arg${i}`, indexed: i < indexedCount })),
       };
       const d = decodeEventLog({ abi: [ev], data: log.data, topics: log.topics as [Hex, ...Hex[]], strict: true });
-      return { name: ev.name, signature: sig, args: toDecodedValues(ev.inputs, d.args as any), guessed: true };
+      return { name: ev.name, signature: sig, args: toDecodedValues(ev.inputs, d.args as any), guessed: true, source: "4byte" };
     } catch {}
   }
-  if (sigs.length) return { name: sigs[0].split("(")[0], signature: sigs[0], args: [], guessed: true };
+  if (sigs.length) return { name: sigs[0].split("(")[0], signature: sigs[0], args: [], guessed: true, source: "4byte" };
   return undefined;
 }
 

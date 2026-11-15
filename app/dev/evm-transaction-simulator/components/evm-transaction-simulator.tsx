@@ -267,8 +267,9 @@ const EvmTransactionSimulatorComponent = () => {
       <div className="max-w-5xl">
         <p className="mb-6 text-sm text-body dark:text-bodydark2">
           Simulate a transaction on any EVM chain without sending it. Runs <code>eth_call</code> and{" "}
-          <code>eth_estimateGas</code> through a public RPC (no API key), plus <code>debug_traceCall</code> when the
-          RPC supports it, to show the status, revert reason, return data, gas, call trace, events and token transfers.
+          <code>eth_estimateGas</code> through a public RPC (no API key) to show the status, revert reason, return
+          data and gas. Events and token transfers come from <code>eth_simulateV1</code>, and the call trace from{" "}
+          <code>debug_traceCall</code> when the RPC supports it.
         </p>
 
         <div className="space-y-4">
@@ -349,7 +350,7 @@ const EvmTransactionSimulatorComponent = () => {
           <div className="flex flex-col gap-2 text-sm">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={withTrace} onChange={(e) => setWithTrace(e.target.checked)} />
-              Trace calls and events (<code>debug_traceCall</code>, needs an RPC with the debug API)
+              Call trace (<code>debug_traceCall</code>, needs an RPC with the debug API; events do not need it)
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={overrideBalance} onChange={(e) => setOverrideBalance(e.target.checked)} />
@@ -408,7 +409,9 @@ const EvmTransactionSimulatorComponent = () => {
                   <Row label="Gas estimate">{result.gasEstimate.toLocaleString()}</Row>
                 )}
                 {result.gasUsed !== undefined && (
-                  <Row label="Gas used (trace)">{result.gasUsed.toLocaleString()}</Row>
+                  <Row label={result.trace ? "Gas used (trace)" : "Gas used (simulated)"}>
+                    {result.gasUsed.toLocaleString()}
+                  </Row>
                 )}
                 {fee !== undefined && (
                   <Row label="Est. fee">
@@ -503,8 +506,26 @@ const EvmTransactionSimulatorComponent = () => {
                             <span className="text-xs text-bodydark">#{i}</span>
                             <span className="font-mono font-semibold">{d?.name || log.topics[0]?.slice(0, 10) || "anonymous"}</span>
                             <span className="text-xs">{addrLink(log.address)}</span>
-                            {d?.guessed && <span className="text-xs text-bodydark">(from 4byte)</span>}
+                            {d?.source && (
+                              <span
+                                className={clsx(
+                                  "rounded px-1.5 py-0.5 text-[11px]",
+                                  d.source === "abi"
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-gray text-bodydark dark:bg-meta-4 dark:text-bodydark2"
+                                )}
+                              >
+                                {d.source === "abi"
+                                  ? "from your ABI"
+                                  : d.source === "common"
+                                    ? "common event"
+                                    : "guessed from 4byte"}
+                              </span>
+                            )}
                           </div>
+                          {d?.signature && (
+                            <div className="mt-0.5 break-all font-mono text-xs text-bodydark">{d.signature}</div>
+                          )}
                           {d && d.args.length > 0 ? (
                             <div className="mt-1">
                               <ArgsTable args={d.args} />
@@ -530,6 +551,12 @@ const EvmTransactionSimulatorComponent = () => {
                 </Card>
               )}
 
+              {result.success && result.logsSource && result.logs.length === 0 && (
+                <Card title="Events (0)">
+                  <div className="text-sm text-bodydark">This transaction emits no events.</div>
+                </Card>
+              )}
+
               {result.trace && (
                 <Card title="Call trace">
                   <div className="overflow-x-auto">
@@ -538,13 +565,32 @@ const EvmTransactionSimulatorComponent = () => {
                 </Card>
               )}
 
-              {(result.traceError || result.warnings.length > 0) && (
+              {(result.traceError || (!result.logsSource && result.logsError) || result.warnings.length > 0) && (
                 <div className="rounded border border-warning/40 bg-warning/10 p-3 text-xs space-y-1">
                   {result.traceError && (
                     <div>
-                      Call trace and events are not available: this RPC does not support <code>debug_traceCall</code> (
-                      {result.traceError}). Use an RPC with the debug API (for example your own node, or a provider
-                      plan that enables it) in the RPC URL field to see them.
+                      {result.logsSource
+                        ? "The call trace is not available"
+                        : "The call trace and events are not available"}
+                      : this RPC does not support <code>debug_traceCall</code> ({result.traceError})
+                      {result.logsSource ? (
+                        <>
+                          . Events were read with <code>eth_simulateV1</code> instead.
+                        </>
+                      ) : (
+                        <>
+                          {" "}
+                          or <code>eth_simulateV1</code> ({result.logsError}).
+                        </>
+                      )}{" "}
+                      Use an RPC with the debug API (for example your own node, or a provider plan that enables it) in
+                      the RPC URL field to see {result.logsSource ? "the trace" : "them"}.
+                    </div>
+                  )}
+                  {!result.traceError && !result.logsSource && result.logsError && (
+                    <div>
+                      Events are not available: this RPC does not support <code>eth_simulateV1</code> (
+                      {result.logsError}). Turn on the call trace or use another RPC.
                     </div>
                   )}
                   {result.warnings.map((w, i) => (

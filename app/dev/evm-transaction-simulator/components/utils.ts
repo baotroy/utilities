@@ -145,10 +145,21 @@ export interface SimulationResult {
   };
   /** why the events could not be read (neither method is supported) */
   logsError?: string;
+  /**
+   * Native value transfers reported by eth_simulateV1 (traceTransfers: true),
+   * in execution order. Used for internal transactions when there is no trace.
+   */
+  valueTransfers?: ValueTransfer[];
   blockNumber?: bigint;
   chainId?: number;
   durationMs: number;
   warnings: string[];
+}
+
+export interface ValueTransfer {
+  from: string;
+  to: string;
+  value: bigint;
 }
 
 export interface ReplayTarget {
@@ -380,17 +391,13 @@ export async function simulateTransaction(
     if (overrides) block.stateOverrides = overrides;
     try {
       const blocks = await rpcRequest<SimulatedBlock[]>(rpc, "eth_simulateV1", [
-        { blockStateCalls: [block], validation: false, traceTransfers: false },
+        { blockStateCalls: [block], validation: false, traceTransfers: true },
         pinnedTag,
       ]);
       const sim = blocks?.[0]?.calls?.[0];
       if (!sim) throw new Error("empty eth_simulateV1 response");
       // a reverted call has no logs (they are rolled back on chain as well)
-      result.logs = (sim.logs || []).map((l) => ({
-        address: l.address,
-        topics: l.topics || [],
-        data: l.data || "0x",
-      }));
+      splitSimulatedLogs(sim.logs, result);
       result.logsSource = "eth_simulateV1";
       if (result.gasUsed === undefined && sim.gasUsed) result.gasUsed = BigInt(sim.gasUsed);
       if (!result.success && !result.revertData && sim.error) {
@@ -540,7 +547,7 @@ async function replayWithSimulate(
     if (overrides) stateCall.stateOverrides = overrides;
     try {
       const blocks = await rpcRequest<SimulatedBlock[]>(rpc, "eth_simulateV1", [
-        { blockStateCalls: [stateCall], validation: false, traceTransfers: false },
+        { blockStateCalls: [stateCall], validation: false, traceTransfers: true },
         parentTag,
       ]);
       const calls = blocks?.[0]?.calls;
@@ -557,11 +564,7 @@ async function replayWithSimulate(
           (sim.returnData && sim.returnData !== "0x" ? sim.returnData : undefined);
         result.errorMessage = sim.error?.message || "execution reverted";
       }
-      result.logs = (sim.logs || []).map((l) => ({
-        address: l.address,
-        topics: l.topics || [],
-        data: l.data || "0x",
-      }));
+      splitSimulatedLogs(sim.logs, result);
       result.logsSource = "eth_simulateV1";
       if (sim.gasUsed) result.gasUsed = BigInt(sim.gasUsed);
       result.replay = {
@@ -575,6 +578,36 @@ async function replayWithSimulate(
     }
   }
   throw lastError;
+}
+
+// eth_simulateV1 with traceTransfers reports every native value transfer as an
+// ERC20-like Transfer log from the pseudo address 0xEeee…EEeE. Move those out
+// of the real events into result.valueTransfers.
+const ETH_PSEUDO_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+
+function splitSimulatedLogs(logs: TraceLog[] | undefined, result: SimulationResult) {
+  const events: TraceLog[] = [];
+  const transfers: ValueTransfer[] = [];
+  for (const l of logs || []) {
+    const topics = l.topics || [];
+    if (
+      l.address?.toLowerCase() === ETH_PSEUDO_ADDRESS &&
+      topics[0]?.toLowerCase() === TRANSFER_TOPIC &&
+      topics.length === 3
+    ) {
+      try {
+        transfers.push({
+          from: topicToAddress(topics[1]),
+          to: topicToAddress(topics[2]),
+          value: !l.data || l.data === "0x" ? 0n : BigInt(l.data.slice(0, 66)),
+        });
+        continue;
+      } catch {}
+    }
+    events.push({ address: l.address, topics, data: l.data || "0x" });
+  }
+  result.logs = events;
+  result.valueTransfers = transfers;
 }
 
 interface SimulatedBlock {
@@ -1061,7 +1094,11 @@ export function collectTransfers(
     f.calls?.forEach(walk);
   };
   if (result.trace) walk(result.trace);
-  else if (result.success && tx.value > 0n && tx.to) {
+  else if (result.valueTransfers) {
+    for (const t of result.valueTransfers) {
+      if (t.value > 0n) out.push({ kind: "native", from: t.from, to: t.to, amount: t.value });
+    }
+  } else if (result.success && tx.value > 0n && tx.to) {
     out.push({ kind: "native", from: tx.from, to: tx.to, amount: tx.value });
   }
 
@@ -1098,6 +1135,85 @@ export function collectTransfers(
     } catch {}
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Internal transactions
+// ---------------------------------------------------------------------------
+
+export interface InternalTx {
+  /** position in the call tree, e.g. "0_1" = 2nd sub-call of the 1st sub-call */
+  id: string;
+  depth: number;
+  type: string;
+  from: string;
+  to?: string;
+  value: bigint;
+  gasUsed?: bigint;
+  input?: Hex;
+  error?: string;
+  /** this call, or one of its parents, reverted: its effects were rolled back */
+  reverted: boolean;
+}
+
+export interface InternalTxs {
+  source?: "trace" | "eth_simulateV1";
+  items: InternalTx[];
+}
+
+export function collectInternalTxs(tx: TxRequest, result: SimulationResult): InternalTxs {
+  if (result.trace) {
+    const items: InternalTx[] = [];
+    const walk = (f: CallFrame, path: number[], parentReverted: boolean) => {
+      const reverted = parentReverted || !!f.error;
+      f.calls?.forEach((c, i) => {
+        const p = [...path, i];
+        const cReverted = reverted || !!c.error;
+        items.push({
+          id: p.join("_"),
+          depth: p.length,
+          type: c.type,
+          from: c.from,
+          to: c.to,
+          value: c.value ? BigInt(c.value) : 0n,
+          gasUsed: c.gasUsed ? BigInt(c.gasUsed) : undefined,
+          input: c.input,
+          error: c.error,
+          reverted: cReverted,
+        });
+        walk(c, p, cReverted);
+      });
+    };
+    walk(result.trace, [], !!result.trace.error);
+    return { source: "trace", items };
+  }
+  if (result.valueTransfers) {
+    let list = result.valueTransfers;
+    // The first reported transfer is the transaction's own value: not internal
+    const first = list[0];
+    if (
+      first &&
+      tx.value > 0n &&
+      first.value === tx.value &&
+      first.from.toLowerCase() === tx.from.toLowerCase() &&
+      first.to.toLowerCase() === (tx.to || "").toLowerCase()
+    ) {
+      list = list.slice(1);
+    }
+    return {
+      source: "eth_simulateV1",
+      items: list.map((t, i) => ({
+        id: String(i),
+        depth: 1,
+        type: "CALL",
+        from: t.from,
+        to: t.to,
+        value: t.value,
+        reverted: !result.success,
+      })),
+    };
+  }
+  return { items: [] };
 }
 
 export interface TokenMeta {

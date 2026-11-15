@@ -20,6 +20,7 @@ import {
   TokenMeta,
   TxRequest,
   collectSelectors,
+  collectInternalTxs,
   collectTransfers,
   decodeCall,
   decodeLog,
@@ -107,6 +108,7 @@ const EvmTransactionSimulatorComponent = () => {
   const [abiText, setAbiText] = useState("");
   const [overrideBalance, setOverrideBalance] = useState(false);
   const [withTrace, setWithTrace] = useState(true);
+  const [internalValueOnly, setInternalValueOnly] = useState(true);
   // The mined transaction last loaded by hash (so it can be replayed in its block)
   const [loaded, setLoaded] = useState<LoadedTx | null>(null);
   const [replayInBlock, setReplayInBlock] = useState(true);
@@ -281,6 +283,11 @@ const EvmTransactionSimulatorComponent = () => {
     simTx && result?.success ? decodeReturn(simTx.data, result.returnData, abi) : undefined;
   const revert = result && !result.success ? decodeRevert(result.revertData, abi, signatures) : undefined;
   const transfers = simTx && result ? collectTransfers(simTx, result) : [];
+  const internal = simTx && result ? collectInternalTxs(simTx, result) : { items: [] };
+  const internalShown =
+    internal.source === "trace" && internalValueOnly
+      ? internal.items.filter((t) => t.value > 0n)
+      : internal.items;
   const fee =
     result?.gasPrice !== undefined && (result.gasUsed ?? result.gasEstimate) !== undefined
       ? (result.gasUsed ?? result.gasEstimate)! * result.gasPrice
@@ -552,6 +559,104 @@ const EvmTransactionSimulatorComponent = () => {
                   </div>
                 </Card>
               )}
+
+              <Card
+                title={`Internal transactions (${internalShown.length}${
+                  internalShown.length !== internal.items.length ? ` of ${internal.items.length} calls` : ""
+                })`}
+                right={
+                  internal.source === "trace" ? (
+                    <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={internalValueOnly}
+                        onChange={(e) => setInternalValueOnly(e.target.checked)}
+                      />
+                      Only calls that move {symbol}
+                    </label>
+                  ) : internal.source === "eth_simulateV1" ? (
+                    <span className="text-xs text-bodydark dark:text-bodydark2">{symbol} transfers from eth_simulateV1</span>
+                  ) : undefined
+                }
+              >
+                {!internal.source ? (
+                  <div className="text-sm text-bodydark dark:text-bodydark2">
+                    Not available: internal transactions need an RPC that supports <code>debug_traceCall</code> or{" "}
+                    <code>eth_simulateV1</code>.
+                  </div>
+                ) : internalShown.length === 0 ? (
+                  <div className="text-sm text-bodydark dark:text-bodydark2">
+                    {internal.items.length === 0
+                      ? `This transaction makes no internal ${internal.source === "trace" ? "calls" : `${symbol} transfers`}.`
+                      : `No internal call moves ${symbol}. Untick the box to see all ${internal.items.length} calls.`}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs font-mono">
+                      <thead>
+                        <tr className="text-left text-bodydark dark:text-bodydark2 border-b border-stroke dark:border-strokedark">
+                          <th className="py-1 pr-3">{internal.source === "trace" ? "Trace" : "#"}</th>
+                          <th className="py-1 pr-3">Type</th>
+                          <th className="py-1 pr-3">From</th>
+                          <th className="py-1 pr-3">To</th>
+                          {internal.source === "trace" && <th className="py-1 pr-3">Function</th>}
+                          <th className="py-1 pr-3 text-right">Value ({symbol})</th>
+                          {internal.source === "trace" && <th className="py-1 pr-3 text-right">Gas used</th>}
+                          <th className="py-1">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {internalShown.map((t) => {
+                          const fn =
+                            internal.source === "trace" && !t.type.startsWith("CREATE")
+                              ? decodeCall(t.input, abi, signatures)
+                              : undefined;
+                          return (
+                            <tr
+                              key={t.id}
+                              className={clsx(
+                                "border-b border-stroke/50 dark:border-strokedark/50 last:border-b-0",
+                                t.reverted && "opacity-60"
+                              )}
+                            >
+                              <td className="py-1 pr-3 whitespace-nowrap">
+                                <span style={{ paddingLeft: `${(t.depth - 1) * 8}px` }}>{internal.source === "trace" ? `call_${t.id}` : Number(t.id) + 1}</span>
+                              </td>
+                              <td className="py-1 pr-3 whitespace-nowrap">{t.type}</td>
+                              <td className="py-1 pr-3">{addrLink(t.from)}</td>
+                              <td className="py-1 pr-3">{t.to ? addrLink(t.to) : "—"}</td>
+                              {internal.source === "trace" && (
+                                <td className="py-1 pr-3 whitespace-nowrap" title={fn?.signature || t.input}>
+                                  {t.type.startsWith("CREATE")
+                                    ? "constructor"
+                                    : fn?.name || (t.input && t.input.length >= 10 ? t.input.slice(0, 10) : "—")}
+                                </td>
+                              )}
+                              <td className={clsx("py-1 pr-3 text-right whitespace-nowrap", t.value > 0n && "text-warning")}>
+                                {t.value > 0n ? fmtAmount(t.value) : "0"}
+                              </td>
+                              {internal.source === "trace" && (
+                                <td className="py-1 pr-3 text-right whitespace-nowrap">
+                                  {t.gasUsed !== undefined ? t.gasUsed.toLocaleString() : ""}
+                                </td>
+                              )}
+                              <td className="py-1 whitespace-nowrap">
+                                {t.error ? (
+                                  <span className="text-danger" title={t.error}>✕ {t.error}</span>
+                                ) : t.reverted ? (
+                                  <span className="text-danger">rolled back</span>
+                                ) : (
+                                  <span className="text-success">✓</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Card>
 
               {result.logs.length > 0 && (
                 <Card title={`Events (${result.logs.length})`}>

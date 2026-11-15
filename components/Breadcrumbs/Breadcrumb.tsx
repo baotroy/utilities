@@ -3,6 +3,7 @@ import convertCase, { CaseType } from "@/app/string/utils";
 import { usePathname } from "next/navigation";
 import { menuItems } from "@/common/menu";
 import { useMemo } from "react";
+import FavoriteButton from "@/components/common/FavoriteButton";
 
 interface BreadcrumbProps {
   pageName?: string;
@@ -25,6 +26,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
     <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
       <h2 className="text-2xl sm:text-3xl font-semibold text-graydark dark:text-bodydark2">
         {convertCase(pageTitle, CaseType.Title)}{isBeta && <i> (beta)</i>}
+        {pathname !== "/" && <FavoriteButton href={pathname} className="ml-2 inline-block align-middle" />}
       </h2>
 
       <nav className="hidden sm:block">

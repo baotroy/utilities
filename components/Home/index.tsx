@@ -2,10 +2,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { MdHistory, MdSearch } from "react-icons/md";
+import { MdHistory, MdSearch, MdStar } from "react-icons/md";
 import menus from "@/common/menu";
 import { searchMenu } from "@/common/menuSearch";
 import { TOOL_DESCRIPTIONS, readRecentTools } from "@/common/toolInfo";
+import FavoriteButton from "@/components/common/FavoriteButton";
+import useFavoriteTools from "@/hooks/useFavoriteTools";
 
 interface Tool {
   label: string;
@@ -42,6 +44,7 @@ function ToolCard({ tool, showGroup }: { tool: Tool; showGroup?: boolean }) {
           {tool.label}
         </span>
         <span className="flex shrink-0 items-center gap-1.5">
+          <FavoriteButton href={tool.href} size={18} />
           {tool.beta && (
             <span className="rounded bg-amber-200 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-600">
               beta
@@ -67,6 +70,11 @@ export default function HomeComponent() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [recent, setRecent] = useState<Tool[]>([]);
+  const favoriteHrefs = useFavoriteTools();
+  const favorites = useMemo(
+    () => favoriteHrefs.map((href) => toolByHref.get(href)).filter((tool): tool is Tool => !!tool),
+    [favoriteHrefs]
+  );
 
   // localStorage exists only in the browser
   useEffect(() => {
@@ -127,6 +135,19 @@ export default function HomeComponent() {
         </section>
       ) : (
         <>
+          {favorites.length > 0 && (
+            <section className="mb-8">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-bodydark dark:text-bodydark2">
+                <MdStar size={18} />
+                Favorites
+              </h2>
+              <div className={gridClass}>
+                {favorites.map((tool) => (
+                  <ToolCard key={tool.href} tool={tool} showGroup />
+                ))}
+              </div>
+            </section>
+          )}
           {recent.length > 0 && (
             <section className="mb-8">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-bodydark dark:text-bodydark2">

@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { MdDownload, MdOutlineClear, MdPlayArrow } from "react-icons/md";
 import type { Abi, Hex } from "viem";
 import { isAddress, isHex, parseUnits } from "viem";
+import { AddressLink, ExplorerContext, ValueView } from "./address";
 import CallTrace from "./call-trace";
 import {
   CHAINS,
@@ -30,11 +31,9 @@ import {
   fetchTokenMeta,
   fetchTransaction,
   fmtAmount,
-  fmtValue,
   jsonReplacer,
   lookupSignatures,
   parseUserAbi,
-  shortAddr,
   simulateTransaction,
 } from "./utils";
 
@@ -75,7 +74,9 @@ const ArgsTable: FC<{ args: { name: string; type: string; value: unknown }[] }> 
         <tr key={i} className="border-b border-stroke/50 dark:border-strokedark/50 last:border-b-0 align-top">
           <td className="py-1 pr-3 whitespace-nowrap">{a.name}</td>
           <td className="py-1 pr-3 whitespace-nowrap text-bodydark dark:text-bodydark2">{a.type}</td>
-          <td className="py-1 break-all">{fmtValue(a.value)}</td>
+          <td className="py-1 break-all">
+            <ValueView value={a.value} />
+          </td>
         </tr>
       ))}
     </tbody>
@@ -124,7 +125,10 @@ const EvmTransactionSimulatorComponent = () => {
   const chain = CHAINS.find((c) => c.name === chainName);
   const rpc = (chainName === CUSTOM_CHAIN ? customRpc : customRpc || chain?.rpc || "").trim();
   const symbol = chain?.symbol || "ETH";
-  const explorer = chain?.explorer;
+  // Prefer the chain the RPC reports (custom RPCs), else the selected preset
+  const explorer =
+    (result?.chainId !== undefined ? CHAINS.find((c) => c.id === result.chainId)?.explorer : undefined) ??
+    chain?.explorer;
 
   const abiState = useMemo((): { abi?: Abi; error?: string } => {
     try {
@@ -297,20 +301,10 @@ const EvmTransactionSimulatorComponent = () => {
     ? JSON.stringify({ request: simTx, result }, jsonReplacer, 2)
     : "";
 
-  const addrLink = (a: string) => (
-    <a
-      href={explorer ? `${explorer}/address/${a}` : undefined}
-      target="_blank"
-      rel="noreferrer"
-      className="text-primary hover:underline"
-      title={a}
-    >
-      {shortAddr(a)}
-    </a>
-  );
+  const addrLink = (a: string, full = false) => <AddressLink address={a} short={!full} />;
 
   return (
-    <>
+    <ExplorerContext.Provider value={explorer}>
       <Breadcrumb />
       <div className="max-w-5xl">
         <p className="mb-6 text-sm text-body dark:text-bodydark2">
@@ -444,6 +438,12 @@ const EvmTransactionSimulatorComponent = () => {
                 <Row label="Network">
                   {chain?.name || "Custom"}
                   {result.chainId !== undefined && ` (chain id ${result.chainId})`}
+                </Row>
+                <Row label="From">
+                  <AddressLink address={simTx.from} />
+                </Row>
+                <Row label="To">
+                  {simTx.to ? <AddressLink address={simTx.to} /> : "(contract deployment)"}
                 </Row>
                 <Row label="Block">
                   {result.replay
@@ -668,7 +668,7 @@ const EvmTransactionSimulatorComponent = () => {
                           <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span className="text-xs text-bodydark">#{i}</span>
                             <span className="font-mono font-semibold">{d?.name || log.topics[0]?.slice(0, 10) || "anonymous"}</span>
-                            <span className="text-xs">{addrLink(log.address)}</span>
+                            <span className="text-xs">{addrLink(log.address, true)}</span>
                             {d?.source && (
                               <span
                                 className={clsx(
@@ -780,7 +780,7 @@ const EvmTransactionSimulatorComponent = () => {
           )}
         </div>
       </div>
-    </>
+    </ExplorerContext.Provider>
   );
 };
 

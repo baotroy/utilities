@@ -8,6 +8,7 @@ import {
   MdInsertDriveFile,
   MdImage,
   MdApps,
+  MdCloudQueue,
 } from "react-icons/md";
 interface childProps {
   label: string;
@@ -61,6 +62,12 @@ const menus: menuProps[] = [
         href: "/string/regex-tester",
         icon: null,
       },
+      {
+        label: "String Escape / Unescape",
+        href: "/string/string-escape",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {
@@ -88,6 +95,17 @@ const menus: menuProps[] = [
         label: "Ethereum Unit Converter",
         // slug: "ethereum-convert-units",
         href: "/number/ethereum-unit-converter",
+        icon: null,
+      },
+      {
+        label: "Byte Size Converter",
+        href: "/number/byte-converter",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Bitwise Calculator",
+        href: "/number/bitwise-calculator",
         icon: null,
       },
     ],
@@ -197,6 +215,11 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
+        label: "AES Encrypt/Decrypt",
+        href: "/dev/aes-encrypt-decrypt",
+        icon: null,
+      },
+      {
         label: "Keccak-256 Hash",
         href: "/dev/keccak256",
         icon: null,
@@ -228,8 +251,106 @@ const menus: menuProps[] = [
         icon: null,
       },
       {
+        label: "Block ↔ Timestamp",
+        href: "/dev/block-timestamp",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
         label: "EVM Transaction Simulator",
         href: "/dev/evm-transaction-simulator",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Transaction Decoder",
+        href: "/dev/transaction-decoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "ABI Encoder",
+        href: "/dev/abi-encoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Event Log Decoder",
+        href: "/dev/event-log-decoder",
+        icon: null,
+      },
+      {
+        label: "Revert Reason Decoder",
+        href: "/dev/revert-decoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Ethereum Signature Verifier",
+        href: "/dev/signature-verifier",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Ethereum Address Tools",
+        href: "/dev/address-tools",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "Storage Slot Reader",
+        href: "/dev/storage-slot-reader",
+        icon: null,
+      },
+      {
+        label: "YAML / TOML / JSON Converter",
+        href: "/dev/yaml-json-converter",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "URL Encoder & Parser",
+        href: "/dev/url-encoder",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "JSONPath Tester",
+        href: "/dev/json-path",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: "JSON Diff",
+        href: "/dev/json-diff",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+    ],
+  },
+  {
+    groupName: "DEVOPS",
+    groupIcon: MdCloudQueue,
+    items: [
+      {
+        label: "docker run ↔ docker-compose",
+        href: "/devops/docker-compose-converter",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
+      {
+        label: ".env ↔ JSON/YAML",
+        href: "/devops/env-converter",
+        icon: null,
+      },
+      {
+        label: "Nginx Config Generator",
+        href: "/devops/nginx-config-generator",
+        icon: null,
+      },
+      {
+        label: "robots.txt Generator",
+        href: "/devops/robots-txt-generator",
         icon: null,
         breadcrumbUseLabel: true,
       },
@@ -260,6 +381,12 @@ const menus: menuProps[] = [
         href: "/file/json-to-csv",
         icon: null,
       },
+      {
+        label: "Base64 to File",
+        href: "/file/base64-to-file",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {
@@ -277,6 +404,12 @@ const menus: menuProps[] = [
         href: "/image/favicon-generator",
         icon: null,
       },
+      {
+        label: "Image Compressor & Converter",
+        href: "/image/image-compressor",
+        icon: null,
+        breadcrumbUseLabel: true,
+      },
     ],
   },
   {
@@ -287,6 +420,11 @@ const menus: menuProps[] = [
         label: "Random Password Generator",
         // slug: "image-resize",
         href: "/misc/random-password-generator",
+        icon: null,
+      },
+      {
+        label: "Password Strength Analyzer",
+        href: "/misc/password-strength-analyzer",
         icon: null,
       },
       {
@@ -314,6 +452,12 @@ const menus: menuProps[] = [
         label: "DNS Lookup",
         href: "/misc/dns-lookup",
         icon: null,
+      },
+      {
+        label: "CIDR / Subnet Calculator",
+        href: "/misc/cidr-calculator",
+        icon: null,
+        breadcrumbUseLabel: true,
       },
     ],
   },

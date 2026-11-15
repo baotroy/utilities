@@ -3,14 +3,13 @@ import clsx from "clsx";
 import { FC, useState } from "react";
 import type { Abi } from "viem";
 import { MdChevronRight, MdExpandMore } from "react-icons/md";
+import { AddressLink, ValueView } from "./address";
 import {
   CallFrame,
   SignatureMap,
   decodeCall,
   decodeRevert,
   fmtAmount,
-  fmtValue,
-  shortAddr,
 } from "./utils";
 
 interface CallTraceProps {
@@ -64,35 +63,34 @@ const CallTrace: FC<CallTraceProps> = ({
         <span className={clsx("rounded px-1.5 py-0.5 font-semibold", TYPE_COLORS[frame.type] || "bg-bodydark/20")}>
           {frame.type}
         </span>
-        {frame.to && (
-          <a
-            href={explorer ? `${explorer}/address/${frame.to}` : undefined}
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary hover:underline"
-            title={frame.to}
+        {frame.to && <AddressLink address={frame.to} short />}
+        <span className="break-all">
+          <button
+            onClick={() => setShowRaw(!showRaw)}
+            className={clsx("text-left hover:underline", decoded ? "font-semibold" : "text-body dark:text-bodydark2")}
+            title="Show input/output"
           >
-            {shortAddr(frame.to)}
-          </a>
-        )}
-        <button
-          onClick={() => setShowRaw(!showRaw)}
-          className="break-all text-left hover:underline"
-          title="Show input/output"
-        >
-          {decoded ? (
-            <>
-              <span className="font-semibold">{decoded.name}</span>
-              <span className="text-body dark:text-bodydark2">
-                ({decoded.args.map((a) => fmtValue(a.value)).join(", ")})
-              </span>
-            </>
-          ) : frame.input && frame.input.length >= 10 ? (
-            <span className="text-body dark:text-bodydark2">{frame.input.slice(0, 10)}</span>
-          ) : (
-            <span className="text-body dark:text-bodydark2">{frame.type.startsWith("CREATE") ? "constructor" : "fallback / receive"}</span>
+            {decoded
+              ? decoded.name
+              : frame.input && frame.input.length >= 10
+                ? frame.input.slice(0, 10)
+                : frame.type.startsWith("CREATE")
+                  ? "constructor"
+                  : "fallback / receive"}
+          </button>
+          {decoded && (
+            <span className="text-body dark:text-bodydark2">
+              (
+              {decoded.args.map((a, i) => (
+                <span key={i}>
+                  {i > 0 && ", "}
+                  <ValueView value={a.value} short />
+                </span>
+              ))}
+              )
+            </span>
           )}
-        </button>
+        </span>
         {value > 0n && (
           <span className="text-warning">
             {fmtAmount(value)} {symbol}
@@ -114,12 +112,12 @@ const CallTrace: FC<CallTraceProps> = ({
         <div className="ml-6 mb-2 space-y-1 rounded bg-gray-2 p-2 text-xs font-mono break-all dark:bg-meta-4">
           <div>
             <span className="text-body dark:text-bodydark2">from </span>
-            {frame.from}
+            <AddressLink address={frame.from} />
           </div>
           {frame.to && (
             <div>
               <span className="text-body dark:text-bodydark2">to </span>
-              {frame.to}
+              <AddressLink address={frame.to} />
             </div>
           )}
           <div>
